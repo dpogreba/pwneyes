@@ -16,9 +16,9 @@ abstract class AppDatabase : RoomDatabase() {
         private var INSTANCE: AppDatabase? = null
 
         private val MIGRATION_2_3 = object : Migration(2, 3) {
-            override fun migrate(database: SupportSQLiteDatabase) {
+            override fun migrate(db: SupportSQLiteDatabase) {
                 // Create a new table with the updated schema
-                database.execSQL("""
+                db.execSQL("""
                     CREATE TABLE connections_new (
                         id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
                         name TEXT NOT NULL DEFAULT 'undefined',
@@ -30,16 +30,16 @@ abstract class AppDatabase : RoomDatabase() {
                 """)
 
                 // Copy data from the old table to the new table
-                database.execSQL("""
+                db.execSQL("""
                     INSERT INTO connections_new (id, name, url, username, password, isConnected)
                     SELECT id, name, url, username, password, 0 FROM connections
                 """)
 
                 // Remove the old table
-                database.execSQL("DROP TABLE connections")
+                db.execSQL("DROP TABLE connections")
 
                 // Rename the new table to the correct name
-                database.execSQL("ALTER TABLE connections_new RENAME TO connections")
+                db.execSQL("ALTER TABLE connections_new RENAME TO connections")
             }
         }
 
@@ -57,4 +57,4 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
     }
-} 
+}

@@ -33,7 +33,7 @@ android {
 
     signingConfigs {
         create("release") {
-            storeFile = file("pwneyes.keystore")
+            storeFile = file("pwneyes.keystore.jks")
             storePassword = project.findProperty("KEYSTORE_PASSWORD").toString()
             keyAlias = "pwneyes"
             keyPassword = project.findProperty("KEY_PASSWORD").toString()

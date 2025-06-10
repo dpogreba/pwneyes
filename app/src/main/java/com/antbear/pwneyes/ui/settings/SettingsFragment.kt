@@ -58,8 +58,8 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
         sharedPreferences.unregisterOnSharedPreferenceChangeListener(this)
     }
     
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
-        if (key == "theme_preference") {
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
+        if (key == "theme_preference" && sharedPreferences != null) {
             applyTheme(sharedPreferences)
         }
     }

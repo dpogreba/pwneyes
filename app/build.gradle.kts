@@ -15,6 +15,11 @@ android {
         targetSdk = 34
         versionCode = 8
         versionName = "8"
+        
+        // Explicitly disable baseline profiles to fix installation issues
+        ndk {
+            abiFilters.clear()
+        }
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -47,6 +52,12 @@ android {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             signingConfig = signingConfigs.getByName("release")
+            // Disable baseline profiles
+            proguardFile("baseline-profiles-rules.pro")
+        }
+        debug {
+            // Disable baseline profiles
+            proguardFile("baseline-profiles-rules.pro")
         }
     }
     
@@ -86,4 +97,9 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+    
+    // Explicitly exclude the profileinstaller
+    configurations.all {
+        exclude(group = "androidx.profileinstaller", module = "profileinstaller")
+    }
 }

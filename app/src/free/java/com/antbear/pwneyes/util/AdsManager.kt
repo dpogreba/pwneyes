@@ -12,7 +12,7 @@ import com.google.android.gms.ads.*
  */
 class AdsManager private constructor(
     private val context: Context,
-    private val billingManager: BillingManager
+    private val billingManager: BillingManager?
 ) {
     companion object {
         // Test ad unit ID for development
@@ -24,30 +24,49 @@ class AdsManager private constructor(
         @Volatile
         private var INSTANCE: AdsManager? = null
         
-        fun initialize(context: Context, billingManager: BillingManager) {
+        fun initialize(context: Context, billingManager: BillingManager?) {
             Log.d(TAG, "Initializing AdsManager")
-            if (INSTANCE == null) {
-                synchronized(this) {
-                    if (INSTANCE == null) {
-                        INSTANCE = AdsManager(context.applicationContext, billingManager)
-                        INSTANCE?.initializeMobileAds()
+            try {
+                if (INSTANCE == null) {
+                    synchronized(this) {
+                        if (INSTANCE == null) {
+                            INSTANCE = AdsManager(context.applicationContext, billingManager)
+                            INSTANCE?.initializeMobileAds()
+                        }
                     }
                 }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error initializing AdsManager", e)
             }
         }
         
-        fun getInstance(): AdsManager {
-            return INSTANCE ?: throw IllegalStateException("AdsManager must be initialized first")
+        fun getInstance(): AdsManager? {
+            return INSTANCE
         }
     }
     
     private var isPremium = false
+    private var premiumObserver: Observer<Boolean>? = null
     
     init {
-        // Observe premium status changes
-        billingManager.premiumStatus.observeForever { isPremium ->
-            this.isPremium = isPremium
-            Log.d(TAG, "Premium status updated: $isPremium")
+        try {
+            // Observe premium status changes
+            billingManager?.let { manager ->
+                premiumObserver = Observer<Boolean> { premium ->
+                    this.isPremium = premium
+                    Log.d(TAG, "Premium status updated: $isPremium")
+                }
+                
+                premiumObserver?.let { observer ->
+                    manager.premiumStatus.observeForever(observer)
+                }
+            } ?: run {
+                Log.d(TAG, "BillingManager is null, defaulting to non-premium")
+                isPremium = false
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error setting up premium status observer", e)
+            isPremium = false
         }
     }
     
@@ -82,8 +101,12 @@ class AdsManager private constructor(
         // Skip loading ad if user has premium status
         if (isPremium) {
             Log.d(TAG, "User has premium status, hiding ad container")
-            adContainer.visibility = ViewGroup.GONE
-            adContainer.removeAllViews()
+            try {
+                adContainer.visibility = ViewGroup.GONE
+                adContainer.removeAllViews()
+            } catch (e: Exception) {
+                Log.e(TAG, "Error hiding ad container", e)
+            }
             return
         }
         
@@ -106,15 +129,23 @@ class AdsManager private constructor(
             adView.adListener = object : AdListener() {
                 override fun onAdLoaded() {
                     Log.d(TAG, "Ad loaded successfully")
-                    adContainer.visibility = ViewGroup.VISIBLE
-                    Log.d(TAG, "Ad container made visible")
+                    try {
+                        adContainer.visibility = ViewGroup.VISIBLE
+                        Log.d(TAG, "Ad container made visible")
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error making ad container visible", e)
+                    }
                 }
 
                 override fun onAdFailedToLoad(error: LoadAdError) {
                     Log.e(TAG, "Ad failed to load. Error code: ${error.code}")
                     Log.e(TAG, "Error message: ${error.message}")
                     Log.e(TAG, "Error domain: ${error.domain}")
-                    adContainer.visibility = ViewGroup.GONE
+                    try {
+                        adContainer.visibility = ViewGroup.GONE
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error hiding ad container after load failure", e)
+                    }
                 }
 
                 override fun onAdOpened() {
@@ -130,17 +161,45 @@ class AdsManager private constructor(
                 }
             }
             
-            // Clear any existing views and add the new ad view
-            adContainer.removeAllViews()
-            adContainer.addView(adView)
-            Log.d(TAG, "Ad view added to container")
+            try {
+                // Clear any existing views and add the new ad view
+                adContainer.removeAllViews()
+                adContainer.addView(adView)
+                Log.d(TAG, "Ad view added to container")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error adding ad view to container", e)
+                return
+            }
             
             // Load the ad
-            adView.loadAd(adRequest)
-            Log.d(TAG, "Ad load request sent")
+            try {
+                adView.loadAd(adRequest)
+                Log.d(TAG, "Ad load request sent")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error loading ad", e)
+                adContainer.visibility = ViewGroup.GONE
+            }
             
         } catch (e: Exception) {
-            Log.e(TAG, "Error loading banner ad: ${e.message}", e)
+            Log.e(TAG, "Error in loadBannerAd: ${e.message}", e)
+            try {
+                adContainer.visibility = ViewGroup.GONE
+            } catch (ex: Exception) {
+                Log.e(TAG, "Error hiding ad container after exception", ex)
+            }
+        }
+    }
+    
+    // Clean up when the app is destroyed
+    fun cleanup() {
+        try {
+            billingManager?.let { manager ->
+                premiumObserver?.let { observer ->
+                    manager.premiumStatus.removeObserver(observer)
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error during cleanup", e)
         }
     }
 }

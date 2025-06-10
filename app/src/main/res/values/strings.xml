@@ -26,4 +26,8 @@
     <string name="connection_url_desc">Enter the URL</string>
     <string name="hamburger_menu">Menu</string>
 
+    <!-- In-app purchase -->
+    <string name="remove_ads">Remove Ads</string>
+    <string name="premium_status">Premium Status</string>
+    <string name="restore_purchases">Restore Purchases</string>
 </resources>

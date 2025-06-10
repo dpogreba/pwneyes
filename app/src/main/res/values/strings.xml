@@ -26,15 +26,4 @@
     <string name="connection_url_desc">Enter the URL</string>
     <string name="hamburger_menu">Menu</string>
 
-    <!-- Theme options -->
-    <string-array name="theme_options">
-        <item>System Default</item>
-        <item>Light</item>
-        <item>Dark</item>
-    </string-array>
-    <string-array name="theme_values">
-        <item>system</item>
-        <item>light</item>
-        <item>dark</item>
-    </string-array>
 </resources>

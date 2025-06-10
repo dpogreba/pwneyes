@@ -14,7 +14,7 @@ android {
         minSdk = 24
         targetSdk = 34
         versionCode = 9
-        versionName = "8.5"
+        versionName = "9.0"
         
         // Explicitly disable baseline profiles to fix installation issues
         ndk {

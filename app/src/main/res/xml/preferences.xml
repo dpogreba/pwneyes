@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory
+        android:title="Appearance"
+        app:iconSpaceReserved="false">
+
+        <ListPreference
+            android:key="theme_preference"
+            android:title="Theme"
+            android:summary="Choose the app theme"
+            android:defaultValue="system"
+            android:entries="@array/theme_options"
+            android:entryValues="@array/theme_values"
+            app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Data Management"
+        app:iconSpaceReserved="false">
+
+        <Preference
+            android:key="erase_all"
+            android:title="Erase All Connections"
+            android:summary="Delete all saved connections"
+            app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

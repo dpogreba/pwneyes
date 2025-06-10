@@ -24,10 +24,12 @@ android {
         create("free") {
             dimension = "version"
             versionNameSuffix = "-free"
+            applicationIdSuffix = ".free"
         }
         create("paid") {
             dimension = "version"
             versionNameSuffix = "-paid"
+            applicationIdSuffix = ".paid"
         }
     }
 

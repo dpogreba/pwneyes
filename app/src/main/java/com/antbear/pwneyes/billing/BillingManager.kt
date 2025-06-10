@@ -97,15 +97,17 @@ class BillingManager(private val context: Context) {
                     .build()
 
                 billingClient?.let { client ->
-                    client.queryPurchasesAsync(params).also { billingResult, purchasesList ->
-                        if (billingResult.responseCode == BillingResponseCode.OK) {
-                            Log.d(TAG, "Found ${purchasesList.size} existing purchases")
-                            for (purchase in purchasesList) {
-                                handlePurchase(purchase)
-                            }
-                        } else {
-                            Log.e(TAG, "Failed to query purchases: ${billingResult.responseCode}")
+                    val purchasesResult = client.queryPurchasesAsync(params)
+                    val billingResult = purchasesResult.billingResult
+                    val purchasesList = purchasesResult.purchasesList
+                    
+                    if (billingResult.responseCode == BillingResponseCode.OK) {
+                        Log.d(TAG, "Found ${purchasesList.size} existing purchases")
+                        for (purchase in purchasesList) {
+                            handlePurchase(purchase)
                         }
+                    } else {
+                        Log.e(TAG, "Failed to query purchases: ${billingResult.responseCode}")
                     }
                 } ?: Log.e(TAG, "Billing client is null")
             } catch (e: Exception) {
@@ -148,12 +150,12 @@ class BillingManager(private val context: Context) {
         coroutineScope.launch {
             try {
                 billingClient?.let { client ->
-                    client.acknowledgePurchase(params) { billingResult ->
-                        if (billingResult.responseCode == BillingResponseCode.OK) {
-                            Log.d(TAG, "Purchase acknowledged successfully")
-                        } else {
-                            Log.e(TAG, "Failed to acknowledge purchase: ${billingResult.responseCode}")
-                        }
+                    val acknowledgePurchaseResult = client.acknowledgePurchase(params)
+                    
+                    if (acknowledgePurchaseResult.responseCode == BillingResponseCode.OK) {
+                        Log.d(TAG, "Purchase acknowledged successfully")
+                    } else {
+                        Log.e(TAG, "Failed to acknowledge purchase: ${acknowledgePurchaseResult.responseCode}")
                     }
                 } ?: Log.e(TAG, "Billing client is null")
             } catch (e: Exception) {
@@ -189,44 +191,46 @@ class BillingManager(private val context: Context) {
                     .build()
 
                 billingClient?.let { client ->
-                    // Use suspending function directly
-                    client.queryProductDetailsAsync(params).also { billingResult, productDetailsList ->
-                        if (billingResult.responseCode == BillingResponseCode.OK && 
-                            !productDetailsList.isNullOrEmpty()) {
-                            
-                            Log.d(TAG, "Product details retrieved, launching billing flow")
-                            
-                            val selectedProductDetails = productDetailsList.first()
-                            
-                            // One-time products don't have subscription offer details
-                            val productDetailsParamsList = listOf(
-                                BillingFlowParams.ProductDetailsParams.newBuilder()
-                                    .setProductDetails(selectedProductDetails)
-                                    .build()
-                            )
-
-                            val billingFlowParams = BillingFlowParams.newBuilder()
-                                .setProductDetailsParamsList(productDetailsParamsList)
+                    val queryProductDetailsResult = client.queryProductDetails(params)
+                    
+                    val billingResult = queryProductDetailsResult.billingResult
+                    val productDetailsList = queryProductDetailsResult.productDetailsList
+                    
+                    if (billingResult.responseCode == BillingResponseCode.OK && 
+                        !productDetailsList.isNullOrEmpty()) {
+                        
+                        Log.d(TAG, "Product details retrieved, launching billing flow")
+                        
+                        val selectedProductDetails = productDetailsList.first()
+                        
+                        // One-time products don't have subscription offer details
+                        val productDetailsParamsList = listOf(
+                            BillingFlowParams.ProductDetailsParams.newBuilder()
+                                .setProductDetails(selectedProductDetails)
                                 .build()
-                                
-                            val flowResult = client.launchBillingFlow(activity, billingFlowParams)
+                        )
+
+                        val billingFlowParams = BillingFlowParams.newBuilder()
+                            .setProductDetailsParamsList(productDetailsParamsList)
+                            .build()
                             
-                            if (flowResult.responseCode != BillingResponseCode.OK) {
-                                Log.e(TAG, "Failed to launch billing flow: ${flowResult.responseCode}")
-                                Toast.makeText(
-                                    context,
-                                    "Failed to start purchase. Please try again later.",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                        } else {
-                            Log.e(TAG, "No product details found for $REMOVE_ADS_PRODUCT_ID. Response code: ${billingResult.responseCode}")
+                        val flowResult = client.launchBillingFlow(activity, billingFlowParams)
+                        
+                        if (flowResult.responseCode != BillingResponseCode.OK) {
+                            Log.e(TAG, "Failed to launch billing flow: ${flowResult.responseCode}")
                             Toast.makeText(
                                 context,
-                                "Product not available. Please try again later.",
+                                "Failed to start purchase. Please try again later.",
                                 Toast.LENGTH_SHORT
                             ).show()
                         }
+                    } else {
+                        Log.e(TAG, "No product details found for $REMOVE_ADS_PRODUCT_ID. Response code: ${billingResult.responseCode}")
+                        Toast.makeText(
+                            context,
+                            "Product not available. Please try again later.",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 } ?: run {
                     Log.e(TAG, "Billing client is null")

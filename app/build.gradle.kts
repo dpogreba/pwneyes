@@ -54,16 +54,6 @@ android {
         viewBinding = true
         buildConfig = true
     }
-    
-    // Disable baseline profiles to resolve installation issues
-    androidResources {
-        noCompress += ["dex", "profile"]
-    }
-    
-    // Disable baseline profile optimization
-    baselineProfile {
-        automaticGenerationDuringBuild = false
-    }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17

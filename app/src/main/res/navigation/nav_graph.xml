@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    app:startDestination="@id/homeFragment">
+
+    <!-- Home Fragment -->
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.antbear.pwneyes.ui.home.HomeFragment"
+        android:label="Home"
+        tools:layout="@layout/fragment_home">
+        <action
+            android:id="@+id/action_nav_home_to_connectionViewer"
+            app:destination="@id/nav_connection_viewer" />
+    </fragment>
+
+    <!-- Gallery Fragment -->
+    <fragment
+        android:id="@+id/nav_gallery"
+        android:name="com.antbear.pwneyes.ui.gallery.GalleryFragment"
+        android:label="Gallery"
+        tools:layout="@layout/fragment_gallery" />
+
+    <!-- Settings Fragment -->
+    <fragment
+        android:id="@+id/nav_settings"
+        android:name="com.antbear.pwneyes.ui.settings.SettingsFragment"
+        android:label="Settings"
+        tools:layout="@layout/fragment_settings" />
+
+    <!-- Add Connection Fragment -->
+    <fragment
+        android:id="@+id/addConnectionFragment"
+        android:name="com.antbear.pwneyes.ui.add.AddConnectionFragment"
+        android:label="Add Connection"
+        tools:layout="@layout/fragment_add_connection">
+        <action
+            android:id="@+id/action_addConnectionFragment_to_home"
+            app:destination="@id/homeFragment" />
+    </fragment>
+
+    <!-- Connection Viewer Fragment -->
+    <fragment
+        android:id="@+id/nav_connection_viewer"
+        android:name="com.antbear.pwneyes.ui.viewer.ConnectionViewerFragment"
+        android:label="View Connection">
+        <argument
+            android:name="url"
+            app:argType="string" />
+        <argument
+            android:name="name"
+            app:argType="string" />
+        <argument
+            android:name="username"
+            app:argType="string"
+            android:defaultValue="" />
+        <argument
+            android:name="password"
+            app:argType="string"
+            android:defaultValue="" />
+    </fragment>
+</navigation>

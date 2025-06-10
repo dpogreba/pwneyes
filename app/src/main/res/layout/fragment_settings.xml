@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Danger Zone Section -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Danger Zone"
+        android:textAppearance="?attr/textAppearanceHeadline6"
+        android:textColor="#FF5252"
+        android:layout_marginBottom="16dp"/>
+
+    <Button
+        android:id="@+id/buttonEraseAll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Erase All Connections"
+        android:backgroundTint="@color/colorAccent"
+        android:layout_marginBottom="32dp"/>
+
+    <!-- About Section -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="About PwnEyes"
+        android:textAlignment="center"
+        android:textAppearance="?attr/textAppearanceHeadline6"
+        android:layout_marginBottom="8dp"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="PwnEyes is a mobile companion app for managing and monitoring your Bluetooth IP devices.\n\nVersion 7.0"
+        android:textAlignment="center"
+        android:layout_marginBottom="16dp"/>
+
+    <!-- RadioGroup for menu position -->
+    <RadioGroup
+        android:id="@+id/radioGroup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginBottom="16dp">
+
+    </RadioGroup>
+
+</LinearLayout>

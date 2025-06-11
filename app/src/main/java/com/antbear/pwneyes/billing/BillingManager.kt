@@ -31,48 +31,92 @@ class BillingManager(private val context: Context) {
     init {
         Log.d(TAG, "BillingManager initialization started")
         _premiumStatus.value = false
-        setupBillingClient()
+        try {
+            setupBillingClient()
+        } catch (e: Exception) {
+            Log.e(TAG, "Critical error during BillingManager initialization", e)
+            // We'll continue operating with a disabled billing client
+        }
     }
 
     private fun setupBillingClient() {
         Log.d(TAG, "Setting up billing client")
-        billingClient = BillingClient.newBuilder(context)
-            .setListener(purchasesUpdatedListener)
-            .enablePendingPurchases()
-            .build()
+        try {
+            billingClient = BillingClient.newBuilder(context)
+                .setListener(purchasesUpdatedListener)
+                .enablePendingPurchases()
+                .build()
 
-        connectToPlayBilling()
+            connectToPlayBilling()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error setting up billing client", e)
+            coroutineScope.launch(Dispatchers.Main) {
+                Toast.makeText(
+                    context,
+                    "Failed to set up in-app purchases. Some features may be unavailable.",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
     }
 
     private fun connectToPlayBilling() {
         Log.d(TAG, "Connecting to Google Play Billing")
-        billingClient?.startConnection(object : BillingClientStateListener {
-            override fun onBillingSetupFinished(billingResult: BillingResult) {
-                if (billingResult.responseCode == BillingResponseCode.OK) {
-                    Log.d(TAG, "Billing client connected successfully")
-                    // Check if user already has premium status
-                    queryPurchases()
-                } else {
-                    Log.e(TAG, "Billing client connection failed: ${billingResult.responseCode}")
-                    Log.e(TAG, "Debug message: ${billingResult.debugMessage}")
-                    
-                    // Show a toast to the user
-                    coroutineScope.launch(Dispatchers.Main) {
-                        Toast.makeText(
-                            context,
-                            "In-app purchase initialization failed: ${billingResult.responseCode}",
-                            Toast.LENGTH_LONG
-                        ).show()
+        try {
+            billingClient?.startConnection(object : BillingClientStateListener {
+                override fun onBillingSetupFinished(billingResult: BillingResult) {
+                    if (billingResult.responseCode == BillingResponseCode.OK) {
+                        Log.d(TAG, "Billing client connected successfully")
+                        // Check if user already has premium status
+                        queryPurchases()
+                    } else {
+                        val errorMessage = when (billingResult.responseCode) {
+                            BillingResponseCode.BILLING_UNAVAILABLE -> 
+                                "Billing unavailable. Google Play Store may need to be updated."
+                            BillingResponseCode.DEVELOPER_ERROR -> 
+                                "Developer error. Please contact support."
+                            BillingResponseCode.FEATURE_NOT_SUPPORTED -> 
+                                "Feature not supported on this device."
+                            BillingResponseCode.ITEM_UNAVAILABLE -> 
+                                "Item unavailable. Product may not be configured properly."
+                            BillingResponseCode.SERVICE_DISCONNECTED -> 
+                                "Service disconnected. Please check your internet connection."
+                            BillingResponseCode.SERVICE_TIMEOUT -> 
+                                "Service timeout. Please try again later."
+                            BillingResponseCode.SERVICE_UNAVAILABLE -> 
+                                "Google Play services unavailable."
+                            BillingResponseCode.USER_CANCELED -> 
+                                "User canceled the operation."
+                            else -> "In-app purchase initialization failed: ${billingResult.responseCode}"
+                        }
+                        
+                        Log.e(TAG, "Billing client connection failed: ${billingResult.responseCode}")
+                        Log.e(TAG, "Debug message: ${billingResult.debugMessage}")
+                        Log.e(TAG, "Friendly error message: $errorMessage")
+                        
+                        // Show a toast to the user with a more friendly message
+                        coroutineScope.launch(Dispatchers.Main) {
+                            Toast.makeText(
+                                context,
+                                "Failed to initialize billing: $errorMessage",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
                     }
                 }
-            }
 
-            override fun onBillingServiceDisconnected() {
-                Log.d(TAG, "Billing service disconnected")
-                // Try to reconnect
-                connectToPlayBilling()
-            }
-        })
+                override fun onBillingServiceDisconnected() {
+                    Log.d(TAG, "Billing service disconnected")
+                    // Try to reconnect, but not immediately (could cause an infinite loop)
+                    coroutineScope.launch {
+                        delay(5000) // Wait 5 seconds before trying to reconnect
+                        connectToPlayBilling()
+                    }
+                }
+            })
+        } catch (e: Exception) {
+            Log.e(TAG, "Error connecting to Play Billing", e)
+        }
     }
 
     private val purchasesUpdatedListener = PurchasesUpdatedListener { billingResult, purchases ->

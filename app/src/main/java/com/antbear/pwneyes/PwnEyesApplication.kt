@@ -30,17 +30,27 @@ class PwnEyesApplication : Application() {
     
     val billingManager by lazy { 
         try {
-            Log.d(TAG, "Attempting to initialize BillingManager...")
-            val manager = BillingManager(this)
-            Log.d(TAG, "BillingManager initialized successfully")
-            manager
+            // Check if device has Google Play Services first
+            val playServicesAvailable = try {
+                val status = com.google.android.gms.common.GoogleApiAvailability.getInstance()
+                    .isGooglePlayServicesAvailable(this)
+                status == com.google.android.gms.common.ConnectionResult.SUCCESS
+            } catch (e: Exception) {
+                Log.w(TAG, "Error checking Google Play Services availability", e)
+                false
+            }
+            
+            if (playServicesAvailable) {
+                Log.d(TAG, "Google Play Services available, initializing BillingManager...")
+                val manager = BillingManager(this)
+                Log.d(TAG, "BillingManager initialized successfully")
+                manager
+            } else {
+                Log.w(TAG, "Google Play Services unavailable, skipping BillingManager initialization")
+                null
+            }
         } catch (e: Exception) {
             Log.e(TAG, "Error initializing billing manager", e)
-            Toast.makeText(
-                this,
-                "Failed to initialize billing. In-app purchases may not be available.",
-                Toast.LENGTH_LONG
-            ).show()
             null
         }
     }

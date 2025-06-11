@@ -79,7 +79,40 @@ class MainActivity : AppCompatActivity() {
 
             // Link the ActionBar and NavigationView with the NavController
             setupActionBarWithNavController(navController, appBarConfiguration)
-            binding.navView.setupWithNavController(navController)
+            
+            // Set up custom navigation item selection listener
+            binding.navView.setNavigationItemSelectedListener { menuItem ->
+                try {
+                    // Close drawer first to improve perceived responsiveness
+                    binding.drawerLayout.closeDrawers()
+                    
+                    // Log the navigation attempt
+                    Log.d(TAG, "Navigation item selected: ${menuItem.title}")
+                    
+                    // Handle navigation based on the selected item's ID
+                    when (menuItem.itemId) {
+                        R.id.homeFragment -> {
+                            // Force navigation to home even if we're already there
+                            navController.popBackStack(R.id.homeFragment, false)
+                            navController.navigate(R.id.homeFragment)
+                            true
+                        }
+                        R.id.addConnectionFragment -> {
+                            navController.navigate(R.id.addConnectionFragment)
+                            true
+                        }
+                        R.id.nav_settings -> {
+                            navController.navigate(R.id.nav_settings)
+                            true
+                        }
+                        else -> false
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error navigating to selected item", e)
+                    Toast.makeText(this, "Navigation error: ${e.message}", Toast.LENGTH_SHORT).show()
+                    false
+                }
+            }
 
             // Set up the ActionBarDrawerToggle to display the default hamburger icon on the top left
             toggle = ActionBarDrawerToggle(
@@ -91,6 +124,11 @@ class MainActivity : AppCompatActivity() {
             )
             binding.drawerLayout.addDrawerListener(toggle)
             toggle.syncState()
+            
+            // Make sure we start at the home fragment
+            if (savedInstanceState == null) {
+                navController.navigate(R.id.homeFragment)
+            }
         } catch (e: Exception) {
             Log.e(TAG, "Error setting up navigation", e)
             Toast.makeText(this, "Error initializing application", Toast.LENGTH_SHORT).show()

@@ -139,23 +139,9 @@ class MainActivity : AppCompatActivity() {
         try {
             menuInflater.inflate(R.menu.main, menu)
             
-            // Add debug logging
+            // Log billing status for debugging
             Log.d(TAG, "Creating options menu. billingManager is ${if (billingManager != null) "not null" else "null"}")
             Log.d(TAG, "Premium status is $isPremium")
-            
-            // Display a Toast with billing status (will help for debugging)
-            Toast.makeText(this, 
-                "Billing: ${if (billingManager != null) "Available" else "Not Available"} | Premium: $isPremium", 
-                Toast.LENGTH_LONG).show()
-            
-            // Adjust menu based on premium status
-            val removeAdsItem = menu.findItem(R.id.action_remove_ads)
-            val restorePurchasesItem = menu.findItem(R.id.action_restore_purchases)
-            
-            removeAdsItem?.isVisible = !isPremium && billingManager != null
-            restorePurchasesItem?.isVisible = billingManager != null
-            
-            Log.d(TAG, "Menu items visibility - Remove Ads: ${removeAdsItem?.isVisible}, Restore: ${restorePurchasesItem?.isVisible}")
         } catch (e: Exception) {
             Log.e(TAG, "Error creating options menu", e)
         }
@@ -168,21 +154,6 @@ class MainActivity : AppCompatActivity() {
             when (item.itemId) {
                 R.id.action_settings -> {
                     navController.navigate(R.id.nav_settings)
-                    true
-                }
-                R.id.action_remove_ads -> {
-                    // Launch the purchase flow
-                    billingManager?.launchPurchaseFlow(this) ?: run {
-                        Toast.makeText(this, "Billing not available", Toast.LENGTH_SHORT).show()
-                    }
-                    true
-                }
-                R.id.action_restore_purchases -> {
-                    // Restore purchases
-                    billingManager?.restorePurchases() ?: run {
-                        Toast.makeText(this, "Billing not available", Toast.LENGTH_SHORT).show()
-                    }
-                    Toast.makeText(this, "Restoring purchases...", Toast.LENGTH_SHORT).show()
                     true
                 }
                 else -> super.onOptionsItemSelected(item)

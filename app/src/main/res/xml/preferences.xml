@@ -27,4 +27,21 @@
             app:iconSpaceReserved="false" />
     </PreferenceCategory>
 
+    <PreferenceCategory
+        android:title="Premium Features"
+        app:iconSpaceReserved="false">
+
+        <Preference
+            android:key="remove_ads"
+            android:title="@string/remove_ads"
+            android:summary="Purchase premium to remove advertisements"
+            app:iconSpaceReserved="false" />
+
+        <Preference
+            android:key="restore_purchases"
+            android:title="@string/restore_purchases"
+            android:summary="Restore previously purchased premium features"
+            app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+
 </PreferenceScreen>

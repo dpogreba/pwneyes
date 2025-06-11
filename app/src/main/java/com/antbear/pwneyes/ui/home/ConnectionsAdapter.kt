@@ -116,31 +116,95 @@ class ConnectionsAdapter(
                 }
 
                 override fun onJsAlert(view: WebView?, url: String?, message: String?, result: JsResult): Boolean {
-                    AlertDialog.Builder(view?.context ?: return false)
-                        .setTitle("Alert")
-                        .setMessage(message)
-                        .setPositiveButton(android.R.string.ok) { _, _ -> 
-                            result.confirm()
-                        }
-                        .setCancelable(false)
-                        .create()
-                        .show()
+                    Log.d("WebView", "JavaScript alert: $message")
+                    try {
+                        val context = view?.context ?: return false
+                        AlertDialog.Builder(context)
+                            .setTitle("Pwnagotchi Alert")
+                            .setMessage(message)
+                            .setPositiveButton("OK") { _, _ -> 
+                                result.confirm()
+                            }
+                            .setCancelable(true)
+                            .setOnCancelListener {
+                                result.cancel()
+                            }
+                            .create()
+                            .show()
+                    } catch (e: Exception) {
+                        Log.e("WebView", "Error showing alert dialog", e)
+                        result.cancel()
+                    }
                     return true
                 }
 
                 override fun onJsConfirm(view: WebView?, url: String?, message: String?, result: JsResult): Boolean {
-                    AlertDialog.Builder(view?.context ?: return false)
-                        .setTitle("Confirm")
-                        .setMessage(message)
-                        .setPositiveButton(android.R.string.ok) { _, _ -> 
-                            result.confirm()
-                        }
-                        .setNegativeButton(android.R.string.cancel) { _, _ -> 
-                            result.cancel()
-                        }
-                        .setCancelable(false)
-                        .create()
-                        .show()
+                    Log.d("WebView", "JavaScript confirm: $message")
+                    try {
+                        val context = view?.context ?: return false
+                        
+                        // Check if this is the shutdown confirmation
+                        val isShutdown = message?.contains("shutdown", ignoreCase = true) ?: false
+                        
+                        val title = if (isShutdown) "Shutdown Confirmation" else "Confirmation"
+                        val positiveButton = if (isShutdown) "Shutdown" else "OK"
+                        
+                        AlertDialog.Builder(context)
+                            .setTitle(title)
+                            .setMessage(message)
+                            .setPositiveButton(positiveButton) { _, _ -> 
+                                result.confirm()
+                            }
+                            .setNegativeButton("Cancel") { _, _ -> 
+                                result.cancel()
+                            }
+                            .setCancelable(true)
+                            .setOnCancelListener {
+                                result.cancel()
+                            }
+                            .create()
+                            .show()
+                    } catch (e: Exception) {
+                        Log.e("WebView", "Error showing confirmation dialog", e)
+                        result.cancel()
+                    }
+                    return true
+                }
+                
+                override fun onJsPrompt(view: WebView?, url: String?, message: String?, defaultValue: String?, result: JsPromptResult): Boolean {
+                    Log.d("WebView", "JavaScript prompt: $message")
+                    try {
+                        val context = view?.context ?: return false
+                        val input = EditText(context)
+                        input.setText(defaultValue)
+                        
+                        AlertDialog.Builder(context)
+                            .setTitle("Prompt")
+                            .setMessage(message)
+                            .setView(input)
+                            .setPositiveButton("OK") { _, _ -> 
+                                result.confirm(input.text.toString())
+                            }
+                            .setNegativeButton("Cancel") { _, _ -> 
+                                result.cancel()
+                            }
+                            .setCancelable(true)
+                            .setOnCancelListener {
+                                result.cancel()
+                            }
+                            .create()
+                            .show()
+                    } catch (e: Exception) {
+                        Log.e("WebView", "Error showing prompt dialog", e)
+                        result.cancel()
+                    }
+                    return true
+                }
+                
+                override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {
+                    consoleMessage?.let {
+                        Log.d("WebConsole", "${it.message()} -- From line ${it.lineNumber()} of ${it.sourceId()}")
+                    }
                     return true
                 }
             }
@@ -213,14 +277,32 @@ class ConnectionsAdapter(
                     databaseEnabled = true
                     setGeolocationEnabled(false)
                     cacheMode = WebSettings.LOAD_NO_CACHE
+                    
+                    // Critical settings for JavaScript dialogs
                     javaScriptCanOpenWindowsAutomatically = true
+                    setSupportMultipleWindows(true)
+                    
+                    // Enable more HTML5 features
+                    databaseEnabled = true
+                    domStorageEnabled = true
+                    
+                    // Allow cross-domain AJAX requests - needed for some pwnagotchi APIs
+                    allowUniversalAccessFromFileURLs = true
+                    allowFileAccessFromFileURLs = true
+                    
+                    // Set default text encoding
+                    defaultTextEncodingName = "UTF-8"
+                    
+                    // Enable this for debugging
+                    WebView.setWebContentsDebuggingEnabled(true)
                 }
-
+                
                 isVerticalScrollBarEnabled = true
                 isHorizontalScrollBarEnabled = true
                 scrollBarStyle = View.SCROLLBARS_INSIDE_OVERLAY
                 overScrollMode = View.OVER_SCROLL_ALWAYS
 
+                // Set clients ONCE at the end to ensure our implementation is used
                 this.webViewClient = webViewClient
                 this.webChromeClient = webChromeClient
             }

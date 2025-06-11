@@ -101,9 +101,23 @@ class MainActivity : AppCompatActivity() {
         try {
             menuInflater.inflate(R.menu.main, menu)
             
+            // Add debug logging
+            Log.d(TAG, "Creating options menu. billingManager is ${if (billingManager != null) "not null" else "null"}")
+            Log.d(TAG, "Premium status is $isPremium")
+            
+            // Display a Toast with billing status (will help for debugging)
+            Toast.makeText(this, 
+                "Billing: ${if (billingManager != null) "Available" else "Not Available"} | Premium: $isPremium", 
+                Toast.LENGTH_LONG).show()
+            
             // Adjust menu based on premium status
-            menu.findItem(R.id.action_remove_ads)?.isVisible = !isPremium && billingManager != null
-            menu.findItem(R.id.action_restore_purchases)?.isVisible = billingManager != null
+            val removeAdsItem = menu.findItem(R.id.action_remove_ads)
+            val restorePurchasesItem = menu.findItem(R.id.action_restore_purchases)
+            
+            removeAdsItem?.isVisible = !isPremium && billingManager != null
+            restorePurchasesItem?.isVisible = billingManager != null
+            
+            Log.d(TAG, "Menu items visibility - Remove Ads: ${removeAdsItem?.isVisible}, Restore: ${restorePurchasesItem?.isVisible}")
         } catch (e: Exception) {
             Log.e(TAG, "Error creating options menu", e)
         }

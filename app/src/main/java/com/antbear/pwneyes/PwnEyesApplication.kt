@@ -3,6 +3,7 @@ package com.antbear.pwneyes
 import android.app.Application
 import android.content.SharedPreferences
 import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.preference.PreferenceManager
 import com.antbear.pwneyes.billing.BillingManager
@@ -29,9 +30,17 @@ class PwnEyesApplication : Application() {
     
     val billingManager by lazy { 
         try {
-            BillingManager(this)
+            Log.d(TAG, "Attempting to initialize BillingManager...")
+            val manager = BillingManager(this)
+            Log.d(TAG, "BillingManager initialized successfully")
+            manager
         } catch (e: Exception) {
             Log.e(TAG, "Error initializing billing manager", e)
+            Toast.makeText(
+                this,
+                "Failed to initialize billing. In-app purchases may not be available.",
+                Toast.LENGTH_LONG
+            ).show()
             null
         }
     }
@@ -55,7 +64,13 @@ class PwnEyesApplication : Application() {
         try {
             // Initialize the AdsManager with the BillingManager
             // Only initialize if billing manager was successfully created
-            billingManager?.let { AdsManager.initialize(this, it) }
+            Log.d(TAG, "About to initialize AdsManager with BillingManager")
+            if (billingManager != null) {
+                Log.d(TAG, "BillingManager is available, initializing AdsManager")
+                AdsManager.initialize(this, billingManager!!)
+            } else {
+                Log.e(TAG, "BillingManager is null, skipping AdsManager initialization")
+            }
         } catch (e: Exception) {
             Log.e(TAG, "Error initializing AdsManager", e)
         }

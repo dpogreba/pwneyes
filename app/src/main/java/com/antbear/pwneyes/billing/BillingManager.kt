@@ -29,6 +29,7 @@ class BillingManager(private val context: Context) {
     private val coroutineScope = CoroutineScope(Dispatchers.Main + Job())
 
     init {
+        Log.d(TAG, "BillingManager initialization started")
         _premiumStatus.value = false
         setupBillingClient()
     }
@@ -48,11 +49,21 @@ class BillingManager(private val context: Context) {
         billingClient?.startConnection(object : BillingClientStateListener {
             override fun onBillingSetupFinished(billingResult: BillingResult) {
                 if (billingResult.responseCode == BillingResponseCode.OK) {
-                    Log.d(TAG, "Billing client connected")
+                    Log.d(TAG, "Billing client connected successfully")
                     // Check if user already has premium status
                     queryPurchases()
                 } else {
                     Log.e(TAG, "Billing client connection failed: ${billingResult.responseCode}")
+                    Log.e(TAG, "Debug message: ${billingResult.debugMessage}")
+                    
+                    // Show a toast to the user
+                    coroutineScope.launch(Dispatchers.Main) {
+                        Toast.makeText(
+                            context,
+                            "In-app purchase initialization failed: ${billingResult.responseCode}",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
                 }
             }
 

@@ -40,10 +40,18 @@ android {
 
     signingConfigs {
         create("release") {
-            storeFile = file("pwneyes.keystore.jks")
-            storePassword = project.findProperty("KEYSTORE_PASSWORD").toString()
-            keyAlias = "pwneyes"
-            keyPassword = project.findProperty("KEY_PASSWORD").toString()
+            // Check if the keystore file exists
+            val keystoreFile = file("pwneyes.keystore.jks")
+            
+            // Only use the keystore if it exists and passwords are provided
+            if (keystoreFile.exists()) {
+                storeFile = keystoreFile
+                
+                // Use empty string as fallback for missing properties
+                storePassword = project.findProperty("KEYSTORE_PASSWORD")?.toString() ?: ""
+                keyAlias = "pwneyes"
+                keyPassword = project.findProperty("KEY_PASSWORD")?.toString() ?: ""
+            }
         }
     }
 
@@ -51,13 +59,24 @@ android {
         release {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            signingConfig = signingConfigs.getByName("release")
+            
+            // Only apply signing config if the keystore file exists
+            val keystoreFile = file("pwneyes.keystore.jks")
+            if (keystoreFile.exists() && 
+                !project.findProperty("KEYSTORE_PASSWORD").toString().isNullOrEmpty() && 
+                !project.findProperty("KEY_PASSWORD").toString().isNullOrEmpty()) {
+                signingConfig = signingConfigs.getByName("release")
+            }
+            
             // Disable baseline profiles
             proguardFile("baseline-profiles-rules.pro")
         }
         debug {
             // Disable baseline profiles
             proguardFile("baseline-profiles-rules.pro")
+            
+            // No signing for debug builds
+            signingConfig = null
         }
     }
     

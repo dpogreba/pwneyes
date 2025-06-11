@@ -42,14 +42,10 @@ class AddConnectionFragment : Fragment() {
                 connectionId = args.getLong("connectionId", 0)
                 val name = args.getString("connectionName", "")
                 val url = args.getString("connectionUrl", "")
-                val username = args.getString("connectionUsername", "")
-                val password = args.getString("connectionPassword", "")
                 
                 // Set the form fields with the connection details
                 binding.editTextConnectionName.setText(name)
                 binding.editTextConnectionUrl.setText(url)
-                binding.editTextUsername.setText(username)
-                binding.editTextPassword.setText(password)
                 
                 // Update the UI to indicate edit mode
                 binding.buttonSave.text = "Update"
@@ -81,8 +77,6 @@ class AddConnectionFragment : Fragment() {
     private fun validateAndCreateConnection(): Connection? {
         val name = binding.editTextConnectionName.text.toString().trim()
         var url = binding.editTextConnectionUrl.text.toString().trim()
-        val username = binding.editTextUsername.text.toString().trim()
-        val password = binding.editTextPassword.text.toString()
 
         if (name.isEmpty()) {
             binding.editTextConnectionName.error = "Name is required"
@@ -104,8 +98,8 @@ class AddConnectionFragment : Fragment() {
             id = if (isEditMode) connectionId else 0, // Use existing ID when editing
             name = name,
             url = url,
-            username = username,
-            password = password,
+            username = "",
+            password = "",
             isConnected = false
         )
     }

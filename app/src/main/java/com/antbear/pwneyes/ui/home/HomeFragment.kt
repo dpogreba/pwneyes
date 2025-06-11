@@ -68,8 +68,6 @@ class HomeFragment : Fragment() {
             "connectionId" to connection.id,
             "connectionName" to connection.name,
             "connectionUrl" to connection.url,
-            "connectionUsername" to connection.username,
-            "connectionPassword" to connection.password,
             "isEditMode" to true
         )
         

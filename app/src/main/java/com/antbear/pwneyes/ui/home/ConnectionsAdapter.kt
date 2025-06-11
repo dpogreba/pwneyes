@@ -232,20 +232,9 @@ class ConnectionsAdapter(
                 url.startsWith("http://") || url.startsWith("https://") -> url
                 else -> "http://$url"
             }
-
-            if (connection.username.isNotEmpty()) {
-                val credentials = "${connection.username}:${connection.password}"
-                val base64Credentials = android.util.Base64.encodeToString(
-                    credentials.toByteArray(),
-                    android.util.Base64.NO_WRAP
-                )
-                binding.webView.loadUrl(
-                    finalUrl,
-                    mapOf("Authorization" to "Basic $base64Credentials")
-                )
-            } else {
-                binding.webView.loadUrl(finalUrl)
-            }
+            
+            // Always load without credentials since we removed username/password fields
+            binding.webView.loadUrl(finalUrl)
         }
 
         fun bind(connection: Connection) {

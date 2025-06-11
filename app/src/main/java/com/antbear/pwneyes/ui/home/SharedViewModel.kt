@@ -33,6 +33,12 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
             repository.update(updatedConnection)
         }
     }
+    
+    fun updateConnection(connection: Connection) {
+        viewModelScope.launch {
+            repository.update(connection)
+        }
+    }
 
     fun deleteConnection(connection: Connection) {
         viewModelScope.launch {
@@ -45,4 +51,4 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
             repository.deleteAll()
         }
     }
-} 
+}

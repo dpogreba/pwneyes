@@ -17,22 +17,62 @@ class AddConnectionFragment : Fragment() {
     private var _binding: FragmentAddConnectionBinding? = null
     private val binding get() = _binding!!
     private val sharedViewModel: SharedViewModel by activityViewModels()
-
+    
+    // Variables to store existing connection details for edit mode
+    private var isEditMode = false
+    private var connectionId: Long = 0
+    
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentAddConnectionBinding.inflate(inflater, container, false)
-        setupSaveButton()
         return binding.root
+    }
+    
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        
+        // Check if we're in edit mode by reading arguments
+        arguments?.let { args ->
+            isEditMode = args.getBoolean("isEditMode", false)
+            
+            if (isEditMode) {
+                // We're in edit mode, so load the connection details
+                connectionId = args.getLong("connectionId", 0)
+                val name = args.getString("connectionName", "")
+                val url = args.getString("connectionUrl", "")
+                val username = args.getString("connectionUsername", "")
+                val password = args.getString("connectionPassword", "")
+                
+                // Set the form fields with the connection details
+                binding.editTextConnectionName.setText(name)
+                binding.editTextConnectionUrl.setText(url)
+                binding.editTextUsername.setText(username)
+                binding.editTextPassword.setText(password)
+                
+                // Update the UI to indicate edit mode
+                binding.buttonSave.text = "Update"
+                binding.textViewTitle.text = "Edit Connection"
+            }
+        }
+        
+        setupSaveButton()
     }
 
     private fun setupSaveButton() {
         binding.buttonSave.setOnClickListener {
             val connection = validateAndCreateConnection()
             if (connection != null) {
-                sharedViewModel.addConnection(connection)
-                Toast.makeText(requireContext(), "Connection saved", Toast.LENGTH_SHORT).show()
+                if (isEditMode) {
+                    // Update existing connection
+                    sharedViewModel.updateConnection(connection)
+                    Toast.makeText(requireContext(), "Connection updated", Toast.LENGTH_SHORT).show()
+                } else {
+                    // Add new connection
+                    sharedViewModel.addConnection(connection)
+                    Toast.makeText(requireContext(), "Connection saved", Toast.LENGTH_SHORT).show()
+                }
                 findNavController().navigateUp()
             }
         }
@@ -61,7 +101,7 @@ class AddConnectionFragment : Fragment() {
         }
 
         return Connection(
-            id = 0, // Room will auto-generate
+            id = if (isEditMode) connectionId else 0, // Use existing ID when editing
             name = name,
             url = url,
             username = username,
@@ -74,4 +114,4 @@ class AddConnectionFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
-} 
+}

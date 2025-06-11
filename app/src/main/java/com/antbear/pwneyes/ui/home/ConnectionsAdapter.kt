@@ -29,6 +29,7 @@ import android.widget.EditText
 
 class ConnectionsAdapter(
     private val onConnectClicked: (Connection) -> Unit,
+    private val onEditClicked: (Connection) -> Unit,
     private val onDeleteClicked: (Connection) -> Unit
 ) : RecyclerView.Adapter<ConnectionsAdapter.ConnectionViewHolder>() {
 
@@ -60,6 +61,7 @@ class ConnectionsAdapter(
     inner class ConnectionViewHolder(
         private val binding: ItemConnectionBinding,
         private val onConnectClick: (Connection) -> Unit,
+        private val onEditClick: (Connection) -> Unit,
         private val onDeleteClick: (Connection) -> Unit
     ) : RecyclerView.ViewHolder(binding.root) {
 
@@ -250,6 +252,7 @@ class ConnectionsAdapter(
             binding.textViewName.text = connection.name
             binding.buttonConnect.text = if (connection.isConnected) "Disconnect" else "Connect"
             binding.buttonConnect.setOnClickListener { onConnectClick(connection) }
+            binding.buttonEdit.setOnClickListener { onEditClick(connection) }
             binding.buttonDelete.setOnClickListener { onDeleteClick(connection) }
 
             if (binding.webView.tag != connection.id) {
@@ -295,7 +298,7 @@ class ConnectionsAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ConnectionViewHolder {
         val binding = ItemConnectionBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return ConnectionViewHolder(binding, onConnectClicked, onDeleteClicked)
+        return ConnectionViewHolder(binding, onConnectClicked, onEditClicked, onDeleteClicked)
     }
 
     override fun onBindViewHolder(holder: ConnectionViewHolder, position: Int) {
@@ -308,4 +311,4 @@ class ConnectionsAdapter(
         super.onViewRecycled(holder)
         holder.cleanup()
     }
-} 
+}

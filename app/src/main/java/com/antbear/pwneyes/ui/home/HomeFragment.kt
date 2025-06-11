@@ -7,7 +7,9 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.antbear.pwneyes.R
 import com.antbear.pwneyes.databinding.FragmentHomeBinding
 import com.antbear.pwneyes.data.Connection
 import android.webkit.WebView
@@ -16,6 +18,7 @@ import android.webkit.WebResourceRequest
 import android.util.Base64
 import android.webkit.HttpAuthHandler
 import android.webkit.WebResourceError
+import androidx.core.os.bundleOf
 
 class HomeFragment : Fragment() {
 
@@ -44,6 +47,9 @@ class HomeFragment : Fragment() {
             onConnectClicked = { connection ->
                 viewModel.toggleConnection(connection)
             },
+            onEditClicked = { connection ->
+                navigateToEditConnection(connection)
+            },
             onDeleteClicked = { connection ->
                 viewModel.deleteConnection(connection)
             }
@@ -54,6 +60,21 @@ class HomeFragment : Fragment() {
             layoutManager = LinearLayoutManager(context)
             setHasFixedSize(true)
         }
+    }
+
+    private fun navigateToEditConnection(connection: Connection) {
+        // Create a bundle with the connection details
+        val bundle = bundleOf(
+            "connectionId" to connection.id,
+            "connectionName" to connection.name,
+            "connectionUrl" to connection.url,
+            "connectionUsername" to connection.username,
+            "connectionPassword" to connection.password,
+            "isEditMode" to true
+        )
+        
+        // Navigate to the AddConnectionFragment with the connection details
+        findNavController().navigate(R.id.addConnectionFragment, bundle)
     }
 
     private fun observeConnections() {

@@ -98,10 +98,7 @@ kapt {
         option("-source", "11")
         option("-target", "11")
     }
-    // Force compatibility with Java 11
-    kotlinOptions {
-        jvmTarget = "11"
-    }
+    // Note: kapt doesn't support kotlinOptions directly
 }
 
 // Make sure all Kotlin compile tasks use Java 11

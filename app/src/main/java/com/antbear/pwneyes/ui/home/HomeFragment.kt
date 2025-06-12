@@ -18,7 +18,7 @@ import android.webkit.WebResourceRequest
 import android.util.Base64
 import android.webkit.HttpAuthHandler
 import android.webkit.WebResourceError
-import androidx.core.os.bundleOf
+import com.antbear.pwneyes.ui.home.HomeFragmentDirections
 
 class HomeFragment : Fragment() {
 
@@ -63,16 +63,16 @@ class HomeFragment : Fragment() {
     }
 
     private fun navigateToEditConnection(connection: Connection) {
-        // Create a bundle with the connection details
-        val bundle = bundleOf(
-            "connectionId" to connection.id,
-            "connectionName" to connection.name,
-            "connectionUrl" to connection.url,
-            "isEditMode" to true
+        // Create a NavDirections object using the generated class
+        val action = HomeFragmentDirections.actionHomeFragmentToAddConnectionFragment(
+            connectionId = connection.id,
+            connectionName = connection.name,
+            connectionUrl = connection.url,
+            isEditMode = true
         )
         
         // Navigate to the AddConnectionFragment with the connection details
-        findNavController().navigate(R.id.addConnectionFragment, bundle)
+        findNavController().navigate(action)
     }
 
     private fun observeConnections() {

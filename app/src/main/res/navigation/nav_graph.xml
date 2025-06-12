@@ -13,6 +13,9 @@
         <action
             android:id="@+id/action_nav_home_to_connectionViewer"
             app:destination="@id/nav_connection_viewer" />
+        <action
+            android:id="@+id/action_homeFragment_to_addConnectionFragment"
+            app:destination="@id/addConnectionFragment" />
     </fragment>
 
     <!-- Gallery Fragment -->
@@ -38,6 +41,24 @@
         <action
             android:id="@+id/action_addConnectionFragment_to_home"
             app:destination="@id/homeFragment" />
+        <argument
+            android:name="connectionId"
+            app:argType="long"
+            android:defaultValue="-1L" />
+        <argument
+            android:name="connectionName"
+            app:argType="string"
+            android:defaultValue="@null"
+            app:nullable="true" />
+        <argument
+            android:name="connectionUrl"
+            app:argType="string"
+            android:defaultValue="@null"
+            app:nullable="true" />
+        <argument
+            android:name="isEditMode"
+            app:argType="boolean"
+            android:defaultValue="false" />
     </fragment>
 
     <!-- Connection Viewer Fragment -->

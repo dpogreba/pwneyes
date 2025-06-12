@@ -8,6 +8,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import com.antbear.pwneyes.databinding.FragmentAddConnectionBinding
 import com.antbear.pwneyes.data.Connection
 import com.antbear.pwneyes.ui.home.SharedViewModel
@@ -17,6 +18,9 @@ class AddConnectionFragment : Fragment() {
     private var _binding: FragmentAddConnectionBinding? = null
     private val binding get() = _binding!!
     private val sharedViewModel: SharedViewModel by activityViewModels()
+    
+    // Use the generated NavArgs class
+    private val args: AddConnectionFragmentArgs by navArgs()
     
     // Variables to store existing connection details for edit mode
     private var isEditMode = false
@@ -33,24 +37,22 @@ class AddConnectionFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
-        // Check if we're in edit mode by reading arguments
-        arguments?.let { args ->
-            isEditMode = args.getBoolean("isEditMode", false)
+        // Get arguments using the generated NavArgs class
+        isEditMode = args.isEditMode
+        
+        if (isEditMode) {
+            // We're in edit mode, so load the connection details
+            connectionId = args.connectionId
+            val name = args.connectionName ?: ""
+            val url = args.connectionUrl ?: ""
             
-            if (isEditMode) {
-                // We're in edit mode, so load the connection details
-                connectionId = args.getLong("connectionId", 0)
-                val name = args.getString("connectionName", "")
-                val url = args.getString("connectionUrl", "")
-                
-                // Set the form fields with the connection details
-                binding.editTextConnectionName.setText(name)
-                binding.editTextConnectionUrl.setText(url)
-                
-                // Update the UI to indicate edit mode
-                binding.buttonSave.text = "Update"
-                binding.textViewTitle.text = "Edit Connection"
-            }
+            // Set the form fields with the connection details
+            binding.editTextConnectionName.setText(name)
+            binding.editTextConnectionUrl.setText(url)
+            
+            // Update the UI to indicate edit mode
+            binding.buttonSave.text = "Update"
+            binding.textViewTitle.text = "Edit Connection"
         }
         
         setupSaveButton()

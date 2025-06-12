@@ -74,12 +74,12 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17"
         freeCompilerArgs = listOf("-Xjvm-default=all")
     }
 }
@@ -87,8 +87,8 @@ android {
 // Configure kapt to use the same Java version
 kapt {
     javacOptions {
-        option("-source", "11")
-        option("-target", "11")
+        option("-source", "17")
+        option("-target", "17")
     }
 }
 

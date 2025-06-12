@@ -1,9 +1,12 @@
 package com.antbear.pwneyes
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.ActionBarDrawerToggle
@@ -129,6 +132,9 @@ class MainActivity : AppCompatActivity() {
             if (savedInstanceState == null) {
                 navController.navigate(R.id.homeFragment)
             }
+            
+            // Set up Buy Me Coffee button in the navigation drawer footer
+            setupBuyMeCoffeeButton()
         } catch (e: Exception) {
             Log.e(TAG, "Error setting up navigation", e)
             Toast.makeText(this, "Error initializing application", Toast.LENGTH_SHORT).show()
@@ -170,6 +176,26 @@ class MainActivity : AppCompatActivity() {
         } catch (e: Exception) {
             Log.e(TAG, "Error navigating up", e)
             super.onSupportNavigateUp()
+        }
+    }
+    
+    private fun setupBuyMeCoffeeButton() {
+        try {
+            // Find the Buy Me Coffee button in the navigation drawer footer
+            val buyMeCoffeeButton = binding.navView.findViewById<Button>(R.id.btnBuyMeCoffee)
+            
+            // Set click listener to open the Buy Me Coffee URL in a browser
+            buyMeCoffeeButton?.setOnClickListener {
+                try {
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://buymeacoffee.com/ltldrk"))
+                    startActivity(intent)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error opening Buy Me Coffee link", e)
+                    Toast.makeText(this, "Could not open browser", Toast.LENGTH_SHORT).show()
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error setting up Buy Me Coffee button", e)
         }
     }
 }

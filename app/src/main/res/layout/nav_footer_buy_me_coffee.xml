@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <Button
+        android:id="@+id/btnBuyMeCoffee"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:background="@drawable/buy_me_coffee_button_bg"
+        android:text="Buy our dogs a treat!"
+        android:textColor="#000000"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:drawableStart="@drawable/ic_coffee_cup"
+        android:drawablePadding="8dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp" />
+
+</LinearLayout>

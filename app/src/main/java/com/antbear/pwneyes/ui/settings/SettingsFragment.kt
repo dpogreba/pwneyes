@@ -83,79 +83,8 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
             true
         }
         
-        // Setup debug premium mode preference
-        setupDebugOptions()
-        
         // Initial update of premium preferences visibility
         updatePremiumPreferencesVisibility()
-    }
-    
-    private fun setupDebugOptions() {
-        try {
-            // Show developer options only in debug builds
-            val developerCategory = findPreference<PreferenceCategory>("developer_options")
-            val isDebugBuild = BuildConfig.DEBUG
-            
-            developerCategory?.isVisible = isDebugBuild
-            
-            if (isDebugBuild) {
-                // Setup the debug premium mode switch
-                val debugPremiumSwitch = findPreference<SwitchPreference>("debug_premium")
-                
-                // Set initial state based on saved preference
-                val debugPremiumEnabled = sharedPreferences.getBoolean("debug_premium", false)
-                
-                // If debug premium was previously enabled, apply it
-                if (debugPremiumEnabled) {
-                    applyDebugPremiumMode(true)
-                }
-                
-                // Listen for changes to the debug premium switch
-                debugPremiumSwitch?.setOnPreferenceChangeListener { _, newValue ->
-                    val enabled = newValue as Boolean
-                    applyDebugPremiumMode(enabled)
-                    true
-                }
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Error setting up debug options", e)
-        }
-    }
-    
-    private fun applyDebugPremiumMode(enabled: Boolean) {
-        try {
-            // Save the debug premium setting
-            sharedPreferences.edit().putBoolean("debug_premium", enabled).apply()
-            
-            // Override premium status for testing
-            isPremium = enabled || (billingManager?.premiumStatus?.value == true)
-            
-            // Update UI based on debug premium setting
-            updatePremiumPreferencesVisibility()
-            
-            // Show toast to confirm debug mode status
-            val message = if (enabled) 
-                "Debug Premium Mode enabled - Ads will be removed" 
-            else 
-                "Debug Premium Mode disabled"
-            
-            Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
-            
-            // Update AdsManager if it exists
-            try {
-                val adsManager = com.antbear.pwneyes.util.AdsManager
-                // Use reflection to call a method that may not exist in all build variants
-                val setDebugPremiumMethod = adsManager::class.java.getDeclaredMethod("setDebugPremiumMode", Boolean::class.java)
-                setDebugPremiumMethod.invoke(adsManager, enabled)
-            } catch (e: Exception) {
-                Log.d(TAG, "AdsManager.setDebugPremiumMode not available or error", e)
-            }
-            
-            // Notify MainActivity that premium status changed
-            requireActivity().invalidateOptionsMenu()
-        } catch (e: Exception) {
-            Log.e(TAG, "Error applying debug premium mode", e)
-        }
     }
     
     private fun updatePremiumPreferencesVisibility() {

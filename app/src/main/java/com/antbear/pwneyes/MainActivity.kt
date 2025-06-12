@@ -181,17 +181,11 @@ class MainActivity : AppCompatActivity() {
     
     private fun setupBuyMeCoffeeButton() {
         try {
-            // Inflate the Buy Me Coffee footer layout
-            val footerView = layoutInflater.inflate(R.layout.nav_footer_buy_me_coffee, binding.navView, false)
-            
-            // Add the footer view to the bottom of the NavigationView
-            binding.navView.addView(footerView)
-            
-            // Find the Buy Me Coffee button in the inflated footer view
-            val buyMeCoffeeButton = footerView.findViewById<Button>(R.id.btnBuyMeCoffee)
+            // Find the Buy Me Coffee button in the navigation drawer footer
+            val buyMeCoffeeButton = binding.navView.findViewById<Button>(R.id.btnBuyMeCoffee)
             
             // Set click listener to open the Buy Me Coffee URL in a browser
-            buyMeCoffeeButton.setOnClickListener {
+            buyMeCoffeeButton?.setOnClickListener {
                 try {
                     val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://buymeacoffee.com/ltldrk"))
                     startActivity(intent)

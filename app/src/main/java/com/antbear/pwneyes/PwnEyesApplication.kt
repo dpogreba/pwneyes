@@ -9,6 +9,7 @@ import androidx.preference.PreferenceManager
 import com.antbear.pwneyes.billing.BillingManager
 import com.antbear.pwneyes.data.AppDatabase
 import com.antbear.pwneyes.data.ConnectionRepository
+import com.antbear.pwneyes.health.ConnectionHealthService
 import com.antbear.pwneyes.util.AdsManager
 
 class PwnEyesApplication : Application() {
@@ -26,6 +27,17 @@ class PwnEyesApplication : Application() {
     
     val repository by lazy { 
         ConnectionRepository(database?.connectionDao() ?: throw IllegalStateException("Database not initialized"))
+    }
+    
+    val connectionHealthService by lazy {
+        try {
+            val connectionDao = database?.connectionDao() 
+                ?: throw IllegalStateException("Database not initialized")
+            ConnectionHealthService(this, connectionDao)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error initializing connection health service", e)
+            null
+        }
     }
     
     val billingManager by lazy { 
@@ -80,6 +92,26 @@ class PwnEyesApplication : Application() {
             Log.d(TAG, "AdsManager initialized")
         } catch (e: Exception) {
             Log.e(TAG, "Error initializing AdsManager", e)
+        }
+        
+        // Start connection health monitoring
+        try {
+            Log.d(TAG, "Starting connection health monitoring")
+            connectionHealthService?.startMonitoring()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error starting connection health monitoring", e)
+        }
+    }
+    
+    override fun onTerminate() {
+        super.onTerminate()
+        
+        // Stop connection health monitoring
+        try {
+            connectionHealthService?.stopMonitoring()
+            connectionHealthService?.cleanup()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error stopping connection health service", e)
         }
     }
     

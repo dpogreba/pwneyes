@@ -87,12 +87,16 @@ class ConnectionsAdapter(
         }
 
         fun bind(connection: Connection) {
+            // Set basic connection info
             binding.textViewName.text = connection.name
             binding.buttonConnect.text = if (connection.isConnected) "Disconnect" else "Connect"
             binding.buttonConnect.setOnClickListener { onConnectClick(connection) }
             binding.buttonEdit.setOnClickListener { onEditClick(connection) }
             binding.buttonDelete.setOnClickListener { onDeleteClick(connection) }
 
+            // Update health status
+            updateHealthStatus(connection)
+            
             // Always set up WebView first
             setupWebView(connection)
 
@@ -104,6 +108,51 @@ class ConnectionsAdapter(
                 binding.webViewContainer.visibility = View.GONE
                 binding.webView.visibility = View.GONE
                 webViewManager?.stopLoading()
+            }
+        }
+        
+        /**
+         * Update the health status display for a connection
+         */
+        private fun updateHealthStatus(connection: Connection) {
+            // Set status icon based on health status
+            val statusIcon = when (connection.healthStatus) {
+                HealthStatus.ONLINE -> R.drawable.ic_status_online
+                HealthStatus.OFFLINE -> R.drawable.ic_status_offline
+                else -> R.drawable.ic_status_unknown
+            }
+            binding.imageViewHealthStatus.setImageResource(statusIcon)
+            
+            // Set status text
+            val statusText = when (connection.healthStatus) {
+                HealthStatus.ONLINE -> "Online"
+                HealthStatus.OFFLINE -> "Offline"
+                HealthStatus.UNSTABLE -> "Unstable"
+                else -> "Unknown"
+            }
+            binding.textViewHealthStatus.text = statusText
+            
+            // Set last checked time
+            binding.textViewLastChecked.text = if (connection.lastChecked > 0) {
+                val timeAgo = getTimeAgo(connection.lastChecked)
+                "Checked $timeAgo"
+            } else {
+                "Never checked"
+            }
+        }
+        
+        /**
+         * Get a human-readable string for how long ago a timestamp was
+         */
+        private fun getTimeAgo(timestamp: Long): String {
+            val now = System.currentTimeMillis()
+            val diff = now - timestamp
+            
+            return when {
+                diff < 60 * 1000 -> "just now"
+                diff < 60 * 60 * 1000 -> "${diff / (60 * 1000)}m ago"
+                diff < 24 * 60 * 60 * 1000 -> "${diff / (60 * 60 * 1000)}h ago"
+                else -> "${diff / (24 * 60 * 60 * 1000)}d ago"
             }
         }
 

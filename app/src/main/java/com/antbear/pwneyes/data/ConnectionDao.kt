@@ -7,6 +7,9 @@ import androidx.room.*
 interface ConnectionDao {
     @Query("SELECT * FROM connections ORDER BY name ASC")
     fun getAllConnections(): LiveData<List<Connection>>
+    
+    @Query("SELECT * FROM connections ORDER BY name ASC")
+    suspend fun getAllConnectionsSync(): List<Connection>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(connection: Connection)
@@ -19,4 +22,7 @@ interface ConnectionDao {
 
     @Query("DELETE FROM connections")
     suspend fun deleteAll()
-} 
+    
+    @Query("SELECT * FROM connections WHERE id = :id")
+    suspend fun getConnectionById(id: Long): Connection?
+}

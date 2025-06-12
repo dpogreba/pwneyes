@@ -7,8 +7,10 @@ import android.view.ViewGroup
 import android.webkit.*
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
+import com.antbear.pwneyes.R
 import com.antbear.pwneyes.databinding.ItemConnectionBinding
 import com.antbear.pwneyes.data.Connection
+import com.antbear.pwneyes.data.HealthStatus
 import java.net.URLEncoder
 import android.util.Log
 import android.webkit.CookieManager

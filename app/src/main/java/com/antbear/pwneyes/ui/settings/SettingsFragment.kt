@@ -1,7 +1,9 @@
 package com.antbear.pwneyes.ui.settings
 
 import android.app.AlertDialog
+import android.content.Intent
 import android.content.SharedPreferences
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -79,6 +81,18 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
                 Toast.makeText(requireContext(), "Restoring purchases...", Toast.LENGTH_SHORT).show()
             } else {
                 Toast.makeText(requireContext(), "Billing service is not available", Toast.LENGTH_SHORT).show()
+            }
+            true
+        }
+        
+        // Set up Buy Me Coffee preference
+        findPreference<Preference>("buy_me_coffee")?.setOnPreferenceClickListener {
+            try {
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://buymeacoffee.com/ltldrk"))
+                startActivity(intent)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error opening Buy Me Coffee link", e)
+                Toast.makeText(requireContext(), "Could not open browser", Toast.LENGTH_SHORT).show()
             }
             true
         }

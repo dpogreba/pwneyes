@@ -44,5 +44,17 @@
             app:iconSpaceReserved="false" />
     </PreferenceCategory>
 
+    <PreferenceCategory
+        android:title="Support"
+        app:iconSpaceReserved="false">
+
+        <Preference
+            android:key="buy_me_coffee"
+            android:title="Buy our dogs a treat"
+            android:summary="Support the development with a coffee"
+            android:icon="@drawable/ic_coffee_cup"
+            app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+
 
 </PreferenceScreen>

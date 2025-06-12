@@ -7,11 +7,9 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.ViewGroup
-import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.Toast
-import com.bumptech.glide.Glide
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatDelegate
@@ -185,49 +183,44 @@ class MainActivity : AppCompatActivity() {
     
     private fun setupBuyMeCoffeeButton() {
         try {
-            // Get the parent view that contains the NavigationView
-            val parent = binding.navView.parent as ViewGroup
+            // Get parent layout for the drawer
+            val drawerLayout = binding.drawerLayout
             
-            // Get index of NavigationView in its parent
-            val navViewIndex = parent.indexOfChild(binding.navView)
-            
-            // Create a new container to hold both the NavigationView and the footer
+            // Create a container for the NavigationView and footer
             val container = LinearLayout(this).apply {
                 orientation = LinearLayout.VERTICAL
-                layoutParams = binding.navView.layoutParams
+                layoutParams = LinearLayout.LayoutParams(
+                    binding.navView.layoutParams.width,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                )
             }
             
-            // Remove NavigationView from its parent
-            parent.removeView(binding.navView)
+            // Find the NavigationView's current parent and index
+            val navViewParent = binding.navView.parent as ViewGroup
+            val navViewIndex = navViewParent.indexOfChild(binding.navView)
             
-            // Change NavigationView layout params to have weight 1 (will expand to fill space)
+            // Remove NavigationView from its parent
+            navViewParent.removeView(binding.navView)
+            
+            // Make NavigationView take up available space
             binding.navView.layoutParams = LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, 
-                0, // Height will be determined by weight
-                1f  // Weight of 1 makes it expand
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                0, // Height set by weight
+                1f  // Weight of 1
             )
             
-            // Add NavigationView to the container
+            // Add NavigationView to container
             container.addView(binding.navView)
             
-            // Inflate the Buy Me Coffee footer layout
-            val footerView = layoutInflater.inflate(R.layout.nav_footer_buy_me_coffee, container, false)
-            
-            // Add the footer view to the bottom of the container
+            // Add footer view to container
+            val footerView = layoutInflater.inflate(R.layout.nav_footer_buy_me_coffee, null)
             container.addView(footerView)
             
-            // Add the container to the parent where NavigationView was
-            parent.addView(container, navViewIndex)
+            // Add container back to drawer at same position as NavigationView was
+            navViewParent.addView(container, navViewIndex)
             
-            // Find the Buy Me Coffee image in the inflated footer view
+            // Setup click listener for Buy Me Coffee image
             val buyMeCoffeeImage = footerView.findViewById<ImageView>(R.id.imgBuyMeCoffee)
-            
-            // Load the official Buy Me Coffee button image using Glide
-            Glide.with(this)
-                .load("https://img.buymeacoffee.com/button-api/?text=Buy%20our%20dogs%20a%20treat%21&emoji=☕&slug=ltldrk&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff")
-                .into(buyMeCoffeeImage)
-            
-            // Set click listener to open the Buy Me Coffee URL in a browser
             buyMeCoffeeImage.setOnClickListener {
                 try {
                     val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://buymeacoffee.com/ltldrk"))

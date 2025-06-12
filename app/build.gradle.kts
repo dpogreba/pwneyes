@@ -24,19 +24,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    flavorDimensions += "version"
-    productFlavors {
-        create("free") {
-            dimension = "version"
-            versionNameSuffix = "-free"
-            applicationIdSuffix = ".free"
-        }
-        create("paid") {
-            dimension = "version"
-            versionNameSuffix = "-paid"
-            applicationIdSuffix = ".paid"
-        }
-    }
+    // Removed product flavors (free/paid) as we're using in-app purchases instead
 
     signingConfigs {
         create("release") {
@@ -112,7 +100,8 @@ dependencies {
     implementation("androidx.preference:preference:1.2.0")
     // Google Play Billing Library for in-app purchases
     implementation("com.android.billingclient:billing-ktx:6.0.1")
-    "freeImplementation"("com.google.android.gms:play-services-ads:22.6.0")
+    // Google Ads - now used conditionally based on premium status
+    implementation("com.google.android.gms:play-services-ads:22.6.0")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")

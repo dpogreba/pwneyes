@@ -11,17 +11,17 @@ cd %~dp0
 REM Clean the project first
 call gradlew clean
 
-REM Build the debug APK for the free flavor
-call gradlew assembleFreeDebug
+REM Build the debug APK (no flavor specified since we removed flavors)
+call gradlew assembleDebug
 
 echo.
 echo Debug build completed!
-echo Look for the APK file in app\build\outputs\apk\free\debug\ directory
+echo Look for the APK file in app\build\outputs\apk\debug\ directory
 echo.
 
 REM List the APK files
 echo APK files available:
-dir /s /b app\build\outputs\apk\free\debug\*.apk
+dir /s /b app\build\outputs\apk\debug\*.apk
 
 echo.
 echo To install on a connected device, run:

@@ -11,7 +11,7 @@ cd "$(dirname "$0")"
 # Clean the project first
 ./gradlew clean
 
-# Build the debug APK for the free flavor
+# Build the debug APK (no flavor specified since we removed flavors)
 ./gradlew assembleDebug
 
 echo ""

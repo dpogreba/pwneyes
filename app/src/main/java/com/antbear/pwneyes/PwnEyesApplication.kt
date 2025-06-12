@@ -73,14 +73,11 @@ class PwnEyesApplication : Application() {
         
         try {
             // Initialize the AdsManager with the BillingManager
-            // Only initialize if billing manager was successfully created
             Log.d(TAG, "About to initialize AdsManager with BillingManager")
-            if (billingManager != null) {
-                Log.d(TAG, "BillingManager is available, initializing AdsManager")
-                AdsManager.initialize(this, billingManager!!)
-            } else {
-                Log.e(TAG, "BillingManager is null, skipping AdsManager initialization")
-            }
+            // Initialize AdsManager even if billingManager is null 
+            // (it will handle the null case internally)
+            AdsManager.initialize(this, billingManager)
+            Log.d(TAG, "AdsManager initialized")
         } catch (e: Exception) {
             Log.e(TAG, "Error initializing AdsManager", e)
         }

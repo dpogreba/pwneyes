@@ -46,6 +46,7 @@ class AdsManager private constructor(
     }
     
     private var isPremium = false
+    private var isDebugPremium = false
     private var premiumObserver: Observer<Boolean>? = null
     
     init {
@@ -64,9 +65,34 @@ class AdsManager private constructor(
                 Log.d(TAG, "BillingManager is null, defaulting to non-premium")
                 isPremium = false
             }
+            
+            // Check for debug premium mode
+            val sharedPrefs = context.getSharedPreferences("com.antbear.pwneyes_preferences", Context.MODE_PRIVATE)
+            isDebugPremium = sharedPrefs.getBoolean("debug_premium", false)
+            if (isDebugPremium) {
+                Log.d(TAG, "Debug premium mode is enabled")
+            }
         } catch (e: Exception) {
             Log.e(TAG, "Error setting up premium status observer", e)
             isPremium = false
+            isDebugPremium = false
+        }
+    }
+    
+    /**
+     * Enable or disable premium features for debugging purposes
+     * This allows testing premium features without an actual purchase
+     */
+    fun setDebugPremiumMode(enabled: Boolean) {
+        try {
+            isDebugPremium = enabled
+            Log.d(TAG, "Debug premium mode set to: $enabled")
+            
+            // Save the setting to preferences
+            val sharedPrefs = context.getSharedPreferences("com.antbear.pwneyes_preferences", Context.MODE_PRIVATE)
+            sharedPrefs.edit().putBoolean("debug_premium", enabled).apply()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error setting debug premium mode", e)
         }
     }
     
@@ -98,9 +124,10 @@ class AdsManager private constructor(
     }
 
     fun loadBannerAd(adContainer: ViewGroup) {
-        // Skip loading ad if user has premium status
-        if (isPremium) {
-            Log.d(TAG, "User has premium status, hiding ad container")
+        // Skip loading ad if user has premium status (either purchased or debug mode)
+        if (isPremium || isDebugPremium) {
+            val source = if (isPremium) "premium status" else "debug mode"
+            Log.d(TAG, "User has $source, hiding ad container")
             try {
                 adContainer.visibility = ViewGroup.GONE
                 adContainer.removeAllViews()

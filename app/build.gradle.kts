@@ -84,6 +84,14 @@ android {
     }
 }
 
+// Configure kapt to use the same Java version
+kapt {
+    javacOptions {
+        option("-source", "11")
+        option("-target", "11")
+    }
+}
+
 dependencies {
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.appcompat:appcompat:1.6.1")

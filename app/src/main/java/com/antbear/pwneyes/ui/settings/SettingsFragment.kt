@@ -97,6 +97,33 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
             true
         }
         
+        // Set up Contact Us preference
+        findPreference<Preference>("contact_us")?.setOnPreferenceClickListener {
+            try {
+                val intent = Intent(Intent.ACTION_SENDTO).apply {
+                    data = Uri.parse("mailto:") // only email apps should handle this
+                    putExtra(Intent.EXTRA_EMAIL, arrayOf("PwnEyes@proton.me"))
+                    putExtra(Intent.EXTRA_SUBJECT, "FROM PWNEYES ANDROID")
+                    
+                    // Include app version in the email body
+                    val appVersion = "App Version: ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})"
+                    val deviceInfo = "Device: ${android.os.Build.MANUFACTURER} ${android.os.Build.MODEL}, Android ${android.os.Build.VERSION.RELEASE}"
+                    putExtra(Intent.EXTRA_TEXT, "\n\n\n\n----------\n$appVersion\n$deviceInfo")
+                }
+                
+                // Verify that there's an email app available to handle the intent
+                if (intent.resolveActivity(requireActivity().packageManager) != null) {
+                    startActivity(intent)
+                } else {
+                    Toast.makeText(requireContext(), "No email app available", Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error launching email intent", e)
+                Toast.makeText(requireContext(), "Could not open email app", Toast.LENGTH_SHORT).show()
+            }
+            true
+        }
+        
         // Initial update of premium preferences visibility
         updatePremiumPreferencesVisibility()
     }

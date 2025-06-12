@@ -54,6 +54,13 @@
             android:summary="Support the development with a coffee"
             android:icon="@drawable/ic_coffee_cup"
             app:iconSpaceReserved="false" />
+            
+        <Preference
+            android:key="contact_us"
+            android:title="Contact Us"
+            android:summary="Get in touch with the development team"
+            android:icon="@drawable/ic_email"
+            app:iconSpaceReserved="false" />
     </PreferenceCategory>
 
 

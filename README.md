@@ -13,16 +13,29 @@ Cause: failed to decrypt safe contents entry: javax.crypto.BadPaddingException: 
 
 This is caused by a keystore password issue when trying to sign release builds. The app's build configuration has been updated to make signing optional for development builds. You can now build and test the app without needing the correct keystore passwords.
 
-### Building Debug Versions
+### Building Versions Without Signing
 
-#### For Windows:
+#### Debug Builds
+
+##### For Windows:
 1. Double-click `build-debug.bat` to build a debug version of the app
 2. The script will create an unsigned debug APK that you can install on your device
 
-#### For macOS/Linux:
+##### For macOS/Linux:
 1. Make the script executable: `chmod +x build-debug.sh`
 2. Run the script: `./build-debug.sh`
 3. The script will create an unsigned debug APK that you can install on your device
+
+#### Release Builds (Unsigned)
+
+##### For Windows:
+1. Double-click `build-release.bat` to build an unsigned release version of the app
+2. The script will create an unsigned release APK that you can install on your device
+
+##### For macOS/Linux:
+1. Make the script executable: `chmod +x build-release.sh`
+2. Run the script: `./build-release.sh`
+3. The script will create an unsigned release APK that you can install on your device
 
 ### Manually Building
 

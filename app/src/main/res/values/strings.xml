@@ -62,4 +62,9 @@
     <string name="toast_browser_error">Could not open browser</string>
     <string name="toast_email_error">Could not open email app</string>
     <string name="toast_no_email_app">No email app available</string>
+    
+    <!-- Empty States -->
+    <string name="empty_connections_title">No Connections</string>
+    <string name="empty_connections_message">You haven\'t added any pwnagotchi connections yet.</string>
+    <string name="empty_connections_action">Add Your First Connection</string>
 </resources>

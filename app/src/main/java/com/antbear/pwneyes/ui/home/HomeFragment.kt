@@ -39,7 +39,15 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupRecyclerView()
+        setupEmptyState()
         observeConnections()
+    }
+    
+    private fun setupEmptyState() {
+        // Set up click listener for the "Add First Connection" button
+        binding.layoutEmptyState.buttonAddFirstConnection.setOnClickListener {
+            findNavController().navigate(R.id.addConnectionFragment)
+        }
     }
 
     private fun setupRecyclerView() {
@@ -78,6 +86,16 @@ class HomeFragment : Fragment() {
     private fun observeConnections() {
         viewModel.connections.observe(viewLifecycleOwner) { connections ->
             connectionsAdapter.updateConnections(connections)
+            
+            // Toggle empty state visibility
+            val emptyStateView = binding.layoutEmptyState.root
+            if (connections.isEmpty()) {
+                binding.recyclerViewConnections.visibility = View.GONE
+                emptyStateView.visibility = View.VISIBLE
+            } else {
+                binding.recyclerViewConnections.visibility = View.VISIBLE
+                emptyStateView.visibility = View.GONE
+            }
         }
     }
 

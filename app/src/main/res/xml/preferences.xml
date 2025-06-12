@@ -44,5 +44,18 @@
             app:iconSpaceReserved="false" />
     </PreferenceCategory>
 
+    <!-- Developer Options - Only visible in debug builds -->
+    <PreferenceCategory
+        android:title="Developer Options"
+        android:key="developer_options"
+        app:iconSpaceReserved="false">
+
+        <SwitchPreference
+            android:key="debug_premium"
+            android:title="Debug Premium Mode"
+            android:summary="Enable premium features without purchase (testing only)"
+            android:defaultValue="false"
+            app:iconSpaceReserved="false" />
+    </PreferenceCategory>
 
 </PreferenceScreen>

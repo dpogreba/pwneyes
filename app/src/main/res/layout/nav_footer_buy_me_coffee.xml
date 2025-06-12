@@ -13,7 +13,6 @@
         android:layout_height="wrap_content"
         android:adjustViewBounds="true"
         android:scaleType="fitCenter"
-        android:src="@drawable/bmc_logo_yellow"
         android:contentDescription="Buy our dogs a treat!" />
 
 </LinearLayout>

@@ -69,7 +69,7 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
             if (billingManager != null) {
                 billingManager?.launchPurchaseFlow(requireActivity())
             } else {
-                Toast.makeText(requireContext(), "Billing service is not available", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), getString(R.string.toast_billing_unavailable), Toast.LENGTH_SHORT).show()
             }
             true
         }
@@ -78,9 +78,9 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
         findPreference<Preference>("restore_purchases")?.setOnPreferenceClickListener {
             if (billingManager != null) {
                 billingManager?.restorePurchases()
-                Toast.makeText(requireContext(), "Restoring purchases...", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), getString(R.string.toast_restoring_purchases), Toast.LENGTH_SHORT).show()
             } else {
-                Toast.makeText(requireContext(), "Billing service is not available", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), getString(R.string.toast_billing_unavailable), Toast.LENGTH_SHORT).show()
             }
             true
         }
@@ -92,7 +92,7 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
                 startActivity(intent)
             } catch (e: Exception) {
                 Log.e(TAG, "Error opening Buy Me Coffee link", e)
-                Toast.makeText(requireContext(), "Could not open browser", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), getString(R.string.toast_browser_error), Toast.LENGTH_SHORT).show()
             }
             true
         }
@@ -115,11 +115,11 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
                 if (intent.resolveActivity(requireActivity().packageManager) != null) {
                     startActivity(intent)
                 } else {
-                    Toast.makeText(requireContext(), "No email app available", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), getString(R.string.toast_no_email_app), Toast.LENGTH_SHORT).show()
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error launching email intent", e)
-                Toast.makeText(requireContext(), "Could not open email app", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), getString(R.string.toast_email_error), Toast.LENGTH_SHORT).show()
             }
             true
         }
@@ -142,7 +142,7 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
             
             // Update summary if user is premium
             if (isPremium) {
-                removeAdsPreference?.summary = "Premium status active"
+                removeAdsPreference?.summary = getString(R.string.premium_status)
             }
             
             Log.d(TAG, "Updated premium preferences. isPremium: $isPremium, billingAvailable: ${billingManager != null}")
@@ -153,13 +153,13 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
     
     private fun showEraseAllConfirmationDialog() {
         AlertDialog.Builder(requireContext())
-            .setTitle("Erase All Connections")
-            .setMessage("Are you sure you want to erase all connections? This action cannot be undone.")
-            .setPositiveButton("Erase All") { _, _ -> 
+            .setTitle(getString(R.string.dialog_erase_all_title))
+            .setMessage(getString(R.string.dialog_erase_all_message))
+            .setPositiveButton(getString(R.string.dialog_erase_all_confirm)) { _, _ -> 
                 sharedViewModel.deleteAllConnections()
-                Toast.makeText(requireContext(), "All connections deleted", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), getString(R.string.toast_connections_deleted), Toast.LENGTH_SHORT).show()
             }
-            .setNegativeButton("Cancel", null)
+            .setNegativeButton(getString(R.string.dialog_cancel), null)
             .show()
     }
     

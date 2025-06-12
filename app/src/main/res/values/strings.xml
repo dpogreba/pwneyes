@@ -30,4 +30,36 @@
     <string name="remove_ads">Remove Ads</string>
     <string name="premium_status">Premium Status</string>
     <string name="restore_purchases">Restore Purchases</string>
+    
+    <!-- Preference Categories -->
+    <string name="pref_category_appearance">Appearance</string>
+    <string name="pref_category_data">Data Management</string>
+    <string name="pref_category_premium">Premium Features</string>
+    <string name="pref_category_support">Support</string>
+    
+    <!-- Preferences -->
+    <string name="pref_theme_title">Theme</string>
+    <string name="pref_theme_summary">Choose the app theme</string>
+    <string name="pref_erase_all_title">Erase All Connections</string>
+    <string name="pref_erase_all_summary">Delete all saved connections</string>
+    <string name="pref_remove_ads_summary">Purchase premium to remove advertisements</string>
+    <string name="pref_restore_purchases_summary">Restore previously purchased premium features</string>
+    <string name="pref_buy_coffee_title">Buy our dogs a treat</string>
+    <string name="pref_buy_coffee_summary">Support the development with a coffee</string>
+    <string name="pref_contact_us_title">Contact Us</string>
+    <string name="pref_contact_us_summary">Get in touch with the development team</string>
+    
+    <!-- Dialogs -->
+    <string name="dialog_erase_all_title">Erase All Connections</string>
+    <string name="dialog_erase_all_message">Are you sure you want to erase all connections? This action cannot be undone.</string>
+    <string name="dialog_erase_all_confirm">Erase All</string>
+    <string name="dialog_cancel">Cancel</string>
+    
+    <!-- Toasts -->
+    <string name="toast_connections_deleted">All connections deleted</string>
+    <string name="toast_restoring_purchases">Restoring purchases…</string>
+    <string name="toast_billing_unavailable">Billing service is not available</string>
+    <string name="toast_browser_error">Could not open browser</string>
+    <string name="toast_email_error">Could not open email app</string>
+    <string name="toast_no_email_app">No email app available</string>
 </resources>

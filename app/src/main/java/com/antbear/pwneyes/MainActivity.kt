@@ -136,17 +136,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        try {
-            menuInflater.inflate(R.menu.main, menu)
-            
-            // Log billing status for debugging
-            Log.d(TAG, "Creating options menu. billingManager is ${if (billingManager != null) "not null" else "null"}")
-            Log.d(TAG, "Premium status is $isPremium")
-        } catch (e: Exception) {
-            Log.e(TAG, "Error creating options menu", e)
-        }
-        
-        return true
+        // Return false to hide the menu (three dots in top-right corner)
+        return false
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

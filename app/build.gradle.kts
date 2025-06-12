@@ -77,6 +77,7 @@ android {
     
     buildFeatures {
         viewBinding = true
+        // This is marked as deprecated but still needed
         buildConfig = true
     }
 
@@ -96,6 +97,17 @@ kapt {
     javacOptions {
         option("-source", "11")
         option("-target", "11")
+    }
+    // Force compatibility with Java 11
+    kotlinOptions {
+        jvmTarget = "11"
+    }
+}
+
+// Make sure all Kotlin compile tasks use Java 11
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+    kotlinOptions {
+        jvmTarget = "11"
     }
 }
 

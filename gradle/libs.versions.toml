@@ -1,7 +1,7 @@
 [versions]
-agp = "8.10.1"
-gradle = "8.7.3"
-kotlin = "1.9.24"
+agp = "7.4.2" 
+gradle = "7.4.2"
+kotlin = "1.8.0"
 coreKtx = "1.15.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"

@@ -20,9 +20,8 @@ import android.webkit.WebSettings
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.content.Context
-import android.os.Handler
-import android.os.Looper
 import kotlinx.coroutines.*
+import com.antbear.pwneyes.ui.webview.WebViewManager
 import java.net.URI
 import android.app.AlertDialog
 import android.widget.EditText
@@ -34,9 +33,7 @@ class ConnectionsAdapter(
 ) : RecyclerView.Adapter<ConnectionsAdapter.ConnectionViewHolder>() {
 
     private var connections: List<Connection> = emptyList()
-    private val handler = Handler(Looper.getMainLooper())
-    private val retryDelayMs = 2000L
-    private val maxRetries = 3
+    private val coroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
     fun updateConnections(newConnections: List<Connection>) {
         val oldConnections = connections
@@ -65,258 +62,28 @@ class ConnectionsAdapter(
         private val onDeleteClick: (Connection) -> Unit
     ) : RecyclerView.ViewHolder(binding.root) {
 
-        private var webViewClient: WebViewClient? = null
-        private var webChromeClient: WebChromeClient? = null
-        private var retryCount = 0
-        private var currentLoadJob: Job? = null
-        private var loadingTimeout: Job? = null
-        private val TIMEOUT_DURATION = 30000L // 30 seconds
-        private val MAX_RETRIES = 2
-
-        private fun hideDebugInfo() {
-            binding.debugInfo.visibility = View.GONE
-            binding.debugInfo.text = ""
-        }
-
-        private fun startLoadingTimeout() {
-            loadingTimeout?.cancel()
-            loadingTimeout = CoroutineScope(Dispatchers.Main).launch {
-                delay(TIMEOUT_DURATION)
-                if (binding.loadingProgress.visibility == View.VISIBLE) {
-                    updateDebugInfo("Connection timed out")
-                    binding.loadingProgress.visibility = View.GONE
-                    binding.webView.stopLoading()
-                    // Disconnect on timeout
-                    val position = adapterPosition
-                    if (position != RecyclerView.NO_POSITION) {
-                        val connection = connections[position]
-                        onConnectClick(connection)
-                    }
-                }
-            }
-        }
-
-        private fun cancelLoadingTimeout() {
-            loadingTimeout?.cancel()
-            loadingTimeout = null
-        }
+        private var webViewManager: WebViewManager? = null
 
         private fun setupWebView(connection: Connection) {
-            webChromeClient = object : WebChromeClient() {
-                override fun onProgressChanged(view: WebView?, newProgress: Int) {
-                    if (newProgress < 100) {
-                        binding.loadingProgress.visibility = View.VISIBLE
-                        binding.loadingProgress.progress = newProgress
-                        updateDebugInfo("Loading: $newProgress%")
-                    } else {
-                        binding.loadingProgress.visibility = View.GONE
-                        hideDebugInfo()
-                        cancelLoadingTimeout()
-                    }
-                }
-
-                override fun onJsAlert(view: WebView?, url: String?, message: String?, result: JsResult): Boolean {
-                    Log.d("WebView", "JavaScript alert: $message")
-                    try {
-                        val context = view?.context ?: return false
-                        AlertDialog.Builder(context)
-                            .setTitle("Pwnagotchi Alert")
-                            .setMessage(message)
-                            .setPositiveButton("OK") { _, _ -> 
-                                result.confirm()
-                            }
-                            .setCancelable(true)
-                            .setOnCancelListener {
-                                result.cancel()
-                            }
-                            .create()
-                            .show()
-                    } catch (e: Exception) {
-                        Log.e("WebView", "Error showing alert dialog", e)
-                        result.cancel()
-                    }
-                    return true
-                }
-
-                override fun onJsConfirm(view: WebView?, url: String?, message: String?, result: JsResult): Boolean {
-                    Log.d("WebView", "JavaScript confirm: $message")
-                    try {
-                        val context = view?.context ?: return false
-                        
-                        // Check if this is the shutdown confirmation
-                        val isShutdown = message?.contains("shutdown", ignoreCase = true) ?: false
-                        
-                        val title = if (isShutdown) "Shutdown Confirmation" else "Confirmation"
-                        val positiveButton = if (isShutdown) "Shutdown" else "OK"
-                        
-                        AlertDialog.Builder(context)
-                            .setTitle(title)
-                            .setMessage(message)
-                            .setPositiveButton(positiveButton) { _, _ -> 
-                                result.confirm()
-                            }
-                            .setNegativeButton("Cancel") { _, _ -> 
-                                result.cancel()
-                            }
-                            .setCancelable(true)
-                            .setOnCancelListener {
-                                result.cancel()
-                            }
-                            .create()
-                            .show()
-                    } catch (e: Exception) {
-                        Log.e("WebView", "Error showing confirmation dialog", e)
-                        result.cancel()
-                    }
-                    return true
-                }
+            // Create WebViewManager if not already created
+            if (webViewManager == null) {
+                webViewManager = WebViewManager(
+                    binding.webView,
+                    binding.loadingProgress,
+                    binding.debugInfo
+                )
                 
-                override fun onJsPrompt(view: WebView?, url: String?, message: String?, defaultValue: String?, result: JsPromptResult): Boolean {
-                    Log.d("WebView", "JavaScript prompt: $message")
-                    try {
-                        val context = view?.context ?: return false
-                        val input = EditText(context)
-                        input.setText(defaultValue)
-                        
-                        AlertDialog.Builder(context)
-                            .setTitle("Prompt")
-                            .setMessage(message)
-                            .setView(input)
-                            .setPositiveButton("OK") { _, _ -> 
-                                result.confirm(input.text.toString())
-                            }
-                            .setNegativeButton("Cancel") { _, _ -> 
-                                result.cancel()
-                            }
-                            .setCancelable(true)
-                            .setOnCancelListener {
-                                result.cancel()
-                            }
-                            .create()
-                            .show()
-                    } catch (e: Exception) {
-                        Log.e("WebView", "Error showing prompt dialog", e)
-                        result.cancel()
-                    }
-                    return true
-                }
-                
-                override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {
-                    consoleMessage?.let {
-                        Log.d("WebConsole", "${it.message()} -- From line ${it.lineNumber()} of ${it.sourceId()}")
-                    }
-                    return true
-                }
-            }
-
-            webViewClient = object : WebViewClient() {
-                override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-                    super.onPageStarted(view, url, favicon)
-                    binding.loadingProgress.visibility = View.VISIBLE
-                    updateDebugInfo("Loading started: $url")
-                    startLoadingTimeout()
-                }
-
-                override fun onPageFinished(view: WebView?, url: String?) {
-                    super.onPageFinished(view, url)
-                    binding.loadingProgress.visibility = View.GONE
-                    hideDebugInfo()
-                    cancelLoadingTimeout()
-                    retryCount = 0
-                }
-
-                override fun onReceivedError(
-                    view: WebView?,
-                    request: WebResourceRequest?,
-                    error: WebResourceError?
-                ) {
-                    super.onReceivedError(view, request, error)
-                    val errorMessage = "Error: ${error?.description}"
-                    updateDebugInfo(errorMessage)
-                    binding.loadingProgress.visibility = View.GONE
-                    
-                    if (retryCount < MAX_RETRIES && request?.isForMainFrame == true) {
-                        retryCount++
-                        updateDebugInfo("Retrying ($retryCount/$MAX_RETRIES)...")
-                        handler.postDelayed({
-                            view?.reload()
-                        }, 2000)
-                    } else if (retryCount >= MAX_RETRIES) {
-                        updateDebugInfo("Failed after $MAX_RETRIES retries")
-                        // Disconnect after max retries
-                        val position = adapterPosition
-                        if (position != RecyclerView.NO_POSITION) {
-                            val connection = connections[position]
-                            onConnectClick(connection)
+                // Set up callback for loading failures
+                webViewManager?.onLoadingFailed = {
+                    val position = adapterPosition
+                    if (position != RecyclerView.NO_POSITION) {
+                        val currentConnection = connections[position]
+                        if (currentConnection.isConnected) {
+                            onConnectClick(currentConnection)
                         }
                     }
                 }
-
-                override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
-                    request?.url?.toString()?.let { url ->
-                        view?.loadUrl(url)
-                    }
-                    return true
-                }
             }
-
-            with(binding.webView) {
-                WebView.setWebContentsDebuggingEnabled(true)
-                
-                settings.apply {
-                    javaScriptEnabled = true
-                    domStorageEnabled = true
-                    loadWithOverviewMode = true
-                    useWideViewPort = true
-                    setSupportZoom(true)
-                    builtInZoomControls = true
-                    displayZoomControls = false
-                    mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
-                    allowContentAccess = true
-                    allowFileAccess = true
-                    databaseEnabled = true
-                    setGeolocationEnabled(false)
-                    cacheMode = WebSettings.LOAD_NO_CACHE
-                    
-                    // Critical settings for JavaScript dialogs
-                    javaScriptCanOpenWindowsAutomatically = true
-                    setSupportMultipleWindows(true)
-                    
-                    // Enable more HTML5 features
-                    databaseEnabled = true
-                    domStorageEnabled = true
-                    
-                    // Allow cross-domain AJAX requests - needed for some pwnagotchi APIs
-                    allowUniversalAccessFromFileURLs = true
-                    allowFileAccessFromFileURLs = true
-                    
-                    // Set default text encoding
-                    defaultTextEncodingName = "UTF-8"
-                    
-                    // Enable this for debugging
-                    WebView.setWebContentsDebuggingEnabled(true)
-                }
-                
-                isVerticalScrollBarEnabled = true
-                isHorizontalScrollBarEnabled = true
-                scrollBarStyle = View.SCROLLBARS_INSIDE_OVERLAY
-                overScrollMode = View.OVER_SCROLL_ALWAYS
-
-                // Set clients ONCE at the end to ensure our implementation is used
-                this.webViewClient = webViewClient
-                this.webChromeClient = webChromeClient
-            }
-        }
-
-        private fun loadUrlWithRetry(connection: Connection) {
-            val url = connection.url.trim()
-            val finalUrl = when {
-                url.startsWith("http://") || url.startsWith("https://") -> url
-                else -> "http://$url"
-            }
-            
-            // Always load without credentials since we removed username/password fields
-            binding.webView.loadUrl(finalUrl)
         }
 
         fun bind(connection: Connection) {
@@ -326,44 +93,23 @@ class ConnectionsAdapter(
             binding.buttonEdit.setOnClickListener { onEditClick(connection) }
             binding.buttonDelete.setOnClickListener { onDeleteClick(connection) }
 
-            if (binding.webView.tag != connection.id) {
-                setupWebView(connection)
-                binding.webView.tag = connection.id
-            }
+            // Always set up WebView first
+            setupWebView(connection)
 
             if (connection.isConnected) {
                 binding.webViewContainer.visibility = View.VISIBLE
                 binding.webView.visibility = View.VISIBLE
-                retryCount = 0
-                loadUrlWithRetry(connection)
+                webViewManager?.loadUrl(connection.url.trim())
             } else {
-                currentLoadJob?.cancel()
                 binding.webViewContainer.visibility = View.GONE
                 binding.webView.visibility = View.GONE
-                binding.loadingProgress.visibility = View.GONE
-                hideDebugInfo()
-                binding.webView.stopLoading()
-                binding.webView.loadUrl("about:blank")
+                webViewManager?.stopLoading()
             }
         }
 
         fun cleanup() {
-            currentLoadJob?.cancel()
-            loadingTimeout?.cancel()
-            binding.webView.stopLoading()
-            binding.webView.loadUrl("about:blank")
-            binding.webView.clearCache(true)
-            binding.webView.clearHistory()
-            hideDebugInfo()
-            webViewClient = null
-            webChromeClient = null
-        }
-
-        private fun updateDebugInfo(message: String?) {
-            binding.debugInfo.apply {
-                text = message
-                visibility = if (message.isNullOrEmpty()) View.GONE else View.VISIBLE
-            }
+            webViewManager?.cleanup()
+            webViewManager = null
         }
     }
 

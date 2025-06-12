@@ -32,6 +32,12 @@ android {
     // Removed product flavors (free/paid) as we're using in-app purchases instead
 
     signingConfigs {
+        // Use debug signing config for temporary testing
+        getByName("debug") {
+            // Debug keystore is automatically created by Android build system
+        }
+        
+        // Release signing config (commented out until we have correct passwords)
         create("release") {
             // Check if the keystore file exists
             val keystoreFile = file("pwneyes.keystore.jks")
@@ -53,8 +59,9 @@ android {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             
-            // Temporarily disable signing to avoid keystore password issues
-            signingConfig = null
+            // Temporarily use debug signing config for testing
+            // This will allow running the release build variant
+            signingConfig = signingConfigs.getByName("debug")
             
             // Disable baseline profiles
             proguardFile("baseline-profiles-rules.pro")

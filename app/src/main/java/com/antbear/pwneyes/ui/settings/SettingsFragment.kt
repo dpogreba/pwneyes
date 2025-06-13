@@ -111,7 +111,7 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
                     // Include app version in the email body
                     val appVersion = "App Version: ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})"
                     val deviceInfo = "Device: ${android.os.Build.MANUFACTURER} ${android.os.Build.MODEL}, Android ${android.os.Build.VERSION.RELEASE}"
-                    putExtra(Intent.EXTRA_TEXT, "\n\n\n\n----------\n$appVersion\n$deviceInfo")
+                    putExtra(Intent.EXTRA_TEXT, "----------\n\n\n----------\n$appVersion\n$deviceInfo")
                 }
                 
                 // Create and show chooser dialog with all compatible apps

@@ -43,6 +43,23 @@ android {
         }
     }
     
+    // Limit build variants (only generate free variants by default)
+    // This reduces the number of build variants from 4 to 2
+    androidComponents {
+        beforeVariants { variantBuilder ->
+            // Only generate free variants by default, unless a paid-specific task is explicitly requested
+            if (variantBuilder.flavorName == "paid") {
+                val paidTaskRequested = gradle.startParameter.taskNames.any { 
+                    it.contains("paid", ignoreCase = true) 
+                }
+                
+                if (!paidTaskRequested) {
+                    variantBuilder.enable = false
+                }
+            }
+        }
+    }
+    
     // Configure source sets to ensure proper flavor-specific class selection
     sourceSets {
         getByName("main") {

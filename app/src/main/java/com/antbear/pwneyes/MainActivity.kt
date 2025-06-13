@@ -18,7 +18,7 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.antbear.pwneyes.billing.BillingManager
 import com.antbear.pwneyes.databinding.ActivityMainBinding
-import com.antbear.pwneyes.util.AdsManager
+import com.antbear.pwneyes.util.AdsManagerBase
 
 class MainActivity : AppCompatActivity() {
     

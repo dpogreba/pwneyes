@@ -8,12 +8,13 @@ import com.antbear.pwneyes.billing.BillingManager
 import com.google.android.gms.ads.*
 
 /**
- * Manages ad loading and display, with premium status awareness
+ * Free flavor implementation of AdsManagerBase that shows ads 
+ * unless premium status is detected
  */
 class AdsManager private constructor(
     private val context: Context,
     private val billingManager: BillingManager?
-) {
+) : AdsManagerBase {
     companion object {
         // Test ad unit ID for development
         private const val TEST_AD_UNIT_ID = "ca-app-pub-3940256099942544/6300978111"
@@ -22,16 +23,20 @@ class AdsManager private constructor(
         private const val TAG = "AdsManager"
         
         @Volatile
-        private var INSTANCE: AdsManager? = null
+        private var INSTANCE: AdsManagerBase? = null
         
         fun initialize(context: Context, billingManager: BillingManager?) {
-            Log.d(TAG, "Initializing AdsManager")
+            Log.d(TAG, "Initializing AdsManager (Free Version)")
             try {
                 if (INSTANCE == null) {
                     synchronized(this) {
                         if (INSTANCE == null) {
-                            INSTANCE = AdsManager(context.applicationContext, billingManager)
-                            INSTANCE?.initializeMobileAds()
+                            val manager = AdsManager(context.applicationContext, billingManager)
+                            manager.initializeMobileAds()
+                            INSTANCE = manager
+                            
+                            // Also set in the base class for access through AdsManagerBase.getInstance()
+                            AdsManagerBase.Companion.INSTANCE = manager
                         }
                     }
                 }
@@ -40,7 +45,7 @@ class AdsManager private constructor(
             }
         }
         
-        fun getInstance(): AdsManager? {
+        fun getInstance(): AdsManagerBase? {
             return INSTANCE
         }
     }
@@ -83,7 +88,7 @@ class AdsManager private constructor(
      * Enable or disable premium features for debugging purposes
      * This allows testing premium features without an actual purchase
      */
-    fun setDebugPremiumMode(enabled: Boolean) {
+    override fun setDebugPremiumMode(enabled: Boolean) {
         try {
             isDebugPremium = enabled
             Log.d(TAG, "Debug premium mode set to: $enabled")
@@ -123,7 +128,7 @@ class AdsManager private constructor(
         }
     }
 
-    fun loadBannerAd(adContainer: ViewGroup) {
+    override fun loadBannerAd(adContainer: ViewGroup) {
         // Skip loading ad if user has premium status (either purchased or debug mode)
         if (isPremium || isDebugPremium) {
             val source = if (isPremium) "premium status" else "debug mode"
@@ -218,7 +223,7 @@ class AdsManager private constructor(
     }
     
     // Clean up when the app is destroyed
-    fun cleanup() {
+    override fun cleanup() {
         try {
             billingManager?.let { manager ->
                 premiumObserver?.let { observer ->

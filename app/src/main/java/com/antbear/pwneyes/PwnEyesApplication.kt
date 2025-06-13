@@ -10,7 +10,7 @@ import com.antbear.pwneyes.billing.BillingManager
 import com.antbear.pwneyes.data.AppDatabase
 import com.antbear.pwneyes.data.ConnectionRepository
 import com.antbear.pwneyes.health.ConnectionHealthService
-import com.antbear.pwneyes.util.AdsManager
+import com.antbear.pwneyes.util.AdsManagerBase
 
 class PwnEyesApplication : Application() {
     private val TAG = "PwnEyesApplication"
@@ -88,7 +88,8 @@ class PwnEyesApplication : Application() {
             Log.d(TAG, "About to initialize AdsManager with BillingManager")
             // Initialize AdsManager even if billingManager is null 
             // (it will handle the null case internally)
-            AdsManager.initialize(this, billingManager)
+            // Flavor-specific AdsManager implementation will be used
+            AdsManagerBase.initialize(this, billingManager)
             Log.d(TAG, "AdsManager initialized")
         } catch (e: Exception) {
             Log.e(TAG, "Error initializing AdsManager", e)

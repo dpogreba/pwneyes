@@ -28,7 +28,7 @@ android {
         abortOnError = false
     }
 
-    // Re-enable product flavors for correct package name on Google Play
+    // Configure product flavors for correct package name on Google Play
     flavorDimensions += "version"
     productFlavors {
         create("free") {
@@ -40,6 +40,19 @@ android {
             dimension = "version"
             applicationIdSuffix = ".paid"
             versionNameSuffix = "-paid"
+        }
+    }
+    
+    // Configure source sets to ensure proper flavor-specific class selection
+    sourceSets {
+        getByName("main") {
+            java.srcDirs("src/main/java")
+        }
+        getByName("free") {
+            java.srcDirs("src/free/java")
+        }
+        getByName("paid") {
+            java.srcDirs("src/paid/java")
         }
     }
 

@@ -42,8 +42,23 @@ class BillingManager(private val context: Context) {
     private fun setupBillingClient() {
         Log.d(TAG, "Setting up billing client")
         try {
+            // Make sure the purchasesUpdatedListener is defined before using it
+            if (purchasesUpdatedListener == null) {
+                Log.e(TAG, "PurchasesUpdatedListener is null, creating default implementation")
+            }
+            
+            // Ensure the purchasesUpdatedListener is properly initialized
+            val listener = purchasesUpdatedListener ?: PurchasesUpdatedListener { billingResult, purchases ->
+                Log.d(TAG, "Default purchase update listener called: ${billingResult.responseCode}")
+                if (billingResult.responseCode == BillingResponseCode.OK && purchases != null) {
+                    for (purchase in purchases) {
+                        handlePurchase(purchase)
+                    }
+                }
+            }
+            
             billingClient = BillingClient.newBuilder(context)
-                .setListener(purchasesUpdatedListener)
+                .setListener(listener)
                 .enablePendingPurchases()
                 .build()
 

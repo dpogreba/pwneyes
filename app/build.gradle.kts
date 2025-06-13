@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     id("kotlin-android")
     id("androidx.navigation.safeargs.kotlin")
+    id("kotlin-kapt") // Add this for annotation processing
 }
 
 android {
@@ -150,8 +151,8 @@ dependencies {
     implementation("androidx.room:room-runtime:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
     implementation("com.google.code.gson:gson:2.10.1")
-    // Remove Room compiler annotation processor since we removed kapt
-    // kapt("androidx.room:room-compiler:2.6.1")
+    // Room compiler annotation processor - needed for code generation
+    kapt("androidx.room:room-compiler:2.6.1")
     implementation("androidx.preference:preference:1.2.0")
     // Google Play Billing Library for in-app purchases
     implementation("com.android.billingclient:billing-ktx:6.0.1")

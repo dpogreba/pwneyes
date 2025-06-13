@@ -1,7 +1,6 @@
 plugins {
     id("com.android.application")
     id("kotlin-android")
-    id("kotlin-kapt")
     id("androidx.navigation.safeargs.kotlin")
 }
 
@@ -13,8 +12,8 @@ android {
         applicationId = "com.antbear.pwneyes"
         minSdk = 24
         targetSdk = 34
-        versionCode = 12
-        versionName = "10.3"
+        versionCode = 13
+        versionName = "10.4"
         
         // Explicitly disable baseline profiles to fix installation issues
         ndk {
@@ -29,7 +28,20 @@ android {
         abortOnError = false
     }
 
-    // Removed product flavors (free/paid) as we're using in-app purchases instead
+    // Re-enable product flavors for correct package name on Google Play
+    flavorDimensions += "version"
+    productFlavors {
+        create("free") {
+            dimension = "version"
+            applicationIdSuffix = ".free"
+            versionNameSuffix = "-free"
+        }
+        create("paid") {
+            dimension = "version"
+            applicationIdSuffix = ".paid"
+            versionNameSuffix = "-paid"
+        }
+    }
 
     signingConfigs {
         // Use debug signing config for temporary testing
@@ -37,19 +49,17 @@ android {
             // Debug keystore is automatically created by Android build system
         }
         
-        // Release signing config (commented out until we have correct passwords)
+        // Release signing config with proper keystore
         create("release") {
             // Check if the keystore file exists
             val keystoreFile = file("pwneyes.keystore.jks")
             
-            // Only use the keystore if it exists and passwords are provided
+            // Only use the keystore if it exists
             if (keystoreFile.exists()) {
                 storeFile = keystoreFile
-                
-                // Use empty string as fallback for missing properties
-                storePassword = project.findProperty("KEYSTORE_PASSWORD")?.toString() ?: ""
+                storePassword = "android" // Default password, can be overridden
                 keyAlias = "pwneyes"
-                keyPassword = project.findProperty("KEY_PASSWORD")?.toString() ?: ""
+                keyPassword = "android" // Default password, can be overridden
             }
         }
     }
@@ -59,9 +69,8 @@ android {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             
-            // Temporarily use debug signing config for testing
-            // This will allow running the release build variant
-            signingConfig = signingConfigs.getByName("debug")
+            // Use release signing config for Google Play Store uploads
+            signingConfig = signingConfigs.getByName("release")
             
             // Disable baseline profiles
             proguardFile("baseline-profiles-rules.pro")
@@ -70,8 +79,8 @@ android {
             // Disable baseline profiles
             proguardFile("baseline-profiles-rules.pro")
             
-            // No signing for debug builds
-            signingConfig = null
+            // Use debug signing for debug builds
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
     
@@ -90,15 +99,6 @@ android {
         jvmTarget = "11"
         freeCompilerArgs = listOf("-Xjvm-default=all")
     }
-}
-
-// Configure kapt to use the same Java version
-kapt {
-    javacOptions {
-        option("-source", "11")
-        option("-target", "11")
-    }
-    // Note: kapt doesn't support kotlinOptions directly
 }
 
 // Make sure all Kotlin compile tasks use Java 11
@@ -120,7 +120,8 @@ dependencies {
     implementation("androidx.room:room-runtime:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
     implementation("com.google.code.gson:gson:2.10.1")
-    kapt("androidx.room:room-compiler:2.6.1")
+    // Remove Room compiler annotation processor since we removed kapt
+    // kapt("androidx.room:room-compiler:2.6.1")
     implementation("androidx.preference:preference:1.2.0")
     // Google Play Billing Library for in-app purchases
     implementation("com.android.billingclient:billing-ktx:6.0.1")

@@ -100,9 +100,12 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
         // Set up Contact Us preference
         findPreference<Preference>("contact_us")?.setOnPreferenceClickListener {
             try {
-                val intent = Intent(Intent.ACTION_SENDTO).apply {
-                    data = Uri.parse("mailto:") // only email apps should handle this
-                    putExtra(Intent.EXTRA_EMAIL, arrayOf("PwnEyes@proton.me"))
+                val emailAddress = "PwnEyes@proton.me"
+                
+                // Create a more general intent that more apps can handle
+                val intent = Intent(Intent.ACTION_SEND).apply {
+                    type = "message/rfc822" // Standard email MIME type
+                    putExtra(Intent.EXTRA_EMAIL, arrayOf(emailAddress))
                     putExtra(Intent.EXTRA_SUBJECT, "FROM PWNEYES ANDROID")
                     
                     // Include app version in the email body
@@ -111,12 +114,9 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
                     putExtra(Intent.EXTRA_TEXT, "\n\n\n\n----------\n$appVersion\n$deviceInfo")
                 }
                 
-                // Verify that there's an email app available to handle the intent
-                if (intent.resolveActivity(requireActivity().packageManager) != null) {
-                    startActivity(intent)
-                } else {
-                    Toast.makeText(requireContext(), getString(R.string.toast_no_email_app), Toast.LENGTH_SHORT).show()
-                }
+                // Create and show chooser dialog with all compatible apps
+                val chooser = Intent.createChooser(intent, "Contact Support")
+                startActivity(chooser)
             } catch (e: Exception) {
                 Log.e(TAG, "Error launching email intent", e)
                 Toast.makeText(requireContext(), getString(R.string.toast_email_error), Toast.LENGTH_SHORT).show()

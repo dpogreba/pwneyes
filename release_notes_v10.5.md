@@ -7,6 +7,13 @@
 📧 **Enhanced Contact Support Experience**
 We've improved the "Contact Us" email template with a cleaner, more user-friendly layout. The new format makes it easier for you to write your message while automatically including the technical details our support team needs to help you.
 
+💳 **Improved In-App Purchase Experience**
+We've completely revamped how the billing system works to provide a more reliable purchasing experience:
+- Added real-time billing service status indicators
+- Better error messages when Google Play services are unavailable
+- Automatic retry mechanism when connection issues occur
+- Clearer feedback about why purchases might not be working
+
 🛠️ **App Stability Improvements**
 This update includes important fixes to ensure the app runs smoothly across all Android devices, improving overall stability and performance.
 

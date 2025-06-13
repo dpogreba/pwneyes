@@ -30,6 +30,11 @@
     <string name="remove_ads">Remove Ads</string>
     <string name="premium_status">Premium Status</string>
     <string name="restore_purchases">Restore Purchases</string>
+    <string name="billing_connecting">Connecting to billing service…</string>
+    <string name="billing_disconnected">Billing service disconnected</string>
+    <string name="billing_error">Billing error: %1$s</string>
+    <string name="billing_not_ready">Billing service not ready. Please try again later.</string>
+    <string name="billing_retry">Retry Connection</string>
     
     <!-- Preference Categories -->
     <string name="pref_category_appearance">Appearance</string>

@@ -20,21 +20,42 @@ class BillingManager(private val context: Context) {
     companion object {
         private const val TAG = "BillingManager"
         const val REMOVE_ADS_PRODUCT_ID = "remove_ads"
+        
+        // Billing connection states
+        const val STATE_DISCONNECTED = 0
+        const val STATE_CONNECTING = 1
+        const val STATE_CONNECTED = 2
+        const val STATE_ERROR = 3
     }
 
     private val _premiumStatus = MutableLiveData<Boolean>()
     val premiumStatus: LiveData<Boolean> = _premiumStatus
-
+    
+    // Track billing service connection state
+    private val _connectionState = MutableLiveData<Int>()
+    val connectionState: LiveData<Int> = _connectionState
+    
+    // Track the latest error message for diagnostics
+    private val _lastErrorMessage = MutableLiveData<String>()
+    val lastErrorMessage: LiveData<String> = _lastErrorMessage
+    
+    private var connectionAttempts = 0
+    private var maxRetryAttempts = 3
     private var billingClient: BillingClient? = null
     private val coroutineScope = CoroutineScope(Dispatchers.Main + Job())
 
     init {
         Log.d(TAG, "BillingManager initialization started")
         _premiumStatus.value = false
+        _connectionState.value = STATE_DISCONNECTED
+        _lastErrorMessage.value = ""
+        
         try {
             setupBillingClient()
         } catch (e: Exception) {
             Log.e(TAG, "Critical error during BillingManager initialization", e)
+            _connectionState.value = STATE_ERROR
+            _lastErrorMessage.value = "Initialization error: ${e.message}"
             // We'll continue operating with a disabled billing client
         }
     }
@@ -77,11 +98,18 @@ class BillingManager(private val context: Context) {
 
     private fun connectToPlayBilling() {
         Log.d(TAG, "Connecting to Google Play Billing")
+        _connectionState.value = STATE_CONNECTING
+        connectionAttempts++
+        
         try {
             billingClient?.startConnection(object : BillingClientStateListener {
                 override fun onBillingSetupFinished(billingResult: BillingResult) {
                     if (billingResult.responseCode == BillingResponseCode.OK) {
                         Log.d(TAG, "Billing client connected successfully")
+                        _connectionState.value = STATE_CONNECTED
+                        _lastErrorMessage.value = ""
+                        connectionAttempts = 0 // Reset the counter on success
+                        
                         // Check if user already has premium status
                         queryPurchases()
                     } else {
@@ -105,6 +133,9 @@ class BillingManager(private val context: Context) {
                             else -> "In-app purchase initialization failed: ${billingResult.responseCode}"
                         }
                         
+                        _connectionState.value = STATE_ERROR
+                        _lastErrorMessage.value = errorMessage
+                        
                         Log.e(TAG, "Billing client connection failed: ${billingResult.responseCode}")
                         Log.e(TAG, "Debug message: ${billingResult.debugMessage}")
                         Log.e(TAG, "Friendly error message: $errorMessage")
@@ -117,20 +148,34 @@ class BillingManager(private val context: Context) {
                                 Toast.LENGTH_LONG
                             ).show()
                         }
+                        
+                        // Try to reconnect if we haven't exceeded maximum attempts
+                        if (connectionAttempts < maxRetryAttempts) {
+                            coroutineScope.launch {
+                                delay(3000) // Wait 3 seconds before retry
+                                Log.d(TAG, "Retrying connection attempt $connectionAttempts of $maxRetryAttempts")
+                                connectToPlayBilling()
+                            }
+                        }
                     }
                 }
 
                 override fun onBillingServiceDisconnected() {
                     Log.d(TAG, "Billing service disconnected")
+                    _connectionState.value = STATE_DISCONNECTED
+                    
                     // Try to reconnect, but not immediately (could cause an infinite loop)
                     coroutineScope.launch {
                         delay(5000) // Wait 5 seconds before trying to reconnect
+                        Log.d(TAG, "Attempting to reconnect after disconnect")
                         connectToPlayBilling()
                     }
                 }
             })
         } catch (e: Exception) {
             Log.e(TAG, "Error connecting to Play Billing", e)
+            _connectionState.value = STATE_ERROR
+            _lastErrorMessage.value = "Connection error: ${e.message}"
         }
     }
 

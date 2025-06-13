@@ -42,14 +42,39 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
             
             // Observe premium status changes if billing manager is available
             billingManager?.let { manager ->
+                // Premium status observer
                 manager.premiumStatus.observe(this, Observer { premium ->
                     isPremium = premium
                     updatePremiumPreferencesVisibility()
+                })
+                
+                // Connection state observer
+                manager.connectionState.observe(this, Observer { state ->
+                    when (state) {
+                        BillingManager.STATE_DISCONNECTED -> {
+                            Log.d(TAG, "Billing service disconnected")
+                            updateBillingState(false, "Billing service disconnected")
+                        }
+                        BillingManager.STATE_CONNECTING -> {
+                            Log.d(TAG, "Connecting to billing service...")
+                            updateBillingState(false, "Connecting to billing service...")
+                        }
+                        BillingManager.STATE_CONNECTED -> {
+                            Log.d(TAG, "Billing service connected")
+                            updateBillingState(true, null)
+                        }
+                        BillingManager.STATE_ERROR -> {
+                            val errorMsg = manager.lastErrorMessage.value ?: "Unknown error"
+                            Log.e(TAG, "Billing service error: $errorMsg")
+                            updateBillingState(false, errorMsg)
+                        }
+                    }
                 })
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error accessing billing manager", e)
             isPremium = false
+            updateBillingState(false, "Failed to initialize billing")
         }
         
         // Set up the erase all preference
@@ -126,6 +151,38 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
         
         // Initial update of premium preferences visibility
         updatePremiumPreferencesVisibility()
+    }
+    
+    /**
+     * Updates the UI based on the billing connection state
+     */
+    private fun updateBillingState(isConnected: Boolean, errorMessage: String?) {
+        try {
+            val removeAdsPreference = findPreference<Preference>("remove_ads")
+            val restorePurchasesPreference = findPreference<Preference>("restore_purchases")
+            
+            // Enable/disable based on connection status
+            removeAdsPreference?.isEnabled = isConnected
+            restorePurchasesPreference?.isEnabled = isConnected
+            
+            // Update summary to show connection status
+            if (!isConnected) {
+                removeAdsPreference?.summary = errorMessage ?: "Billing service not available"
+                restorePurchasesPreference?.summary = errorMessage ?: "Billing service not available"
+            } else {
+                // Clear error message if connected
+                if (isPremium) {
+                    removeAdsPreference?.summary = getString(R.string.premium_status)
+                } else {
+                    removeAdsPreference?.summary = getString(R.string.pref_remove_ads_summary)
+                }
+                restorePurchasesPreference?.summary = getString(R.string.pref_restore_purchases_summary)
+            }
+            
+            Log.d(TAG, "Updated billing state UI. isConnected: $isConnected, errorMessage: $errorMessage")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error updating billing state UI", e)
+        }
     }
     
     private fun updatePremiumPreferencesVisibility() {

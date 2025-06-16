@@ -54,19 +54,23 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
                         BillingManager.STATE_DISCONNECTED -> {
                             Log.d(TAG, "Billing service disconnected")
                             updateBillingState(false, "Billing service disconnected")
+                            updateBillingStatusUI(state, manager.lastErrorMessage.value)
                         }
                         BillingManager.STATE_CONNECTING -> {
                             Log.d(TAG, "Connecting to billing service...")
                             updateBillingState(false, "Connecting to billing service...")
+                            updateBillingStatusUI(state, null)
                         }
                         BillingManager.STATE_CONNECTED -> {
                             Log.d(TAG, "Billing service connected")
                             updateBillingState(true, null)
+                            updateBillingStatusUI(state, null)
                         }
                         BillingManager.STATE_ERROR -> {
                             val errorMsg = manager.lastErrorMessage.value ?: "Unknown error"
                             Log.e(TAG, "Billing service error: $errorMsg")
                             updateBillingState(false, errorMsg)
+                            updateBillingStatusUI(state, errorMsg)
                         }
                     }
                 })
@@ -233,6 +237,51 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         if (key == "theme_preference" && sharedPreferences != null) {
             applyTheme(sharedPreferences)
+        }
+    }
+    
+    /**
+     * Updates the billing status and retry button UI based on connection state
+     */
+    private fun updateBillingStatusUI(state: Int, errorMessage: String?) {
+        try {
+            val retryBillingPreference = findPreference<Preference>("retry_billing")
+            val billingStatusPreference = findPreference<Preference>("billing_status")
+            
+            // Show retry button only when in error or disconnected state
+            val showRetryButton = state == BillingManager.STATE_ERROR || state == BillingManager.STATE_DISCONNECTED
+            retryBillingPreference?.isVisible = showRetryButton
+            
+            // Set up retry button click handler
+            retryBillingPreference?.setOnPreferenceClickListener {
+                billingManager?.retryConnection()
+                Toast.makeText(requireContext(), "Retrying billing connection...", Toast.LENGTH_SHORT).show()
+                true
+            }
+            
+            // Update status text with current state information
+            val statusText = when (state) {
+                BillingManager.STATE_CONNECTING -> getString(R.string.billing_connecting)
+                BillingManager.STATE_CONNECTED -> "Connected to Google Play Billing"
+                BillingManager.STATE_DISCONNECTED -> getString(R.string.billing_disconnected)
+                BillingManager.STATE_ERROR -> getString(R.string.billing_error, errorMessage ?: "Unknown error")
+                else -> "Unknown billing state"
+            }
+            
+            // Show status preference when needed
+            billingStatusPreference?.isVisible = true
+            billingStatusPreference?.title = getString(R.string.billing_connection_status, statusText)
+            
+            // For error states, also show detailed error message as summary
+            if (state == BillingManager.STATE_ERROR && !errorMessage.isNullOrEmpty()) {
+                billingStatusPreference?.summary = errorMessage
+            } else {
+                billingStatusPreference?.summary = null
+            }
+            
+            Log.d(TAG, "Updated billing status UI. State: $state, Message: $errorMessage")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error updating billing status UI", e)
         }
     }
     

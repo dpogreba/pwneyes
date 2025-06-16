@@ -42,6 +42,19 @@
             android:title="@string/restore_purchases"
             android:summary="@string/pref_restore_purchases_summary"
             app:iconSpaceReserved="false" />
+            
+        <Preference
+            android:key="retry_billing"
+            android:title="@string/billing_retry"
+            android:summary="@string/billing_test_mode"
+            app:iconSpaceReserved="false"
+            android:visible="false" />
+            
+        <Preference
+            android:key="billing_status"
+            android:selectable="false"
+            app:iconSpaceReserved="false"
+            android:visible="false" />
     </PreferenceCategory>
 
     <PreferenceCategory

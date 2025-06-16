@@ -41,6 +41,7 @@ class BillingManager(private val context: Context) {
     
     private var connectionAttempts = 0
     private var maxRetryAttempts = 3
+    private var connectingTimeoutJob: Job? = null
     private var billingClient: BillingClient? = null
     private val coroutineScope = CoroutineScope(Dispatchers.Main + Job())
 
@@ -96,10 +97,45 @@ class BillingManager(private val context: Context) {
         }
     }
 
+    /**
+     * Force a new connection attempt to Google Play Billing
+     * This can be called manually from the UI to retry a failed connection
+     */
+    fun retryConnection() {
+        Log.d(TAG, "Manual retry connection requested")
+        
+        // Cancel any existing timeout
+        connectingTimeoutJob?.cancel()
+        connectingTimeoutJob = null
+        
+        // Reset connection attempts to give full retry quota
+        connectionAttempts = 0
+        
+        // Set to disconnected state first to ensure a clean start
+        _connectionState.value = STATE_DISCONNECTED
+        _lastErrorMessage.value = "Retrying connection..."
+        
+        // Start new connection attempt
+        connectToPlayBilling()
+    }
+    
     private fun connectToPlayBilling() {
         Log.d(TAG, "Connecting to Google Play Billing")
         _connectionState.value = STATE_CONNECTING
         connectionAttempts++
+        
+        // Cancel any existing timeout job
+        connectingTimeoutJob?.cancel()
+        
+        // Create a new timeout job - will change to error state if connection takes too long
+        connectingTimeoutJob = coroutineScope.launch {
+            delay(15000) // 15 second timeout for connection
+            if (_connectionState.value == STATE_CONNECTING) {
+                Log.e(TAG, "Billing connection timeout after 15 seconds")
+                _connectionState.value = STATE_ERROR
+                _lastErrorMessage.value = "Connection timeout. App may not be published on Google Play yet."
+            }
+        }
         
         try {
             billingClient?.startConnection(object : BillingClientStateListener {

@@ -34,7 +34,9 @@
     <string name="billing_disconnected">Billing service disconnected</string>
     <string name="billing_error">Billing error: %1$s</string>
     <string name="billing_not_ready">Billing service not ready. Please try again later.</string>
-    <string name="billing_retry">Retry Connection</string>
+    <string name="billing_retry">Retry Billing Connection</string>
+    <string name="billing_connection_status">Billing connection status: %1$s</string>
+    <string name="billing_test_mode">Test Mode: App not published to Play Store</string>
     
     <!-- Preference Categories -->
     <string name="pref_category_appearance">Appearance</string>

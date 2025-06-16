@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- Share files from the app's internal storage -->
+    <files-path name="crash_logs" path="crash_reports/" />
+</paths>

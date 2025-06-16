@@ -163,4 +163,18 @@ class MainActivity : AppCompatActivity() {
             super.onSupportNavigateUp()
         }
     }
+    
+    override fun onDestroy() {
+        try {
+            // Remove premium status observer to prevent memory leaks
+            billingManager?.premiumStatus?.removeObservers(this)
+            
+            // Release any other resources
+            binding.drawerLayout.removeDrawerListener(toggle)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error in onDestroy", e)
+        }
+        
+        super.onDestroy()
+    }
 }

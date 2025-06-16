@@ -11,6 +11,8 @@ import com.antbear.pwneyes.data.AppDatabase
 import com.antbear.pwneyes.data.ConnectionRepository
 import com.antbear.pwneyes.health.ConnectionHealthService
 import com.antbear.pwneyes.util.AdsManagerBase
+import com.antbear.pwneyes.util.CrashReporter
+import com.antbear.pwneyes.util.NetworkUtils
 
 class PwnEyesApplication : Application() {
     private val TAG = "PwnEyesApplication"
@@ -67,14 +69,29 @@ class PwnEyesApplication : Application() {
         }
     }
     
+    // Network utilities for network status monitoring and error handling
+    val networkUtils by lazy {
+        try {
+            Log.d(TAG, "Initializing NetworkUtils")
+            NetworkUtils.getInstance(this)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error initializing NetworkUtils", e)
+            null
+        }
+    }
+    
     override fun onCreate() {
         super.onCreate()
         
-        // Set default uncaught exception handler
-        Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
-            Log.e(TAG, "Uncaught exception in thread ${thread.name}", throwable)
-            // Let the default handler deal with it after logging
-            Thread.getDefaultUncaughtExceptionHandler()?.uncaughtException(thread, throwable)
+        // Initialize crash reporter (must be done before any other initialization)
+        try {
+            Log.d(TAG, "Initializing crash reporter")
+            CrashReporter.initialize(this)
+            
+            // Check for crash reports from previous sessions
+            CrashReporter.checkForCrashReports(this)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error initializing crash reporter", e)
         }
         
         try {
@@ -113,6 +130,13 @@ class PwnEyesApplication : Application() {
             connectionHealthService?.cleanup()
         } catch (e: Exception) {
             Log.e(TAG, "Error stopping connection health service", e)
+        }
+        
+        // Stop network monitoring
+        try {
+            networkUtils?.stopNetworkMonitoring()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error stopping network monitoring", e)
         }
     }
     

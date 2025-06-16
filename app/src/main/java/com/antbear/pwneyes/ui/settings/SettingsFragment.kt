@@ -234,6 +234,21 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
         sharedPreferences.unregisterOnSharedPreferenceChangeListener(this)
     }
     
+    override fun onDestroy() {
+        try {
+            // Remove LiveData observers to prevent memory leaks
+            billingManager?.let { manager ->
+                manager.premiumStatus.removeObservers(this)
+                manager.connectionState.removeObservers(this)
+                manager.lastErrorMessage.removeObservers(this)
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error removing observers in onDestroy", e)
+        }
+        
+        super.onDestroy()
+    }
+    
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         if (key == "theme_preference" && sharedPreferences != null) {
             applyTheme(sharedPreferences)

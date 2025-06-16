@@ -256,23 +256,16 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
     }
     
     /**
-     * Updates the billing status and retry button UI based on connection state
+     * Updates the billing status UI based on connection state
+     * Note: Retry is now handled automatically in the background
      */
     private fun updateBillingStatusUI(state: Int, errorMessage: String?) {
         try {
             val retryBillingPreference = findPreference<Preference>("retry_billing")
             val billingStatusPreference = findPreference<Preference>("billing_status")
             
-            // Show retry button only when in error or disconnected state
-            val showRetryButton = state == BillingManager.STATE_ERROR || state == BillingManager.STATE_DISCONNECTED
-            retryBillingPreference?.isVisible = showRetryButton
-            
-            // Set up retry button click handler
-            retryBillingPreference?.setOnPreferenceClickListener {
-                billingManager?.retryConnection()
-                Toast.makeText(requireContext(), "Retrying billing connection...", Toast.LENGTH_SHORT).show()
-                true
-            }
+            // Always hide the retry button as retries are now automatic
+            retryBillingPreference?.isVisible = false
             
             // Update status text with current state information
             val statusText = when (state) {

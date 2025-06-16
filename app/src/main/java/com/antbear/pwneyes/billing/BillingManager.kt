@@ -40,8 +40,9 @@ class BillingManager(private val context: Context) {
     val lastErrorMessage: LiveData<String> = _lastErrorMessage
     
     private var connectionAttempts = 0
-    private var maxRetryAttempts = 3
+    private var maxRetryAttempts = 5  // Increased from 3 to 5
     private var connectingTimeoutJob: Job? = null
+    private var periodicReconnectionJob: Job? = null
     private var billingClient: BillingClient? = null
     private val coroutineScope = CoroutineScope(Dispatchers.Main + Job())
 
@@ -99,10 +100,10 @@ class BillingManager(private val context: Context) {
 
     /**
      * Force a new connection attempt to Google Play Billing
-     * This can be called manually from the UI to retry a failed connection
+     * This is called automatically and no longer exposed in the UI
      */
     fun retryConnection() {
-        Log.d(TAG, "Manual retry connection requested")
+        Log.d(TAG, "Auto retry connection initiated")
         
         // Cancel any existing timeout
         connectingTimeoutJob?.cancel()
@@ -117,6 +118,31 @@ class BillingManager(private val context: Context) {
         
         // Start new connection attempt
         connectToPlayBilling()
+    }
+    
+    /**
+     * Start periodic reconnection attempts in the background
+     * This ensures billing will eventually connect even after max retries
+     */
+    private fun startPeriodicReconnection() {
+        // Cancel any existing periodic job
+        periodicReconnectionJob?.cancel()
+        
+        // Start a new periodic job that attempts reconnection every 2 minutes
+        periodicReconnectionJob = coroutineScope.launch {
+            while (isActive) {
+                delay(120000) // 2 minutes between reconnection attempts
+                
+                // Only attempt reconnection if we're not already connected or connecting
+                if (_connectionState.value != STATE_CONNECTED && 
+                    _connectionState.value != STATE_CONNECTING) {
+                    
+                    Log.d(TAG, "Periodic reconnection attempt")
+                    connectionAttempts = 0 // Reset connection attempts for a fresh start
+                    connectToPlayBilling()
+                }
+            }
+        }
     }
     
     private fun connectToPlayBilling() {
@@ -188,10 +214,16 @@ class BillingManager(private val context: Context) {
                         // Try to reconnect if we haven't exceeded maximum attempts
                         if (connectionAttempts < maxRetryAttempts) {
                             coroutineScope.launch {
-                                delay(3000) // Wait 3 seconds before retry
-                                Log.d(TAG, "Retrying connection attempt $connectionAttempts of $maxRetryAttempts")
+                                // Exponential backoff: wait longer between consecutive retries
+                                val delayTime = 3000L * (1 shl (connectionAttempts - 1))
+                                Log.d(TAG, "Retrying connection attempt $connectionAttempts of $maxRetryAttempts in ${delayTime/1000} seconds")
+                                delay(delayTime) // Wait with exponential backoff
                                 connectToPlayBilling()
                             }
+                        } else {
+                            // Start periodic reconnection attempts for long-term recovery
+                            Log.d(TAG, "Maximum immediate retries exceeded, switching to periodic reconnection")
+                            startPeriodicReconnection()
                         }
                     }
                 }
@@ -204,6 +236,7 @@ class BillingManager(private val context: Context) {
                     coroutineScope.launch {
                         delay(5000) // Wait 5 seconds before trying to reconnect
                         Log.d(TAG, "Attempting to reconnect after disconnect")
+                        connectionAttempts = 0 // Reset connection attempts on disconnect
                         connectToPlayBilling()
                     }
                 }

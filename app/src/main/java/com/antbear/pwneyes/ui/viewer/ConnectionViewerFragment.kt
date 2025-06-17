@@ -39,13 +39,16 @@ class ConnectionViewerFragment : Fragment() {
                 builtInZoomControls = true
                 displayZoomControls = false
                 
-                // Critical settings for proper viewport rendering
+                // Critical settings for proper viewport rendering and scrolling
                 loadWithOverviewMode = true
                 useWideViewPort = true
                 
+                // Enable caching for better performance
+                cacheMode = WebSettings.LOAD_DEFAULT
+                setAppCacheEnabled(true)
+                
                 // Additional settings for better web experience
                 setGeolocationEnabled(false)
-                cacheMode = WebSettings.LOAD_NO_CACHE
                 
                 // Allow cross-domain AJAX requests if needed for some APIs
                 allowContentAccess = true
@@ -62,11 +65,17 @@ class ConnectionViewerFragment : Fragment() {
                 mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
             }
             
-            // Enable scroll bars
+            // Enable scroll bars and ensure scrolling works
             isVerticalScrollBarEnabled = true
             isHorizontalScrollBarEnabled = true
             scrollBarStyle = View.SCROLLBARS_INSIDE_OVERLAY
             overScrollMode = View.OVER_SCROLL_ALWAYS
+            
+            // Ensure layout is handled properly for scrolling
+            layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
 
             // Set WebChromeClient to handle JavaScript dialogs
             webChromeClient = object : WebChromeClient() {
@@ -184,6 +193,26 @@ class ConnectionViewerFragment : Fragment() {
                 override fun onPageFinished(view: WebView?, url: String?) {
                     super.onPageFinished(view, url)
                     binding.progressBar.visibility = View.GONE
+                    
+                    // Inject JavaScript to ensure content is scrollable
+                    view?.evaluateJavascript("""
+                        (function() {
+                            // Ensure body takes full content height
+                            document.body.style.height = 'auto';
+                            
+                            // Make sure overflow is set to allow scrolling
+                            document.body.style.overflowY = 'auto';
+                            
+                            // Log information about content dimensions for debugging
+                            console.log('Document height: ' + document.documentElement.scrollHeight);
+                            console.log('Viewport height: ' + window.innerHeight);
+                            
+                            // Force a small delay then reflow to ensure scrollbars appear if needed
+                            setTimeout(function() {
+                                window.dispatchEvent(new Event('resize'));
+                            }, 500);
+                        })();
+                    """.trimIndent(), null)
                 }
 
                 override fun onReceivedError(

@@ -43,9 +43,8 @@ class ConnectionViewerFragment : Fragment() {
                 loadWithOverviewMode = true
                 useWideViewPort = true
                 
-                // Enable caching for better performance
+                // Enable caching for better performance (modern approach)
                 cacheMode = WebSettings.LOAD_DEFAULT
-                setAppCacheEnabled(true)
                 
                 // Additional settings for better web experience
                 setGeolocationEnabled(false)

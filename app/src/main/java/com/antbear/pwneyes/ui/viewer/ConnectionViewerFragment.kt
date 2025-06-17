@@ -16,6 +16,18 @@ class ConnectionViewerFragment : Fragment() {
     private var _binding: FragmentConnectionViewerBinding? = null
     private val binding get() = _binding!!
     private val args: ConnectionViewerFragmentArgs by navArgs()
+    
+    // Variables to preserve WebView state across orientation changes
+    private var webViewState: Bundle? = null
+    private var lastUrl: String? = null
+    private var lastScrollX: Int = 0
+    private var lastScrollY: Int = 0
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        // Retain this fragment across configuration changes
+        retainInstance = true
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -24,11 +36,20 @@ class ConnectionViewerFragment : Fragment() {
     ): View {
         _binding = FragmentConnectionViewerBinding.inflate(inflater, container, false)
         setupWebView()
+        
+        // Restore WebView state if it exists
+        if (webViewState != null) {
+            binding.webView.restoreState(webViewState!!)
+        }
+        
         return binding.root
     }
 
     private fun setupWebView() {
+        // Configure WebView to handle orientation changes better
         binding.webView.apply {
+            // Set an ID to help with state restoration
+            id = View.generateViewId()
             settings.apply {
                 // Enable JavaScript and DOM storage
                 javaScriptEnabled = true
@@ -193,14 +214,44 @@ class ConnectionViewerFragment : Fragment() {
                     super.onPageFinished(view, url)
                     binding.progressBar.visibility = View.GONE
                     
-                    // Inject JavaScript to ensure content is scrollable
+                        // Save last URL for state restoration
+                    lastUrl = url
+                    
+                    // Inject enhanced JavaScript to ensure content is scrollable, including nested areas
                     view?.evaluateJavascript("""
                         (function() {
-                            // Ensure body takes full content height
-                            document.body.style.height = 'auto';
+                            // Store current scroll position for orientation changes
+                            window.addEventListener('scroll', function() {
+                                window.scrollXPos = window.scrollX;
+                                window.scrollYPos = window.scrollY;
+                            });
                             
-                            // Make sure overflow is set to allow scrolling
+                            // Make sure all potential scrollable elements are actually scrollable
+                            function makeScrollable(element) {
+                                if (element) {
+                                    element.style.height = element.scrollHeight > element.clientHeight ? '100%' : 'auto';
+                                    element.style.overflowY = 'auto';
+                                    element.style.webkitOverflowScrolling = 'touch';
+                                }
+                            }
+                            
+                            // Ensure body takes full content height and is scrollable
+                            document.body.style.height = 'auto';
                             document.body.style.overflowY = 'auto';
+                            document.body.style.webkitOverflowScrolling = 'touch';
+                            
+                            // Force all containers to be scrollable
+                            var containers = document.querySelectorAll('div, section, article, main, .scrollable, [role="main"]');
+                            for (var i = 0; i < containers.length; i++) {
+                                makeScrollable(containers[i]);
+                            }
+                            
+                            // Specifically target elements that might be in the orange box area from the screenshot
+                            // These selectors should match common UI patterns for content areas
+                            var contentElements = document.querySelectorAll('.content, .main, .container, .scroll, .panel');
+                            for (var i = 0; i < contentElements.length; i++) {
+                                makeScrollable(contentElements[i]);
+                            }
                             
                             // Log information about content dimensions for debugging
                             console.log('Document height: ' + document.documentElement.scrollHeight);
@@ -209,9 +260,20 @@ class ConnectionViewerFragment : Fragment() {
                             // Force a small delay then reflow to ensure scrollbars appear if needed
                             setTimeout(function() {
                                 window.dispatchEvent(new Event('resize'));
+                                
+                                // Restore scroll position if it exists
+                                if (typeof window.scrollXPos !== 'undefined' && typeof window.scrollYPos !== 'undefined') {
+                                    window.scrollTo(window.scrollXPos, window.scrollYPos);
+                                }
                             }, 500);
                         })();
                     """.trimIndent(), null)
+                    
+                    // Save scroll position after page has fully loaded
+                    view?.postDelayed({
+                        lastScrollX = view.scrollX
+                        lastScrollY = view.scrollY
+                    }, 1000)
                 }
 
                 override fun onReceivedError(
@@ -262,8 +324,37 @@ class ConnectionViewerFragment : Fragment() {
         }
     }
 
+    override fun onPause() {
+        super.onPause()
+        // Save WebView state when fragment is paused (e.g., during orientation change)
+        webViewState = Bundle()
+        binding.webView.saveState(webViewState)
+    }
+    
+    override fun onResume() {
+        super.onResume()
+        // Restore scroll position after resuming
+        if (lastScrollX != 0 || lastScrollY != 0) {
+            binding.webView.postDelayed({
+                binding.webView.scrollTo(lastScrollX, lastScrollY)
+            }, 300)
+        }
+    }
+    
     override fun onDestroyView() {
         super.onDestroyView()
-        _binding = null
+        // Don't nullify _binding if we're just changing orientation
+        if (!requireActivity().isChangingConfigurations) {
+            _binding = null
+        }
+    }
+    
+    override fun onDestroy() {
+        super.onDestroy()
+        // Clean up WebView resources only if the fragment is truly being destroyed
+        if (!requireActivity().isChangingConfigurations) {
+            binding.webView.destroy()
+            webViewState = null
+        }
     }
 }

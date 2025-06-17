@@ -9,7 +9,7 @@
     <WebView
         android:id="@+id/webView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
         android:scrollbars="vertical|horizontal"
         android:scrollbarStyle="insideOverlay"
         android:overScrollMode="always"
@@ -18,10 +18,47 @@
         android:nestedScrollingEnabled="true"
         android:isScrollContainer="true"
         android:fadeScrollbars="false"
+        android:paddingBottom="150dp"
+        android:clipToPadding="false"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+        
+    <!-- Control buttons overlay to ensure visibility -->
+    <LinearLayout
+        android:id="@+id/controlButtonsOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:padding="8dp"
+        android:background="#33FF0000"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <Button
+            android:id="@+id/btnShutdown"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Shutdown"
+            android:layout_marginEnd="8dp" />
+
+        <Button
+            android:id="@+id/btnReboot"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Reboot"
+            android:layout_marginEnd="8dp" />
+
+        <Button
+            android:id="@+id/btnRestart"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Restart MANU" />
+    </LinearLayout>
 
     <ProgressBar
         android:id="@+id/progressBar"

@@ -36,6 +36,7 @@ class ConnectionViewerFragment : Fragment() {
     ): View {
         _binding = FragmentConnectionViewerBinding.inflate(inflater, container, false)
         setupWebView()
+        setupControlButtons()
         
         // Restore WebView state if it exists
         webViewState?.let { state ->
@@ -43,6 +44,115 @@ class ConnectionViewerFragment : Fragment() {
         }
         
         return binding.root
+    }
+    
+    private fun setupControlButtons() {
+        // Set up click listeners for our overlay buttons
+        binding.btnShutdown.setOnClickListener {
+            executeJavaScriptCommand("shutdown")
+        }
+        
+        binding.btnReboot.setOnClickListener {
+            executeJavaScriptCommand("reboot")
+        }
+        
+        binding.btnRestart.setOnClickListener {
+            executeJavaScriptCommand("restart_manu")
+        }
+    }
+    
+    private fun executeJavaScriptCommand(command: String) {
+        val js = when (command) {
+            "shutdown" -> """
+                (function() {
+                    // Find shutdown button and click it
+                    var shutdownButtons = Array.from(document.querySelectorAll('*')).filter(function(el) {
+                        var text = el.textContent || el.innerText || '';
+                        return text.toLowerCase().includes('shutdown');
+                    });
+                    
+                    if (shutdownButtons.length > 0) {
+                        console.log('Found shutdown button, clicking...');
+                        shutdownButtons[0].click();
+                        return 'Shutdown button clicked';
+                    } else {
+                        console.log('No shutdown button found');
+                        // Try to trigger a shutdown via URL/form if applicable
+                        return 'No shutdown button found';
+                    }
+                })();
+            """
+            "reboot" -> """
+                (function() {
+                    // Find reboot button and click it
+                    var rebootButtons = Array.from(document.querySelectorAll('*')).filter(function(el) {
+                        var text = el.textContent || el.innerText || '';
+                        return text.toLowerCase().includes('reboot');
+                    });
+                    
+                    if (rebootButtons.length > 0) {
+                        console.log('Found reboot button, clicking...');
+                        rebootButtons[0].click();
+                        return 'Reboot button clicked';
+                    } else {
+                        console.log('No reboot button found');
+                        // Try to trigger a reboot via URL/form if applicable
+                        return 'No reboot button found';
+                    }
+                })();
+            """
+            "restart_manu" -> """
+                (function() {
+                    // Find MANU restart button and click it
+                    var restartButtons = Array.from(document.querySelectorAll('*')).filter(function(el) {
+                        var text = el.textContent || el.innerText || '';
+                        return text.toLowerCase().includes('restart') && text.toLowerCase().includes('manu');
+                    });
+                    
+                    if (restartButtons.length > 0) {
+                        console.log('Found restart MANU button, clicking...');
+                        restartButtons[0].click();
+                        return 'Restart MANU button clicked';
+                    } else {
+                        console.log('No restart MANU button found');
+                        // Try to find any restart button
+                        var anyRestartButtons = Array.from(document.querySelectorAll('*')).filter(function(el) {
+                            var text = el.textContent || el.innerText || '';
+                            return text.toLowerCase().includes('restart');
+                        });
+                        
+                        if (anyRestartButtons.length > 0) {
+                            console.log('Found generic restart button, clicking...');
+                            anyRestartButtons[0].click();
+                            return 'Generic restart button clicked';
+                        }
+                        
+                        return 'No restart buttons found';
+                    }
+                })();
+            """
+            else -> """
+                (function() {
+                    console.log('Unknown command: $command');
+                    return 'Unknown command';
+                })();
+            """
+        }
+        
+        binding.webView.evaluateJavascript(js.trimIndent()) { result ->
+            android.util.Log.d("WebCommandExecution", "Command: $command, Result: $result")
+            
+            // Show a toast confirmation
+            val message = when {
+                result.contains("clicked") -> "Command sent: $command"
+                result.contains("No") -> "Could not find button for: $command"
+                else -> "Command execution failed"
+            }
+            
+            context?.let {
+                Toast.makeText(it, message, Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     private fun setupWebView() {

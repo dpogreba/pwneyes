@@ -330,8 +330,9 @@ class ConnectionViewerFragment : Fragment() {
     override fun onPause() {
         super.onPause()
         // Save WebView state when fragment is paused (e.g., during orientation change)
-        webViewState = Bundle()
-        binding.webView.saveState(webViewState)
+        val newState = Bundle()
+        binding.webView.saveState(newState)
+        webViewState = newState
     }
     
     override fun onResume() {

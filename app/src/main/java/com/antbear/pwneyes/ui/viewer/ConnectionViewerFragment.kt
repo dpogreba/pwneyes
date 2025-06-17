@@ -617,15 +617,36 @@ class ConnectionViewerFragment : Fragment() {
                 }
             }
 
-            // Handle basic auth in URL if credentials are provided
+            // Handle basic auth in URL if credentials are provided, preserving port numbers
             val urlWithAuth = if (args.username.isNotEmpty()) {
-                val credentials = "${args.username}:${args.password}"
-                val base64Credentials = Base64.getEncoder().encodeToString(credentials.toByteArray())
-                args.url.replace("://", "://$base64Credentials@")
+                try {
+                    // Parse the URL to extract its components
+                    val url = java.net.URL(args.url)
+                    val protocol = url.protocol
+                    val host = url.host
+                    val port = if (url.port == -1) "" else ":${url.port}"
+                    val path = if (url.path.isEmpty()) "/" else url.path
+                    val query = if (url.query == null) "" else "?${url.query}"
+                    val ref = if (url.ref == null) "" else "#${url.ref}"
+                    
+                    // Create credentials
+                    val credentials = "${args.username}:${args.password}"
+                    val base64Credentials = Base64.getEncoder().encodeToString(credentials.toByteArray())
+                    
+                    // Reconstruct URL with credentials while preserving port
+                    "$protocol://$base64Credentials@$host$port$path$query$ref"
+                } catch (e: Exception) {
+                    // Fallback to simple replacement if URL parsing fails
+                    android.util.Log.e("ConnectionViewer", "Error parsing URL: ${e.message}")
+                    val credentials = "${args.username}:${args.password}"
+                    val base64Credentials = Base64.getEncoder().encodeToString(credentials.toByteArray())
+                    args.url.replace("://", "://$base64Credentials@")
+                }
             } else {
                 args.url
             }
 
+            android.util.Log.d("ConnectionViewer", "Loading URL: $urlWithAuth")
             loadUrl(urlWithAuth)
         }
     }

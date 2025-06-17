@@ -70,8 +70,8 @@ class ConnectionViewerFragment : Fragment() {
                 loadWithOverviewMode = true
                 useWideViewPort = true
                 
-                // Force a much smaller initial scale to ensure all content is visible
-                setInitialScale(75) // 75% of original size to ensure bottom bar is visible
+                // Take drastic measures - use extremely small scale to ensure all content fits
+                setInitialScale(50) // 50% of original size to force everything into view
                 
                 // Enable zoom controls to allow user to adjust view as needed
                 builtInZoomControls = true
@@ -111,8 +111,11 @@ class ConnectionViewerFragment : Fragment() {
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
             
-            // Force a much smaller scale to ensure bottom controls are visible
-            setInitialScale(75)
+            // Use extreme scaling to ensure bottom controls are visible
+            setInitialScale(50)
+            
+            // Add explicit bottom padding to push content up
+            setPadding(0, 0, 0, 200) // Add 200px padding at bottom
             
             // Implement direct touch handling with custom scrolling
             setOnTouchListener(CustomWebViewTouchListener())
@@ -237,15 +240,33 @@ class ConnectionViewerFragment : Fragment() {
                     // Save last URL for state restoration
                     lastUrl = url
                     
-                    // Force immediate scale to show all content
+                    // Force immediate extreme zoom out to show all content
                     view?.postDelayed({
-                        // Use a low level zoom out to ensure everything is visible
-                        view.zoomOut()
+                        // Use multiple zoom outs to force everything visible
+                        for (i in 1..5) {
+                            view.zoomOut()
+                        }
                         
-                        // Try to scroll to bottom to make sure it's loaded and then back up
-                        val heightGuess = 5000 // Guess at content height to force load
+                        // Try to scroll to extreme bottom to ensure it's loaded
+                        val heightGuess = 10000 // Much larger guess to ensure we reach bottom
                         view.scrollTo(0, heightGuess)
-                        view.postDelayed({ view.scrollTo(0, 0) }, 200)
+                        
+                        // Wait longer before scrolling back to top
+                        view.postDelayed({
+                            // Scroll to show most content but ensure bottom is visible
+                            view.scrollTo(0, 100)
+                            
+                            // Add a direct pixel offset to the rendering to show bottom of page
+                            view.evaluateJavascript("""
+                                (function() {
+                                    // Direct offset of the entire content to show bottom
+                                    document.body.style.transform = 'translateY(-150px)';
+                                    document.body.style.marginBottom = '300px';
+                                    document.documentElement.style.height = 'calc(100% - 200px)';
+                                    return 'Applied extreme transform';
+                                })();
+                            """.trimIndent(), null)
+                        }, 500)
                     }, 500)
                     
                     // Inject enhanced JavaScript to ensure content is scrollable, including nested areas
@@ -380,27 +401,65 @@ class ConnectionViewerFragment : Fragment() {
                                     window.scrollTo(window.scrollXPos, window.scrollYPos);
                                 }
                                 
-                                // Force aggressive viewport scaling to ensure bottom control bar is visible
+                                // Extreme viewport manipulation to force all content to fit
                                 var meta = document.querySelector('meta[name="viewport"]');
                                 if (!meta) {
                                     meta = document.createElement('meta');
                                     meta.name = 'viewport';
                                     document.head.appendChild(meta);
                                 }
-                                meta.content = 'width=device-width, initial-scale=0.75, maximum-scale=3.0, user-scalable=yes';
+                                meta.content = 'width=device-width, initial-scale=0.5, maximum-scale=3.0, user-scalable=yes';
                                 
-                                // Force movement of bottom controls into view if they exist
-                                var bottomButtons = document.querySelectorAll('button, input[type="button"], .button, [role="button"], a.btn');
-                                bottomButtons.forEach(function(btn) {
-                                    // Check if button is likely in the bottom area and might be hidden
-                                    var rect = btn.getBoundingClientRect();
-                                    if (rect.bottom > window.innerHeight * 0.9) {
-                                        // Move button into view by creating a margin at the bottom
-                                        document.body.style.paddingBottom = '100px';
-                                        document.body.style.marginBottom = '100px';
-                                        console.log('Found and adjusted bottom button: ' + btn.textContent);
+                                // Force all content to be visible by manipulating root styles
+                                document.documentElement.style.height = 'auto';
+                                document.documentElement.style.overflow = 'visible';
+                                document.documentElement.style.position = 'relative';
+                                document.documentElement.style.paddingBottom = '400px';
+                                
+                                // Make body smaller to fit within the viewport
+                                document.body.style.transform = 'scale(0.9)';
+                                document.body.style.transformOrigin = 'top center';
+                                document.body.style.marginBottom = '300px';
+                                
+                                // Extreme method to find and move bottom controls
+                                var possibleButtons = document.querySelectorAll('*');
+                                var foundControls = false;
+                                
+                                // Check for shutdown/reboot text in any element
+                                for (var i = 0; i < possibleButtons.length; i++) {
+                                    var el = possibleButtons[i];
+                                    var text = el.innerText || el.textContent;
+                                    
+                                    if (text && (text.indexOf('Shutdown') >= 0 || 
+                                                text.indexOf('Reboot') >= 0 || 
+                                                text.indexOf('MANU') >= 0)) {
+                                        // Found control element - move it into view!
+                                        console.log('FOUND CONTROL ELEMENT: ' + text);
+                                        foundControls = true;
+                                        
+                                        // Force it to fixed position at bottom of screen
+                                        el.style.position = 'fixed';
+                                        el.style.bottom = '50px';
+                                        el.style.left = '50%';
+                                        el.style.transform = 'translateX(-50%)';
+                                        el.style.zIndex = '9999';
+                                        el.style.backgroundColor = 'rgba(255,0,0,0.3)';
+                                        el.style.padding = '10px';
+                                        el.style.border = '2px solid red';
                                     }
-                                });
+                                }
+                                
+                                // If we found controls, dramatically modify the page to show them
+                                if (foundControls) {
+                                    // Force entire body to be shorter
+                                    document.body.style.height = '70vh';
+                                    document.body.style.overflow = 'visible';
+                                    document.documentElement.style.height = '70vh';
+                                }
+                                
+                                // As a fallback, add a huge bottom margin anyway
+                                document.body.style.paddingBottom = '250px';
+                                document.body.style.marginBottom = '250px';
                                 
                                 // Force bottom margin for any bottom toolbars, navigation, etc.
                                 var possibleBottomBars = document.querySelectorAll('.toolbar, .navbar, .navigation, nav, footer, .footer, .controls, .bottom-controls');

@@ -50,6 +50,9 @@ class ConnectionViewerFragment : Fragment() {
         binding.webView.apply {
             // Set an ID to help with state restoration
             id = View.generateViewId()
+            
+            // Set hardware acceleration for better performance
+            setLayerType(View.LAYER_TYPE_HARDWARE, null)
             settings.apply {
                 // Enable JavaScript and DOM storage
                 javaScriptEnabled = true

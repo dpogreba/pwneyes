@@ -67,6 +67,14 @@ class ConnectionViewerFragment : Fragment() {
                 loadWithOverviewMode = true
                 useWideViewPort = true
                 
+                // Set initial scale to show more content (including bottom bar)
+                setInitialScale(90) // 90% of original size to ensure bottom bar is visible
+                
+                // Enable zoom controls to allow user to adjust view as needed
+                builtInZoomControls = true
+                displayZoomControls = false
+                setSupportZoom(true)
+                
                 // Enable caching for better performance (modern approach)
                 cacheMode = WebSettings.LOAD_DEFAULT
                 
@@ -99,6 +107,15 @@ class ConnectionViewerFragment : Fragment() {
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
+            
+            // Set initial scale to show more content
+            setInitialScale(90)
+            
+            // Add pinch-to-zoom and double-tap-to-zoom gesture handling
+            setOnTouchListener { v, event ->
+                v.parent.requestDisallowInterceptTouchEvent(true)
+                false
+            }
 
             // Set WebChromeClient to handle JavaScript dialogs
             webChromeClient = object : WebChromeClient() {
@@ -229,31 +246,114 @@ class ConnectionViewerFragment : Fragment() {
                                 window.scrollYPos = window.scrollY;
                             });
                             
-                            // Make sure all potential scrollable elements are actually scrollable
+                            // More aggressive scrolling function with touch handling
                             function makeScrollable(element) {
-                                if (element) {
-                                    element.style.height = element.scrollHeight > element.clientHeight ? '100%' : 'auto';
-                                    element.style.overflowY = 'auto';
-                                    element.style.webkitOverflowScrolling = 'touch';
+                                if (!element) return;
+                                
+                                // Force height to ensure scrollability
+                                element.style.height = element.scrollHeight > element.clientHeight ? '100%' : 'auto';
+                                element.style.maxHeight = 'none';
+                                
+                                // Force all overflow settings
+                                element.style.overflow = 'auto';
+                                element.style.overflowX = 'auto';
+                                element.style.overflowY = 'auto';
+                                element.style.webkitOverflowScrolling = 'touch';
+                                
+                                // Add specific CSS for touch devices
+                                element.style.touchAction = 'pan-y';
+                                
+                                // Ensure the element is not preventing scroll
+                                element.style.position = element.style.position === 'fixed' ? 'absolute' : element.style.position;
+                                
+                                // Add data attribute for debugging
+                                element.setAttribute('data-made-scrollable', 'true');
+                            }
+                            
+                            // Apply scrolling to document and body
+                            document.documentElement.style.height = 'auto';
+                            document.documentElement.style.overflow = 'auto';
+                            document.body.style.height = 'auto';
+                            document.body.style.overflow = 'auto';
+                            document.body.style.webkitOverflowScrolling = 'touch';
+                            
+                            // Force all containers to be scrollable - target everything
+                            var allElements = document.querySelectorAll('*');
+                            for (var i = 0; i < allElements.length; i++) {
+                                // Skip certain elements that shouldn't be scrollable
+                                var tagName = allElements[i].tagName.toLowerCase();
+                                if (tagName === 'script' || tagName === 'style' || tagName === 'meta' || tagName === 'link') {
+                                    continue;
+                                }
+                                
+                                // Check if this might be a content container
+                                var style = window.getComputedStyle(allElements[i]);
+                                if (style.display !== 'none' && style.visibility !== 'hidden' && 
+                                    (style.overflow === 'hidden' || allElements[i].scrollHeight > allElements[i].clientHeight)) {
+                                    makeScrollable(allElements[i]);
                                 }
                             }
                             
-                            // Ensure body takes full content height and is scrollable
-                            document.body.style.height = 'auto';
-                            document.body.style.overflowY = 'auto';
-                            document.body.style.webkitOverflowScrolling = 'touch';
+                            // Specifically target elements that might be in the Plugin tab
+                            var specialSelectors = [
+                                '.plugin', '.plugin-content', '.tab-content', '.main-content', 
+                                '[id*="plugin"]', '[id*="tab"]', '[class*="plugin"]', '[class*="tab"]',
+                                'iframe', 'frame', '.scrollable', '[role="main"]'
+                            ];
                             
-                            // Force all containers to be scrollable
-                            var containers = document.querySelectorAll('div, section, article, main, .scrollable, [role="main"]');
-                            for (var i = 0; i < containers.length; i++) {
-                                makeScrollable(containers[i]);
-                            }
+                            specialSelectors.forEach(function(selector) {
+                                try {
+                                    var elements = document.querySelectorAll(selector);
+                                    for (var i = 0; i < elements.length; i++) {
+                                        makeScrollable(elements[i]);
+                                        
+                                        // Also make all children scrollable
+                                        var children = elements[i].querySelectorAll('*');
+                                        for (var j = 0; j < children.length; j++) {
+                                            makeScrollable(children[j]);
+                                        }
+                                    }
+                                } catch (e) {
+                                    console.error('Error applying scrollable to ' + selector, e);
+                                }
+                            });
                             
-                            // Specifically target elements that might be in the orange box area from the screenshot
-                            // These selectors should match common UI patterns for content areas
-                            var contentElements = document.querySelectorAll('.content, .main, .container, .scroll, .panel');
-                            for (var i = 0; i < contentElements.length; i++) {
-                                makeScrollable(contentElements[i]);
+                            // Add touch event listeners to handle custom scrolling on problematic elements
+                            var touchStartY = 0;
+                            var scrollingElement = null;
+                            
+                            document.addEventListener('touchstart', function(e) {
+                                touchStartY = e.touches[0].clientY;
+                                var target = e.target;
+                                
+                                // Find scrollable parent
+                                while (target && !isScrollable(target)) {
+                                    target = target.parentElement;
+                                }
+                                
+                                scrollingElement = target;
+                            }, { passive: false });
+                            
+                            document.addEventListener('touchmove', function(e) {
+                                if (!scrollingElement) return;
+                                
+                                var touchY = e.touches[0].clientY;
+                                var deltaY = touchStartY - touchY;
+                                
+                                scrollingElement.scrollTop += deltaY;
+                                touchStartY = touchY;
+                                
+                                // Prevent default only if we're handling the scroll
+                                if (Math.abs(deltaY) > 5) {
+                                    e.preventDefault();
+                                }
+                            }, { passive: false });
+                            
+                            function isScrollable(element) {
+                                if (!element) return false;
+                                var style = window.getComputedStyle(element);
+                                return style.overflowY === 'auto' || style.overflowY === 'scroll' || 
+                                       element.scrollHeight > element.clientHeight;
                             }
                             
                             // Log information about content dimensions for debugging
@@ -268,6 +368,17 @@ class ConnectionViewerFragment : Fragment() {
                                 if (typeof window.scrollXPos !== 'undefined' && typeof window.scrollYPos !== 'undefined') {
                                     window.scrollTo(window.scrollXPos, window.scrollYPos);
                                 }
+                                
+                                // Scale viewport to ensure bottom control bar is visible
+                                var meta = document.querySelector('meta[name="viewport"]');
+                                if (!meta) {
+                                    meta = document.createElement('meta');
+                                    meta.name = 'viewport';
+                                    document.head.appendChild(meta);
+                                }
+                                meta.content = 'width=device-width, initial-scale=0.9, maximum-scale=3.0, user-scalable=yes';
+                                
+                                console.log('Enhanced scrolling applied to all elements');
                             }, 500);
                         })();
                     """.trimIndent(), null)

@@ -13,8 +13,8 @@ android {
         applicationId = "com.antbear.pwneyes"
         minSdk = 24
         targetSdk = 34
-        versionCode = 21
-        versionName = "10.12"
+        versionCode = 22
+        versionName = "10.13"
         
         // Explicitly disable baseline profiles to fix installation issues
         ndk {

@@ -53,6 +53,9 @@ class ConnectionViewerFragment : Fragment() {
             
             // Set hardware acceleration for better performance
             setLayerType(View.LAYER_TYPE_HARDWARE, null)
+            
+            // Enable WebView debugging (requires Chrome DevTools)
+            WebView.setWebContentsDebuggingEnabled(true)
             settings.apply {
                 // Enable JavaScript and DOM storage
                 javaScriptEnabled = true
@@ -67,8 +70,8 @@ class ConnectionViewerFragment : Fragment() {
                 loadWithOverviewMode = true
                 useWideViewPort = true
                 
-                // Set initial scale to show more content (including bottom bar)
-                setInitialScale(90) // 90% of original size to ensure bottom bar is visible
+                // Force a much smaller initial scale to ensure all content is visible
+                setInitialScale(75) // 75% of original size to ensure bottom bar is visible
                 
                 // Enable zoom controls to allow user to adjust view as needed
                 builtInZoomControls = true
@@ -108,14 +111,11 @@ class ConnectionViewerFragment : Fragment() {
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
             
-            // Set initial scale to show more content
-            setInitialScale(90)
+            // Force a much smaller scale to ensure bottom controls are visible
+            setInitialScale(75)
             
-            // Add pinch-to-zoom and double-tap-to-zoom gesture handling
-            setOnTouchListener { v, event ->
-                v.parent.requestDisallowInterceptTouchEvent(true)
-                false
-            }
+            // Implement direct touch handling with custom scrolling
+            setOnTouchListener(CustomWebViewTouchListener())
 
             // Set WebChromeClient to handle JavaScript dialogs
             webChromeClient = object : WebChromeClient() {
@@ -234,8 +234,19 @@ class ConnectionViewerFragment : Fragment() {
                     super.onPageFinished(view, url)
                     binding.progressBar.visibility = View.GONE
                     
-                        // Save last URL for state restoration
+                    // Save last URL for state restoration
                     lastUrl = url
+                    
+                    // Force immediate scale to show all content
+                    view?.postDelayed({
+                        // Use a low level zoom out to ensure everything is visible
+                        view.zoomOut()
+                        
+                        // Try to scroll to bottom to make sure it's loaded and then back up
+                        val heightGuess = 5000 // Guess at content height to force load
+                        view.scrollTo(0, heightGuess)
+                        view.postDelayed({ view.scrollTo(0, 0) }, 200)
+                    }, 500)
                     
                     // Inject enhanced JavaScript to ensure content is scrollable, including nested areas
                     view?.evaluateJavascript("""
@@ -369,14 +380,37 @@ class ConnectionViewerFragment : Fragment() {
                                     window.scrollTo(window.scrollXPos, window.scrollYPos);
                                 }
                                 
-                                // Scale viewport to ensure bottom control bar is visible
+                                // Force aggressive viewport scaling to ensure bottom control bar is visible
                                 var meta = document.querySelector('meta[name="viewport"]');
                                 if (!meta) {
                                     meta = document.createElement('meta');
                                     meta.name = 'viewport';
                                     document.head.appendChild(meta);
                                 }
-                                meta.content = 'width=device-width, initial-scale=0.9, maximum-scale=3.0, user-scalable=yes';
+                                meta.content = 'width=device-width, initial-scale=0.75, maximum-scale=3.0, user-scalable=yes';
+                                
+                                // Force movement of bottom controls into view if they exist
+                                var bottomButtons = document.querySelectorAll('button, input[type="button"], .button, [role="button"], a.btn');
+                                bottomButtons.forEach(function(btn) {
+                                    // Check if button is likely in the bottom area and might be hidden
+                                    var rect = btn.getBoundingClientRect();
+                                    if (rect.bottom > window.innerHeight * 0.9) {
+                                        // Move button into view by creating a margin at the bottom
+                                        document.body.style.paddingBottom = '100px';
+                                        document.body.style.marginBottom = '100px';
+                                        console.log('Found and adjusted bottom button: ' + btn.textContent);
+                                    }
+                                });
+                                
+                                // Force bottom margin for any bottom toolbars, navigation, etc.
+                                var possibleBottomBars = document.querySelectorAll('.toolbar, .navbar, .navigation, nav, footer, .footer, .controls, .bottom-controls');
+                                possibleBottomBars.forEach(function(bar) {
+                                    var rect = bar.getBoundingClientRect();
+                                    if (rect.bottom > window.innerHeight * 0.8) {
+                                        bar.style.marginBottom = '80px';
+                                        console.log('Adjusted bottom bar');
+                                    }
+                                });
                                 
                                 console.log('Enhanced scrolling applied to all elements');
                             }, 500);

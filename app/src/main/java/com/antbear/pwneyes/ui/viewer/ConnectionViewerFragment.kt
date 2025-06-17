@@ -38,8 +38,8 @@ class ConnectionViewerFragment : Fragment() {
         setupWebView()
         
         // Restore WebView state if it exists
-        if (webViewState != null) {
-            binding.webView.restoreState(webViewState!!)
+        webViewState?.let { state ->
+            binding.webView.restoreState(state)
         }
         
         return binding.root

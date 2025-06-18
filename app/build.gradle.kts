@@ -159,13 +159,20 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
     implementation("androidx.navigation:navigation-fragment-ktx:2.5.3")
     implementation("androidx.navigation:navigation-ui-ktx:2.5.3")
-    implementation("androidx.room:room-runtime:2.6.1")
-    implementation("androidx.room:room-ktx:2.6.1")
+    implementation("androidx.room:room-runtime:2.6.2")
+    implementation("androidx.room:room-ktx:2.6.2")
     implementation("com.google.code.gson:gson:2.10.1")
     // Room compiler annotation processor - needed for code generation
-    kapt("androidx.room:room-compiler:2.6.1")
+    kapt("androidx.room:room-compiler:2.6.2")
     // Add kotlinx-metadata-jvm dependency to fix Kotlin metadata version incompatibility
-    kapt("org.jetbrains.kotlinx:kotlinx-metadata-jvm:0.7.0")
+    kapt("org.jetbrains.kotlinx:kotlinx-metadata-jvm:0.9.0") 
+    implementation("org.jetbrains.kotlinx:kotlinx-metadata-jvm:0.9.0")
+    // Add specific version that should be compatible with Kotlin 2.1.0 metadata
+    kapt("org.jetbrains.kotlinx:kotlinx-metadata-jvm:1.0.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-metadata-jvm:1.0.0")
+    // Add direct dependency on processor with compatible kotlin metadata version
+    kapt("androidx.room:room-compiler-processing:2.6.2")
+    kapt("androidx.room:room-compiler-processing-testing:2.6.2")
     implementation("androidx.preference:preference:1.2.0")
     // Google Play Billing Library for in-app purchases
     implementation("com.android.billingclient:billing-ktx:6.0.1")

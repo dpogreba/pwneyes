@@ -12,25 +12,12 @@ buildscript {
 }
 
 tasks.register("clean", Delete::class) {
-    delete(rootProject.buildDir)
+    delete(layout.buildDirectory)
 }
 
-// Force Kotlin version to be 2.1.0 for all projects
-allprojects {
-    // Apply a resolution strategy to all configurations
-    configurations.all {
-        resolutionStrategy.eachDependency { details ->
-            // Force all Kotlin dependencies to use version 2.1.0
-            if (details.requested.group == "org.jetbrains.kotlin") {
-                details.useVersion("2.1.0")
-            }
-        }
-    }
-}
-
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    kotlinOptions {
-        jvmTarget = "11"
-        freeCompilerArgs = listOf("-Xjvm-default=all")
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+        freeCompilerArgs.add("-Xjvm-default=all")
     }
 }

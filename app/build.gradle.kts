@@ -136,17 +136,16 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-
+    
     kotlinOptions {
-        jvmTarget = "11"
-        freeCompilerArgs = listOf("-Xjvm-default=all")
+        jvmTarget = JavaVersion.VERSION_11.toString()
     }
 }
 
 // Make sure all Kotlin compile tasks use Java 11
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    kotlinOptions {
-        jvmTarget = "11"
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
     }
 }
 
@@ -184,12 +183,12 @@ dependencies {
     // Explicitly exclude the profileinstaller
     configurations.all {
         exclude(group = "androidx.profileinstaller", module = "profileinstaller")
-        
-        // Force the use of Kotlin 2.1.0 for all dependencies
-        resolutionStrategy.eachDependency { details ->
-            if (details.requested.group == "org.jetbrains.kotlin") {
-                details.useVersion("2.1.0")
-            }
-        }
+    }
+    
+    // Handle metadata compatibility differently
+    configurations.all {
+        resolutionStrategy.force(
+            "org.jetbrains.kotlinx:kotlinx-metadata-jvm:1.0.0"
+        )
     }
 }

@@ -31,7 +31,7 @@
         android:id="@+id/tabDetailIndicator"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="🔍 PLUGINS TAB 🔍"
+        android:text="--- PLUGINS TAB ---"
         android:textSize="16sp"
         android:textStyle="bold"
         android:textColor="#000000"

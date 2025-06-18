@@ -13,8 +13,8 @@ android {
         applicationId = "com.antbear.pwneyes"
         minSdk = 24
         targetSdk = 34
-        versionCode = 25
-        versionName = "10.16"
+        versionCode = 26
+        versionName = "10.17"
         
         // Explicitly disable baseline profiles to fix installation issues
         ndk {
@@ -119,6 +119,8 @@ android {
         viewBinding = true
         // This is marked as deprecated but still needed
         buildConfig = true
+        // Enable data binding support
+        dataBinding = true
     }
 
     compileOptions {

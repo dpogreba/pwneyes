@@ -49,7 +49,7 @@ class ConnectionViewerFragment : Fragment() {
     
     private fun setupControlButtons() {
         // Set up direct Plugins navigation button
-        binding.btnGoToPluginsTab.setOnClickListener {
+        binding.pluginsTabButton.setOnClickListener {
             navigateToPluginsTab()
         }
         

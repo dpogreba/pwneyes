@@ -14,7 +14,7 @@
 
     <!-- Direct Plugins Button - Fixed position at top-right -->
     <Button
-        android:id="@+id/btnGoToPluginsTab"
+        android:id="@+id/pluginsTabButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="PLUGINS"

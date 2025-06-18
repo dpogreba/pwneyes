@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.webkit.*
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.antbear.pwneyes.databinding.FragmentConnectionViewerBinding
 import java.util.Base64
@@ -47,6 +48,11 @@ class ConnectionViewerFragment : Fragment() {
     }
     
     private fun setupControlButtons() {
+        // Set up direct Plugins navigation button
+        binding.btnGoToPluginsTab.setOnClickListener {
+            navigateToPluginsTab()
+        }
+        
         // Set up click listeners for our overlay buttons
         binding.btnShutdown.setOnClickListener {
             executeJavaScriptCommand("shutdown")
@@ -58,6 +64,67 @@ class ConnectionViewerFragment : Fragment() {
         
         binding.btnRestart.setOnClickListener {
             executeJavaScriptCommand("restart_manu")
+        }
+    }
+    
+    /**
+     * Direct method to navigate to the Plugins tab
+     * This bypasses all the JavaScript detection complexity
+     */
+    private fun navigateToPluginsTab() {
+        try {
+            // Ensure URL has port 8080 if needed
+            var url = args.url
+            if (!url.contains(":8080") && !url.contains(":443") && !url.contains(":80")) {
+                url = if (url.endsWith("/")) {
+                    url.substring(0, url.length - 1) + ":8080/"
+                } else {
+                    url + ":8080"
+                }
+                android.util.Log.d("DirectNavigation", "Added port 8080 to URL: $url")
+            }
+            
+            android.util.Log.i("DirectNavigation", "Navigating directly to Plugins tab")
+            android.util.Log.i("DirectNavigation", "URL: $url")
+            
+            // Create navigation action with explicit details
+            val action = ConnectionViewerFragmentDirections.actionConnectionViewerToTabDetail(
+                url = url,
+                tabName = "Plugins Tab",  // Make tab name very explicit
+                tabSelector = "plugins",
+                username = args.username,
+                password = args.password
+            )
+            
+            // Show a big visible message
+            context?.let {
+                Toast.makeText(
+                    it, 
+                    "⚠️ NAVIGATING TO PLUGINS TAB ⚠️", 
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+            
+            // Add a small delay to ensure toast is visible
+            android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                // Navigate to the tab detail fragment
+                findNavController().navigate(action)
+                android.util.Log.i("DirectNavigation", "Navigation completed")
+            }, 300)
+            
+        } catch (e: Exception) {
+            // Log any exceptions
+            android.util.Log.e("DirectNavigation", "Error navigating to Plugins tab: ${e.message}")
+            android.util.Log.e("DirectNavigation", "Stack trace: ${e.stackTraceToString()}")
+            
+            // Show error toast
+            context?.let {
+                Toast.makeText(
+                    it, 
+                    "ERROR: ${e.message}", 
+                    Toast.LENGTH_LONG
+                ).show()
+            }
         }
     }
     

@@ -4,42 +4,64 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:animateLayoutChanges="true">
+    android:animateLayoutChanges="true"
+    android:background="#F5F5F5">
 
-    <!-- Direct Plugins Button - Fixed position at top-right -->
-    <Button
-        android:id="@+id/btnGoToPluginsTab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="PLUGINS"
-        android:textStyle="bold"
-        android:backgroundTint="#2196F3"
-        android:textColor="#FFFFFF"
-        android:layout_margin="16dp"
-        android:padding="12dp"
-        android:elevation="8dp"
+    <!-- Toolbar with back arrow - distinctive appearance -->
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="#3F51B5"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:visibility="visible" />
+        app:navigationIcon="@android:drawable/ic_menu_close_clear_cancel"
+        app:title="TAB DETAIL VIEW"
+        app:titleTextColor="#FFFFFF" />
+        
+    <!-- Visible indicator that we're in the Tab Detail View -->
+    <TextView
+        android:id="@+id/tabDetailIndicator"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="🔍 PLUGINS TAB 🔍"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="#000000"
+        android:background="#FFEB3B"
+        android:padding="8dp"
+        android:gravity="center"
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
-    <WebView
-        android:id="@+id/webView"
+    <!-- ScrollView to handle content scrolling -->
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/scrollView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:scrollbars="vertical|horizontal"
+        android:fillViewport="true"
+        android:scrollbars="vertical"
         android:scrollbarStyle="insideOverlay"
-        android:overScrollMode="always"
-        android:focusable="true"
-        android:focusableInTouchMode="true"
-        android:nestedScrollingEnabled="true"
-        android:isScrollContainer="true"
         android:fadeScrollbars="false"
-        android:paddingBottom="150dp"
-        android:clipToPadding="false"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:background="#FFFFFF"
+        app:layout_constraintBottom_toTopOf="@id/controlButtonsOverlay"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/tabDetailIndicator">
+
+        <!-- WebView with static measurement -->
+        <WebView
+            android:id="@+id/webView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:overScrollMode="never"
+            android:isScrollContainer="false"
+            android:nestedScrollingEnabled="false" />
+    </androidx.core.widget.NestedScrollView>
         
     <!-- Control buttons overlay to ensure visibility -->
     <LinearLayout
@@ -48,9 +70,8 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center"
-        android:padding="8dp"
-        android:background="#33FF0000"
-        android:layout_marginBottom="8dp"
+        android:padding="12dp"
+        android:background="#4CAF50"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
@@ -60,6 +81,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Shutdown"
+            android:backgroundTint="#F44336"
+            android:textColor="#FFFFFF"
             android:layout_marginEnd="8dp" />
 
         <Button
@@ -85,7 +108,7 @@
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/toolbar" />
 
     <LinearLayout
         android:id="@+id/errorLayout"

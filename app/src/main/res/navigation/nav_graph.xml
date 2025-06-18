@@ -80,5 +80,32 @@
             android:name="password"
             app:argType="string"
             android:defaultValue="" />
+        <action
+            android:id="@+id/actionConnectionViewerToTabDetail"
+            app:destination="@id/nav_tab_detail" />
+    </fragment>
+    
+    <!-- Tab Detail Fragment -->
+    <fragment
+        android:id="@+id/nav_tab_detail"
+        android:name="com.antbear.pwneyes.ui.viewer.TabDetailFragment"
+        android:label="Tab Detail">
+        <argument
+            android:name="url"
+            app:argType="string" />
+        <argument
+            android:name="tabName"
+            app:argType="string" />
+        <argument
+            android:name="tabSelector"
+            app:argType="string" />
+        <argument
+            android:name="username"
+            app:argType="string"
+            android:defaultValue="" />
+        <argument
+            android:name="password"
+            app:argType="string"
+            android:defaultValue="" />
     </fragment>
 </navigation>

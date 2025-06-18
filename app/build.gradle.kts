@@ -3,6 +3,7 @@ plugins {
     id("kotlin-android")
     id("androidx.navigation.safeargs.kotlin")
     id("kotlin-kapt") // Add this for annotation processing
+    id("kotlin-parcelize") // Add this for parcelable support
 }
 
 android {
@@ -162,15 +163,20 @@ dependencies {
     implementation("androidx.room:room-ktx:2.6.1")
     implementation("com.google.code.gson:gson:2.10.1")
     
+    // Core Kotlin dependencies
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:2.1.0")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.1.0")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:2.1.0")
+    
     // Room compiler annotation processor - needed for code generation
     kapt("androidx.room:room-compiler:2.6.1") {
         // Force Room to use our specific kotlinx-metadata-jvm version
         exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-metadata-jvm")
     }
     
-    // Add kotlinx-metadata-jvm dependency with specific version
-    implementation("org.jetbrains.kotlinx:kotlinx-metadata-jvm:0.5.0")
-    kapt("org.jetbrains.kotlinx:kotlinx-metadata-jvm:0.5.0")
+    // Try with an older, more compatible version of kotlinx-metadata-jvm
+    implementation("org.jetbrains.kotlinx:kotlinx-metadata-jvm:0.3.0")
+    kapt("org.jetbrains.kotlinx:kotlinx-metadata-jvm:0.3.0")
     
     implementation("androidx.preference:preference:1.2.0")
     // Google Play Billing Library for in-app purchases
@@ -188,12 +194,26 @@ dependencies {
         exclude(group = "androidx.profileinstaller", module = "profileinstaller")
     }
     
-    // Force a compatible version of kotlinx-metadata-jvm
+    // Force compatible versions
     configurations.all {
         resolutionStrategy {
-            force("org.jetbrains.kotlinx:kotlinx-metadata-jvm:0.5.0")
+            // Force older version of kotlinx-metadata-jvm
+            force("org.jetbrains.kotlinx:kotlinx-metadata-jvm:0.3.0")
             // Force compatible kotlin reflection version
             force("org.jetbrains.kotlin:kotlin-reflect:2.1.0")
+            force("org.jetbrains.kotlin:kotlin-stdlib:2.1.0")
+            force("org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.1.0")
+            
+            // Try to resolve any Kotlin-related version conflicts
+            eachDependency { details ->
+                if (details.requested.group == "org.jetbrains.kotlin") {
+                    details.useVersion("2.1.0")
+                }
+                if (details.requested.group == "org.jetbrains.kotlinx" && 
+                    details.requested.name == "kotlinx-metadata-jvm") {
+                    details.useVersion("0.3.0")
+                }
+            }
         }
     }
 }

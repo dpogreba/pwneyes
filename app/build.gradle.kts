@@ -95,13 +95,22 @@ android {
         }
     }
 
+    // Check if we should skip signing
+    val skipSigning = project.hasProperty("skipSigning") && 
+                      project.property("skipSigning") == "true"
+                      
     buildTypes {
         release {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             
-            // Use release signing config for Google Play Store uploads
-            signingConfig = signingConfigs.getByName("release")
+            // Use release signing config for Google Play Store uploads, unless skipSigning is true
+            if (!skipSigning) {
+                signingConfig = signingConfigs.getByName("release")
+            } else {
+                // Use debug signing config when skipSigning is true
+                signingConfig = signingConfigs.getByName("debug")
+            }
             
             // Disable baseline profiles
             proguardFile("baseline-profiles-rules.pro")
@@ -155,6 +164,8 @@ dependencies {
     implementation("com.google.code.gson:gson:2.10.1")
     // Room compiler annotation processor - needed for code generation
     kapt("androidx.room:room-compiler:2.6.1")
+    // Add kotlinx-metadata-jvm dependency to fix Kotlin metadata version incompatibility
+    kapt("org.jetbrains.kotlinx:kotlinx-metadata-jvm:0.7.0")
     implementation("androidx.preference:preference:1.2.0")
     // Google Play Billing Library for in-app purchases
     implementation("com.android.billingclient:billing-ktx:6.0.1")

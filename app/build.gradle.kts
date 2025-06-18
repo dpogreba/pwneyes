@@ -163,9 +163,13 @@ dependencies {
     implementation("androidx.room:room-ktx:2.6.1")
     implementation("com.google.code.gson:gson:2.10.1")
     // Room compiler annotation processor - needed for code generation
-    kapt("androidx.room:room-compiler:2.6.1")
+    kapt("androidx.room:room-compiler:2.6.1") {
+        // Force Room to use our specific kotlinx-metadata-jvm version
+        exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-metadata-jvm")
+    }
     // Add kotlinx-metadata-jvm dependency to fix Kotlin metadata version incompatibility
-    kapt("org.jetbrains.kotlinx:kotlinx-metadata-jvm:0.6.0")
+    kapt("org.jetbrains.kotlinx:kotlinx-metadata-jvm:1.0.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-metadata-jvm:1.0.0")
     implementation("androidx.preference:preference:1.2.0")
     // Google Play Billing Library for in-app purchases
     implementation("com.android.billingclient:billing-ktx:6.0.1")
@@ -180,5 +184,12 @@ dependencies {
     // Explicitly exclude the profileinstaller
     configurations.all {
         exclude(group = "androidx.profileinstaller", module = "profileinstaller")
+        
+        // Force the use of Kotlin 2.1.0 for all dependencies
+        resolutionStrategy.eachDependency { details ->
+            if (details.requested.group == "org.jetbrains.kotlin") {
+                details.useVersion("2.1.0")
+            }
+        }
     }
 }

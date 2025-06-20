@@ -371,7 +371,7 @@ class TabDetailFragment : Fragment() {
                                     // Try to find links with tab name text
                                     var tabLinks = Array.from(document.querySelectorAll('a')).filter(function(el) {
                                         var text = el.textContent || el.innerText || '';
-                                        return text.toLowerCase().includes('${args.tabName.toLowerCase()}');
+                                        return text.toLowerCase ? text.toLowerCase().includes('${args.tabName.lowercase()}') : text.includes('${args.tabName.lowercase()}');
                                     });
                                     
                                     if (tabLinks.length > 0) {

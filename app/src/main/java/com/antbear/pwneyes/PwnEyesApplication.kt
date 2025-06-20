@@ -76,7 +76,8 @@ class PwnEyesApplication : Application() {
     val networkUtils by lazy {
         try {
             Log.d(TAG, "Initializing NetworkUtils")
-            NetworkUtils.getInstance(this)
+            // Create a new instance directly since we're not using DI now
+            NetworkUtils(this)
         } catch (e: Exception) {
             Log.e(TAG, "Error initializing NetworkUtils", e)
             null
@@ -137,6 +138,7 @@ class PwnEyesApplication : Application() {
         
         // Stop network monitoring
         try {
+            // Call the stopNetworkMonitoring method directly
             networkUtils?.stopNetworkMonitoring()
         } catch (e: Exception) {
             Log.e(TAG, "Error stopping network monitoring", e)

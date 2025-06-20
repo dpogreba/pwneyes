@@ -10,15 +10,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Manager class for WebView configuration and JavaScript injection.
  * Centralizes all WebView enhancement logic and provides a clean API for fragments.
  */
-@Singleton
-class WebViewManager @Inject constructor(private val context: Context) {
+class WebViewManager(private val context: Context) {
     
     private val TAG = "WebViewManager"
     
@@ -252,7 +249,7 @@ class WebViewManager @Inject constructor(private val context: Context) {
                     var text = el.innerText || el.textContent || '';
                     
                     if (text) {
-                        var lowerText = text.toLowerCase();
+                        var lowerText = text.toLowerCase ? text.toLowerCase() : text.toLowerCase;
                         var isControl = controlKeywords.some(keyword => lowerText.includes(keyword));
                         
                         if (isControl) {
@@ -322,9 +319,10 @@ class WebViewManager @Inject constructor(private val context: Context) {
                 // Find button based on text content
                 var buttons = Array.from(document.querySelectorAll('*')).filter(function(el) {
                     var text = el.textContent || el.innerText || '';
-                    text = text.toLowerCase();
-                    if (text.includes('${command.toLowerCase()}')) {
-                        return ${if (additionalKeyword != null) "text.includes('${additionalKeyword.toLowerCase()}')" else "true"};
+                    text = text.toLowerCase ? text.toLowerCase() : text;
+                    var cmdLower = '${command.lowercase()}';
+                    if (text.includes(cmdLower)) {
+                        return ${if (additionalKeyword != null) "text.includes('${additionalKeyword.lowercase()}')" else "true"};
                     }
                     return false;
                 });

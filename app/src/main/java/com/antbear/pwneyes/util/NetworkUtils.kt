@@ -14,8 +14,6 @@ import java.net.HttpURLConnection
 import java.net.URL
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlin.concurrent.thread
 
 /**
@@ -25,8 +23,7 @@ import kotlin.concurrent.thread
  * 2. Internet availability checking
  * 3. Helper methods for network error handling
  */
-@Singleton
-class NetworkUtils @Inject constructor(private val context: Context) {
+class NetworkUtils(private val context: Context) {
     private val TAG = "NetworkUtils"
     
     // LiveData to track network connectivity status

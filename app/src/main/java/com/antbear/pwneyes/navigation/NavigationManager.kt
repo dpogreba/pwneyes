@@ -1,5 +1,6 @@
 package com.antbear.pwneyes.navigation
 
+import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
 import android.widget.Toast
@@ -118,7 +119,11 @@ class NavigationManager(
      */
     fun navigateWithArgs(actionId: Int, args: androidx.navigation.NavArgs) {
         try {
-            navController.navigate(actionId, args.toBundle())
+            // Get the Bundle from NavArgs using reflection
+            val bundleMethod = args.javaClass.getMethod("toBundle")
+            val bundle = bundleMethod.invoke(args) as Bundle
+            
+            navController.navigate(actionId, bundle)
         } catch (e: Exception) {
             Log.e(TAG, "Error navigating with args", e)
             Toast.makeText(

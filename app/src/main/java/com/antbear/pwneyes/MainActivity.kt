@@ -1,6 +1,7 @@
 package com.antbear.pwneyes
 
 import android.os.Bundle
+import android.os.Looper
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
@@ -84,24 +85,69 @@ class MainActivity : AppCompatActivity() {
         }
     }
     
+    /**
+     * Check network connectivity and show appropriate messages to the user
+     * Using the improved NetworkUtils methods
+     */
     private fun checkNetworkConnectivity() {
-        lifecycleScope.launch {
-            try {
-                networkUtils?.let { utils ->
-                    // Use old API until we implement Coroutines fully
-                    utils.checkInternetAsync { hasInternet ->
-                        if (!hasInternet) {
-                            Toast.makeText(
-                                this@MainActivity, 
-                                "No internet connection detected. Some features may not work properly.", 
-                                Toast.LENGTH_LONG
-                            ).show()
+        try {
+            // First check if network is even available
+            val isNetworkAvailable = networkUtils?.isNetworkAvailable() ?: false
+            if (!isNetworkAvailable) {
+                showNetworkErrorMessage("No network connection. Please connect to WiFi or mobile data.")
+                return
+            }
+            
+            // Use the coroutine-based approach for actual internet connectivity check
+            networkUtils?.let { utils ->
+                lifecycleScope.launch {
+                    try {
+                        utils.checkInternetWithCoroutines(lifecycleScope) { hasInternet ->
+                            if (!hasInternet) {
+                                // Get a more detailed error message
+                                val errorMessage = utils.getNetworkErrorMessage()
+                                showNetworkErrorMessage(errorMessage)
+                                
+                                // Try to recover connectivity automatically
+                                utils.attemptConnectivityRecovery()
+                            } else {
+                                Log.d(TAG, "Internet connectivity confirmed")
+                                // Log detailed network info for debugging
+                                Log.d(TAG, "Network info: ${utils.getNetworkInfoForLogging()}")
+                            }
                         }
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error checking internet connectivity", e)
+                        showNetworkErrorMessage("Error checking network status. Please try again.")
                     }
                 }
-            } catch (e: Exception) {
-                Log.e(TAG, "Error checking network connectivity", e)
+            } ?: run {
+                Log.e(TAG, "NetworkUtils not available")
             }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error in checkNetworkConnectivity", e)
+            showNetworkErrorMessage("Network check failed. Please check your connection.")
+        }
+    }
+    
+    /**
+     * Show a network error message to the user with proper error handling
+     */
+    private fun showNetworkErrorMessage(message: String) {
+        try {
+            // Always show messages on the main thread
+            if (Looper.myLooper() == Looper.getMainLooper()) {
+                Toast.makeText(this@MainActivity, message, Toast.LENGTH_LONG).show()
+            } else {
+                runOnUiThread {
+                    Toast.makeText(this@MainActivity, message, Toast.LENGTH_LONG).show()
+                }
+            }
+            // Log the message as well
+            Log.w(TAG, "Network error: $message")
+        } catch (e: Exception) {
+            // Last resort error handling
+            Log.e(TAG, "Error showing network message", e)
         }
     }
 
@@ -187,13 +233,31 @@ class MainActivity : AppCompatActivity() {
         try {
             // Remove premium status observer to prevent memory leaks
             billingManager?.premiumStatus?.removeObservers(this)
-            
+
             // Release any other resources
             binding.drawerLayout.removeDrawerListener(toggle)
+            
+            // Stop network monitoring to free up resources
+            networkUtils?.stopNetworkMonitoring()
         } catch (e: Exception) {
             Log.e(TAG, "Error in onDestroy", e)
         }
-        
+
         super.onDestroy()
+    }
+    
+    /**
+     * Called when the app is resumed.
+     * Good opportunity to check network status again.
+     */
+    override fun onResume() {
+        super.onResume()
+        
+        try {
+            // Check network connectivity again when app is resumed
+            checkNetworkConnectivity()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error in onResume", e)
+        }
     }
 }

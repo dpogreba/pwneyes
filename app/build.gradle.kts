@@ -4,6 +4,7 @@ plugins {
     id("androidx.navigation.safeargs.kotlin")
     id("kotlin-kapt") // Add this for annotation processing
     id("kotlin-parcelize") // Add this for parcelable support
+    id("com.google.dagger.hilt.android") // Add Hilt for dependency injection
 }
 
 android {
@@ -155,24 +156,46 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.11.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+    
+    // Lifecycle components
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.2")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-savedstate:2.6.2")
+    
+    // Navigation components
     implementation("androidx.navigation:navigation-fragment-ktx:2.5.3")
     implementation("androidx.navigation:navigation-ui-ktx:2.5.3")
+    
+    // Room database
     implementation("androidx.room:room-runtime:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
-    implementation("com.google.code.gson:gson:2.10.1")
+    kapt("androidx.room:room-compiler:2.6.1") {
+        // Force Room to use our specific kotlinx-metadata-jvm version
+        exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-metadata-jvm")
+    }
+    
+    // Coroutines
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1")
+    
+    // Security
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")
+    
+    // DataStore - modern alternative to SharedPreferences
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
+    
+    // Hilt for dependency injection
+    implementation("com.google.dagger:hilt-android:2.48")
+    kapt("com.google.dagger:hilt-android-compiler:2.48")
     
     // Core Kotlin dependencies
     implementation("org.jetbrains.kotlin:kotlin-stdlib:2.1.0")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.1.0")
     implementation("org.jetbrains.kotlin:kotlin-reflect:2.1.0")
     
-    // Room compiler annotation processor - needed for code generation
-    kapt("androidx.room:room-compiler:2.6.1") {
-        // Force Room to use our specific kotlinx-metadata-jvm version
-        exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-metadata-jvm")
-    }
+    // JSON parsing
+    implementation("com.google.code.gson:gson:2.10.1")
     
     // Try with an older, more compatible version of kotlinx-metadata-jvm
     implementation("org.jetbrains.kotlinx:kotlinx-metadata-jvm:0.3.0")
@@ -185,6 +208,8 @@ dependencies {
     implementation("com.google.android.gms:play-services-ads:22.6.0")
     // WorkManager for background tasks
     implementation("androidx.work:work-runtime-ktx:2.7.1")
+    
+    // Testing
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
@@ -203,16 +228,18 @@ dependencies {
             force("org.jetbrains.kotlin:kotlin-reflect:2.1.0")
             force("org.jetbrains.kotlin:kotlin-stdlib:2.1.0")
             force("org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.1.0")
-            
-            // Try to resolve any Kotlin-related version conflicts
-            eachDependency { details ->
-                if (details.requested.group == "org.jetbrains.kotlin") {
-                    details.useVersion("2.1.0")
-                }
-                if (details.requested.group == "org.jetbrains.kotlinx" && 
-                    details.requested.name == "kotlinx-metadata-jvm") {
-                    details.useVersion("0.3.0")
-                }
+        }
+    }
+    
+    // Handle kotlinx dependencies specifically
+    configurations.all {
+        resolutionStrategy.eachDependency {
+            if (requested.group == "org.jetbrains.kotlin") {
+                useVersion("2.1.0")
+            }
+            if (requested.group == "org.jetbrains.kotlinx" && 
+                requested.name == "kotlinx-metadata-jvm") {
+                useVersion("0.3.0")
             }
         }
     }

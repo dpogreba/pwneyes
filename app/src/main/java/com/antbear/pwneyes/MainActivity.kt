@@ -5,21 +5,24 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.ActionBarDrawerToggle
-import androidx.appcompat.app.AppCompatDelegate
-import androidx.drawerlayout.widget.DrawerLayout
-import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
 import androidx.navigation.ui.setupActionBarWithNavController
-import androidx.navigation.ui.setupWithNavController
 import com.antbear.pwneyes.billing.BillingManager
 import com.antbear.pwneyes.databinding.ActivityMainBinding
-import com.antbear.pwneyes.util.AdsManagerBase
+import com.antbear.pwneyes.navigation.NavigationManager
+import com.antbear.pwneyes.util.NetworkUtils
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     
     private val TAG = "MainActivity"
@@ -28,33 +31,71 @@ class MainActivity : AppCompatActivity() {
     private lateinit var navController: NavController
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var toggle: ActionBarDrawerToggle
-    private var billingManager: BillingManager? = null
+    private lateinit var navigationManager: NavigationManager
+    
+    // Inject dependencies
+    @Inject lateinit var billingManager: BillingManager
+    @Inject lateinit var networkUtils: NetworkUtils
+    
+    // Track premium status
     private var isPremium = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         try {
-            // Get the billing manager from the application
-            billingManager = (application as PwnEyesApplication).billingManager
+            // Setup billing and observe premium status changes
+            setupBilling()
             
-            // Observe premium status changes if billing manager is available
-            billingManager?.let { manager ->
-                manager.premiumStatus.observe(this, Observer { premium ->
-                    isPremium = premium
-                    invalidateOptionsMenu() // Refresh the options menu
-                })
+            // Inflate layout using ViewBinding
+            binding = ActivityMainBinding.inflate(layoutInflater)
+            setContentView(binding.root)
+
+            // Set up UI components
+            setupNavigation(savedInstanceState)
+            
+            // Check network connectivity
+            checkNetworkConnectivity()
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Error in onCreate", e)
+            Toast.makeText(this, "Error initializing application", Toast.LENGTH_SHORT).show()
+        }
+    }
+    
+    private fun setupBilling() {
+        try {
+            // Observe premium status changes
+            billingManager.premiumStatus.observe(this) { premium ->
+                isPremium = premium
+                invalidateOptionsMenu() // Refresh the options menu
+                Log.d(TAG, "Premium status updated: $isPremium")
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Error initializing billing manager in MainActivity", e)
+            Log.e(TAG, "Error initializing billing manager", e)
             // Default to not premium if there's an error
             isPremium = false
         }
+    }
+    
+    private fun checkNetworkConnectivity() {
+        lifecycleScope.launch {
+            try {
+                val hasInternet = networkUtils.hasInternetAccessSuspend()
+                if (!hasInternet) {
+                    Toast.makeText(
+                        this@MainActivity, 
+                        "No internet connection detected. Some features may not work properly.", 
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error checking network connectivity", e)
+            }
+        }
+    }
 
-        // Inflate layout using ViewBinding
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-
+    private fun setupNavigation(savedInstanceState: Bundle?) {
         try {
             // Set up Toolbar as the ActionBar
             setSupportActionBar(binding.toolbar)
@@ -71,59 +112,27 @@ class MainActivity : AppCompatActivity() {
             
             navController = navHostFragment.navController
 
-            // Configure AppBarConfiguration with top-level destinations and the DrawerLayout
-            appBarConfiguration = AppBarConfiguration(
-                setOf(R.id.homeFragment, R.id.addConnectionFragment, R.id.nav_settings),
-                binding.drawerLayout
+            // Initialize NavigationManager
+            navigationManager = NavigationManager(
+                navController = navController,
+                drawerLayout = binding.drawerLayout,
+                activity = this,
+                toolbar = binding.toolbar
             )
+            
+            // Configure AppBarConfiguration with top-level destinations
+            appBarConfiguration = navigationManager.setupAppBarConfiguration()
 
-            // Link the ActionBar and NavigationView with the NavController
+            // Link the ActionBar with the NavController
             setupActionBarWithNavController(navController, appBarConfiguration)
+            
+            // Setup navigation drawer
+            toggle = navigationManager.setupDrawerToggle()
             
             // Set up custom navigation item selection listener
             binding.navView.setNavigationItemSelectedListener { menuItem ->
-                try {
-                    // Close drawer first to improve perceived responsiveness
-                    binding.drawerLayout.closeDrawers()
-                    
-                    // Log the navigation attempt
-                    Log.d(TAG, "Navigation item selected: ${menuItem.title}")
-                    
-                    // Handle navigation based on the selected item's ID
-                    when (menuItem.itemId) {
-                        R.id.homeFragment -> {
-                            // Force navigation to home even if we're already there
-                            navController.popBackStack(R.id.homeFragment, false)
-                            navController.navigate(R.id.homeFragment)
-                            true
-                        }
-                        R.id.addConnectionFragment -> {
-                            navController.navigate(R.id.addConnectionFragment)
-                            true
-                        }
-                        R.id.nav_settings -> {
-                            navController.navigate(R.id.nav_settings)
-                            true
-                        }
-                        else -> false
-                    }
-                } catch (e: Exception) {
-                    Log.e(TAG, "Error navigating to selected item", e)
-                    Toast.makeText(this, "Navigation error: ${e.message}", Toast.LENGTH_SHORT).show()
-                    false
-                }
+                navigationManager.handleNavigationItemSelected(menuItem)
             }
-
-            // Set up the ActionBarDrawerToggle to display the default hamburger icon on the top left
-            toggle = ActionBarDrawerToggle(
-                this,
-                binding.drawerLayout,
-                binding.toolbar,
-                R.string.navigation_drawer_open,   // Ensure these strings exist in res/values/strings.xml
-                R.string.navigation_drawer_close
-            )
-            binding.drawerLayout.addDrawerListener(toggle)
-            toggle.syncState()
             
             // Make sure we start at the home fragment
             if (savedInstanceState == null) {
@@ -131,7 +140,7 @@ class MainActivity : AppCompatActivity() {
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error setting up navigation", e)
-            Toast.makeText(this, "Error initializing application", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Error initializing navigation", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -167,7 +176,7 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         try {
             // Remove premium status observer to prevent memory leaks
-            billingManager?.premiumStatus?.removeObservers(this)
+            billingManager.premiumStatus.removeObservers(this)
             
             // Release any other resources
             binding.drawerLayout.removeDrawerListener(toggle)

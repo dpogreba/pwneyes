@@ -2,21 +2,32 @@ package com.antbear.pwneyes.ui.viewer
 
 import android.graphics.Bitmap
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.*
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.antbear.pwneyes.databinding.FragmentConnectionViewerBinding
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import java.util.Base64
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class ConnectionViewerFragment : Fragment() {
+    private val TAG = "ConnectionViewerFragment"
+    
     private var _binding: FragmentConnectionViewerBinding? = null
     private val binding get() = _binding!!
     private val args: ConnectionViewerFragmentArgs by navArgs()
+    
+    // Inject WebViewManager
+    @Inject lateinit var webViewManager: WebViewManager
     
     // Variables to preserve WebView state across orientation changes
     private var webViewState: Bundle? = null
@@ -36,8 +47,10 @@ class ConnectionViewerFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentConnectionViewerBinding.inflate(inflater, container, false)
+        
         setupWebView()
         setupControlButtons()
+        observeWebViewLoadingState()
         
         // Restore WebView state if it exists
         webViewState?.let { state ->
@@ -45,6 +58,25 @@ class ConnectionViewerFragment : Fragment() {
         }
         
         return binding.root
+    }
+    
+    private fun observeWebViewLoadingState() {
+        webViewManager.loadingState.observe(viewLifecycleOwner) { state ->
+            when (state) {
+                WebViewManager.LoadingState.LOADING -> {
+                    binding.progressBar.visibility = View.VISIBLE
+                }
+                WebViewManager.LoadingState.ENHANCING -> {
+                    binding.progressBar.visibility = View.VISIBLE
+                }
+                WebViewManager.LoadingState.ENHANCED -> {
+                    binding.progressBar.visibility = View.GONE
+                }
+                WebViewManager.LoadingState.ERROR -> {
+                    binding.progressBar.visibility = View.GONE
+                }
+            }
+        }
     }
     
     private fun setupControlButtons() {
@@ -55,15 +87,37 @@ class ConnectionViewerFragment : Fragment() {
         
         // Set up click listeners for our overlay buttons
         binding.btnShutdown.setOnClickListener {
-            executeJavaScriptCommand("shutdown")
+            executeCommand("shutdown")
         }
         
         binding.btnReboot.setOnClickListener {
-            executeJavaScriptCommand("reboot")
+            executeCommand("reboot")
         }
         
         binding.btnRestart.setOnClickListener {
-            executeJavaScriptCommand("restart_manu")
+            executeCommand("restart_manu")
+        }
+    }
+    
+    /**
+     * Execute a command via the WebViewManager
+     */
+    private fun executeCommand(command: String) {
+        lifecycleScope.launch {
+            try {
+                webViewManager.executeCommand(binding.webView, command)
+                
+                // Show toast confirmation
+                val message = "Command sent: $command"
+                context?.let {
+                    Toast.makeText(it, message, Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error executing command: $command", e)
+                context?.let {
+                    Toast.makeText(it, "Command execution failed: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
     }
     
@@ -81,11 +135,11 @@ class ConnectionViewerFragment : Fragment() {
                 } else {
                     url + ":8080"
                 }
-                android.util.Log.d("DirectNavigation", "Added port 8080 to URL: $url")
+                Log.d(TAG, "Added port 8080 to URL: $url")
             }
             
-            android.util.Log.i("DirectNavigation", "Navigating directly to Plugins tab")
-            android.util.Log.i("DirectNavigation", "URL: $url")
+            Log.i(TAG, "Navigating directly to Plugins tab")
+            Log.i(TAG, "URL: $url")
             
             // Create navigation action with explicit details
             val action = ConnectionViewerFragmentDirections.actionConnectionViewerToTabDetail(
@@ -109,13 +163,13 @@ class ConnectionViewerFragment : Fragment() {
             android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
                 // Navigate to the tab detail fragment
                 findNavController().navigate(action)
-                android.util.Log.i("DirectNavigation", "Navigation completed")
+                Log.i(TAG, "Navigation completed")
             }, 300)
             
         } catch (e: Exception) {
             // Log any exceptions
-            android.util.Log.e("DirectNavigation", "Error navigating to Plugins tab: ${e.message}")
-            android.util.Log.e("DirectNavigation", "Stack trace: ${e.stackTraceToString()}")
+            Log.e(TAG, "Error navigating to Plugins tab: ${e.message}")
+            Log.e(TAG, "Stack trace: ${e.stackTraceToString()}")
             
             // Show error toast
             context?.let {
@@ -127,176 +181,15 @@ class ConnectionViewerFragment : Fragment() {
             }
         }
     }
-    
-    private fun executeJavaScriptCommand(command: String) {
-        val js = when (command) {
-            "shutdown" -> """
-                (function() {
-                    // Find shutdown button and click it
-                    var shutdownButtons = Array.from(document.querySelectorAll('*')).filter(function(el) {
-                        var text = el.textContent || el.innerText || '';
-                        return text.toLowerCase().includes('shutdown');
-                    });
-                    
-                    if (shutdownButtons.length > 0) {
-                        console.log('Found shutdown button, clicking...');
-                        shutdownButtons[0].click();
-                        return 'Shutdown button clicked';
-                    } else {
-                        console.log('No shutdown button found');
-                        // Try to trigger a shutdown via URL/form if applicable
-                        return 'No shutdown button found';
-                    }
-                })();
-            """
-            "reboot" -> """
-                (function() {
-                    // Find reboot button and click it
-                    var rebootButtons = Array.from(document.querySelectorAll('*')).filter(function(el) {
-                        var text = el.textContent || el.innerText || '';
-                        return text.toLowerCase().includes('reboot');
-                    });
-                    
-                    if (rebootButtons.length > 0) {
-                        console.log('Found reboot button, clicking...');
-                        rebootButtons[0].click();
-                        return 'Reboot button clicked';
-                    } else {
-                        console.log('No reboot button found');
-                        // Try to trigger a reboot via URL/form if applicable
-                        return 'No reboot button found';
-                    }
-                })();
-            """
-            "restart_manu" -> """
-                (function() {
-                    // Find MANU restart button and click it
-                    var restartButtons = Array.from(document.querySelectorAll('*')).filter(function(el) {
-                        var text = el.textContent || el.innerText || '';
-                        return text.toLowerCase().includes('restart') && text.toLowerCase().includes('manu');
-                    });
-                    
-                    if (restartButtons.length > 0) {
-                        console.log('Found restart MANU button, clicking...');
-                        restartButtons[0].click();
-                        return 'Restart MANU button clicked';
-                    } else {
-                        console.log('No restart MANU button found');
-                        // Try to find any restart button
-                        var anyRestartButtons = Array.from(document.querySelectorAll('*')).filter(function(el) {
-                            var text = el.textContent || el.innerText || '';
-                            return text.toLowerCase().includes('restart');
-                        });
-                        
-                        if (anyRestartButtons.length > 0) {
-                            console.log('Found generic restart button, clicking...');
-                            anyRestartButtons[0].click();
-                            return 'Generic restart button clicked';
-                        }
-                        
-                        return 'No restart buttons found';
-                    }
-                })();
-            """
-            else -> """
-                (function() {
-                    console.log('Unknown command: $command');
-                    return 'Unknown command';
-                })();
-            """
-        }
-        
-        binding.webView.evaluateJavascript(js.trimIndent()) { result ->
-            android.util.Log.d("WebCommandExecution", "Command: $command, Result: $result")
-            
-            // Show a toast confirmation
-            val message = when {
-                result.contains("clicked") -> "Command sent: $command"
-                result.contains("No") -> "Could not find button for: $command"
-                else -> "Command execution failed"
-            }
-            
-            context?.let {
-                Toast.makeText(it, message, Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
 
     private fun setupWebView() {
-        // Configure WebView to handle orientation changes better
         binding.webView.apply {
             // Set an ID to help with state restoration
             id = View.generateViewId()
             
-            // Set hardware acceleration for better performance
-            setLayerType(View.LAYER_TYPE_HARDWARE, null)
+            // Configure WebView using WebViewManager
+            webViewManager.configureWebView(this)
             
-            // Enable WebView debugging (requires Chrome DevTools)
-            WebView.setWebContentsDebuggingEnabled(true)
-            settings.apply {
-                // Enable JavaScript and DOM storage
-                javaScriptEnabled = true
-                domStorageEnabled = true
-                
-                // Enable zooming capabilities
-                setSupportZoom(true)
-                builtInZoomControls = true
-                displayZoomControls = false
-                
-                // Critical settings for proper viewport rendering and scrolling
-                loadWithOverviewMode = true
-                useWideViewPort = true
-                
-                // Take drastic measures - use extremely small scale to ensure all content fits
-                setInitialScale(50) // 50% of original size to force everything into view
-                
-                // Enable zoom controls to allow user to adjust view as needed
-                builtInZoomControls = true
-                displayZoomControls = false
-                setSupportZoom(true)
-                
-                // Enable caching for better performance (modern approach)
-                cacheMode = WebSettings.LOAD_DEFAULT
-                
-                // Additional settings for better web experience
-                setGeolocationEnabled(false)
-                
-                // Allow cross-domain AJAX requests if needed for some APIs
-                allowContentAccess = true
-                allowFileAccess = true
-                
-                // Enable JavaScript dialogs
-                javaScriptCanOpenWindowsAutomatically = true
-                setSupportMultipleWindows(true)
-                
-                // Set default text encoding
-                defaultTextEncodingName = "UTF-8"
-                
-                // Allow mixed content - needed for some older web interfaces
-                mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
-            }
-            
-            // Enable scroll bars and ensure scrolling works
-            isVerticalScrollBarEnabled = true
-            isHorizontalScrollBarEnabled = true
-            scrollBarStyle = View.SCROLLBARS_INSIDE_OVERLAY
-            overScrollMode = View.OVER_SCROLL_ALWAYS
-            
-            // Ensure layout is handled properly for scrolling
-            layoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-            )
-            
-            // Use extreme scaling to ensure bottom controls are visible
-            setInitialScale(50)
-            
-            // Add explicit bottom padding to push content up
-            setPadding(0, 0, 0, 200) // Add 200px padding at bottom
-            
-            // Implement direct touch handling with custom scrolling
-            setOnTouchListener(CustomWebViewTouchListener())
-
             // Set WebChromeClient to handle JavaScript dialogs
             webChromeClient = object : WebChromeClient() {
                 override fun onProgressChanged(view: WebView?, newProgress: Int) {
@@ -393,7 +286,7 @@ class ConnectionViewerFragment : Fragment() {
                 
                 override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {
                     consoleMessage?.let {
-                        android.util.Log.d("WebConsole", "${it.message()} -- From line ${it.lineNumber()} of ${it.sourceId()}")
+                        Log.d("WebConsole", "${it.message()} -- From line ${it.lineNumber()} of ${it.sourceId()}")
                     }
                     return true
                 }
@@ -417,244 +310,11 @@ class ConnectionViewerFragment : Fragment() {
                     // Save last URL for state restoration
                     lastUrl = url
                     
-                    // Force immediate extreme zoom out to show all content
-                    view?.postDelayed({
-                        // Use multiple zoom outs to force everything visible
-                        for (i in 1..5) {
-                            view.zoomOut()
-                        }
-                        
-                        // Try to scroll to extreme bottom to ensure it's loaded
-                        val heightGuess = 10000 // Much larger guess to ensure we reach bottom
-                        view.scrollTo(0, heightGuess)
-                        
-                        // Wait longer before scrolling back to top
-                        view.postDelayed({
-                            // Scroll to show most content but ensure bottom is visible
-                            view.scrollTo(0, 100)
-                            
-                            // Add a direct pixel offset to the rendering to show bottom of page
-                            view.evaluateJavascript("""
-                                (function() {
-                                    // Direct offset of the entire content to show bottom
-                                    document.body.style.transform = 'translateY(-150px)';
-                                    document.body.style.marginBottom = '300px';
-                                    document.documentElement.style.height = 'calc(100% - 200px)';
-                                    return 'Applied extreme transform';
-                                })();
-                            """.trimIndent(), null)
-                        }, 500)
-                    }, 500)
-                    
-                    // Inject enhanced JavaScript to ensure content is scrollable, including nested areas
-                    view?.evaluateJavascript("""
-                        (function() {
-                            // Store current scroll position for orientation changes
-                            window.addEventListener('scroll', function() {
-                                window.scrollXPos = window.scrollX;
-                                window.scrollYPos = window.scrollY;
-                            });
-                            
-                            // More aggressive scrolling function with touch handling
-                            function makeScrollable(element) {
-                                if (!element) return;
-                                
-                                // Force height to ensure scrollability
-                                element.style.height = element.scrollHeight > element.clientHeight ? '100%' : 'auto';
-                                element.style.maxHeight = 'none';
-                                
-                                // Force all overflow settings
-                                element.style.overflow = 'auto';
-                                element.style.overflowX = 'auto';
-                                element.style.overflowY = 'auto';
-                                element.style.webkitOverflowScrolling = 'touch';
-                                
-                                // Add specific CSS for touch devices
-                                element.style.touchAction = 'pan-y';
-                                
-                                // Ensure the element is not preventing scroll
-                                element.style.position = element.style.position === 'fixed' ? 'absolute' : element.style.position;
-                                
-                                // Add data attribute for debugging
-                                element.setAttribute('data-made-scrollable', 'true');
-                            }
-                            
-                            // Apply scrolling to document and body
-                            document.documentElement.style.height = 'auto';
-                            document.documentElement.style.overflow = 'auto';
-                            document.body.style.height = 'auto';
-                            document.body.style.overflow = 'auto';
-                            document.body.style.webkitOverflowScrolling = 'touch';
-                            
-                            // Force all containers to be scrollable - target everything
-                            var allElements = document.querySelectorAll('*');
-                            for (var i = 0; i < allElements.length; i++) {
-                                // Skip certain elements that shouldn't be scrollable
-                                var tagName = allElements[i].tagName.toLowerCase();
-                                if (tagName === 'script' || tagName === 'style' || tagName === 'meta' || tagName === 'link') {
-                                    continue;
-                                }
-                                
-                                // Check if this might be a content container
-                                var style = window.getComputedStyle(allElements[i]);
-                                if (style.display !== 'none' && style.visibility !== 'hidden' && 
-                                    (style.overflow === 'hidden' || allElements[i].scrollHeight > allElements[i].clientHeight)) {
-                                    makeScrollable(allElements[i]);
-                                }
-                            }
-                            
-                            // Specifically target elements that might be in the Plugin tab
-                            var specialSelectors = [
-                                '.plugin', '.plugin-content', '.tab-content', '.main-content', 
-                                '[id*="plugin"]', '[id*="tab"]', '[class*="plugin"]', '[class*="tab"]',
-                                'iframe', 'frame', '.scrollable', '[role="main"]'
-                            ];
-                            
-                            specialSelectors.forEach(function(selector) {
-                                try {
-                                    var elements = document.querySelectorAll(selector);
-                                    for (var i = 0; i < elements.length; i++) {
-                                        makeScrollable(elements[i]);
-                                        
-                                        // Also make all children scrollable
-                                        var children = elements[i].querySelectorAll('*');
-                                        for (var j = 0; j < children.length; j++) {
-                                            makeScrollable(children[j]);
-                                        }
-                                    }
-                                } catch (e) {
-                                    console.error('Error applying scrollable to ' + selector, e);
-                                }
-                            });
-                            
-                            // Add touch event listeners to handle custom scrolling on problematic elements
-                            var touchStartY = 0;
-                            var scrollingElement = null;
-                            
-                            document.addEventListener('touchstart', function(e) {
-                                touchStartY = e.touches[0].clientY;
-                                var target = e.target;
-                                
-                                // Find scrollable parent
-                                while (target && !isScrollable(target)) {
-                                    target = target.parentElement;
-                                }
-                                
-                                scrollingElement = target;
-                            }, { passive: false });
-                            
-                            document.addEventListener('touchmove', function(e) {
-                                if (!scrollingElement) return;
-                                
-                                var touchY = e.touches[0].clientY;
-                                var deltaY = touchStartY - touchY;
-                                
-                                scrollingElement.scrollTop += deltaY;
-                                touchStartY = touchY;
-                                
-                                // Prevent default only if we're handling the scroll
-                                if (Math.abs(deltaY) > 5) {
-                                    e.preventDefault();
-                                }
-                            }, { passive: false });
-                            
-                            function isScrollable(element) {
-                                if (!element) return false;
-                                var style = window.getComputedStyle(element);
-                                return style.overflowY === 'auto' || style.overflowY === 'scroll' || 
-                                       element.scrollHeight > element.clientHeight;
-                            }
-                            
-                            // Log information about content dimensions for debugging
-                            console.log('Document height: ' + document.documentElement.scrollHeight);
-                            console.log('Viewport height: ' + window.innerHeight);
-                            
-                            // Force a small delay then reflow to ensure scrollbars appear if needed
-                            setTimeout(function() {
-                                window.dispatchEvent(new Event('resize'));
-                                
-                                // Restore scroll position if it exists
-                                if (typeof window.scrollXPos !== 'undefined' && typeof window.scrollYPos !== 'undefined') {
-                                    window.scrollTo(window.scrollXPos, window.scrollYPos);
-                                }
-                                
-                                // Extreme viewport manipulation to force all content to fit
-                                var meta = document.querySelector('meta[name="viewport"]');
-                                if (!meta) {
-                                    meta = document.createElement('meta');
-                                    meta.name = 'viewport';
-                                    document.head.appendChild(meta);
-                                }
-                                meta.content = 'width=device-width, initial-scale=0.5, maximum-scale=3.0, user-scalable=yes';
-                                
-                                // Force all content to be visible by manipulating root styles
-                                document.documentElement.style.height = 'auto';
-                                document.documentElement.style.overflow = 'visible';
-                                document.documentElement.style.position = 'relative';
-                                document.documentElement.style.paddingBottom = '400px';
-                                
-                                // Make body smaller to fit within the viewport
-                                document.body.style.transform = 'scale(0.9)';
-                                document.body.style.transformOrigin = 'top center';
-                                document.body.style.marginBottom = '300px';
-                                
-                                // Extreme method to find and move bottom controls
-                                var possibleButtons = document.querySelectorAll('*');
-                                var foundControls = false;
-                                
-                                // Check for shutdown/reboot text in any element
-                                for (var i = 0; i < possibleButtons.length; i++) {
-                                    var el = possibleButtons[i];
-                                    var text = el.innerText || el.textContent;
-                                    
-                                    if (text && (text.indexOf('Shutdown') >= 0 || 
-                                                text.indexOf('Reboot') >= 0 || 
-                                                text.indexOf('MANU') >= 0)) {
-                                        // Found control element - move it into view!
-                                        console.log('FOUND CONTROL ELEMENT: ' + text);
-                                        foundControls = true;
-                                        
-                                        // Force it to fixed position at bottom of screen
-                                        el.style.position = 'fixed';
-                                        el.style.bottom = '50px';
-                                        el.style.left = '50%';
-                                        el.style.transform = 'translateX(-50%)';
-                                        el.style.zIndex = '9999';
-                                        el.style.backgroundColor = 'rgba(255,0,0,0.3)';
-                                        el.style.padding = '10px';
-                                        el.style.border = '2px solid red';
-                                    }
-                                }
-                                
-                                // If we found controls, dramatically modify the page to show them
-                                if (foundControls) {
-                                    // Force entire body to be shorter
-                                    document.body.style.height = '70vh';
-                                    document.body.style.overflow = 'visible';
-                                    document.documentElement.style.height = '70vh';
-                                }
-                                
-                                // As a fallback, add a huge bottom margin anyway
-                                document.body.style.paddingBottom = '250px';
-                                document.body.style.marginBottom = '250px';
-                                
-                                // Force bottom margin for any bottom toolbars, navigation, etc.
-                                var possibleBottomBars = document.querySelectorAll('.toolbar, .navbar, .navigation, nav, footer, .footer, .controls, .bottom-controls');
-                                possibleBottomBars.forEach(function(bar) {
-                                    var rect = bar.getBoundingClientRect();
-                                    if (rect.bottom > window.innerHeight * 0.8) {
-                                        bar.style.marginBottom = '80px';
-                                        console.log('Adjusted bottom bar');
-                                    }
-                                });
-                                
-                                console.log('Enhanced scrolling applied to all elements');
-                            }, 500);
-                        })();
-                    """.trimIndent(), null)
+                    // Apply WebView enhancements
+                    webViewManager.enhanceRendering(view ?: return)
                     
                     // Save scroll position after page has fully loaded
-                    view?.postDelayed({
+                    view.postDelayed({
                         lastScrollX = view.scrollX
                         lastScrollY = view.scrollY
                     }, 1000)
@@ -704,7 +364,7 @@ class ConnectionViewerFragment : Fragment() {
                     "$protocol://$base64Credentials@$host$port$path$query$ref"
                 } catch (e: Exception) {
                     // Fallback to simple replacement if URL parsing fails
-                    android.util.Log.e("ConnectionViewer", "Error parsing URL: ${e.message}")
+                    Log.e(TAG, "Error parsing URL: ${e.message}")
                     val credentials = "${args.username}:${args.password}"
                     val base64Credentials = Base64.getEncoder().encodeToString(credentials.toByteArray())
                     args.url.replace("://", "://$base64Credentials@")
@@ -713,7 +373,7 @@ class ConnectionViewerFragment : Fragment() {
                 args.url
             }
 
-            android.util.Log.d("ConnectionViewer", "Loading URL: $urlWithAuth")
+            Log.d(TAG, "Loading URL: $urlWithAuth")
             loadUrl(urlWithAuth)
         }
     }

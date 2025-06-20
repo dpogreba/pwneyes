@@ -12,6 +12,10 @@ import androidx.lifecycle.MutableLiveData
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlin.concurrent.thread
 
 /**
@@ -21,7 +25,8 @@ import kotlin.concurrent.thread
  * 2. Internet availability checking
  * 3. Helper methods for network error handling
  */
-class NetworkUtils private constructor(private val context: Context) {
+@Singleton
+class NetworkUtils @Inject constructor(private val context: Context) {
     private val TAG = "NetworkUtils"
     
     // LiveData to track network connectivity status
@@ -37,10 +42,6 @@ class NetworkUtils private constructor(private val context: Context) {
     }
     
     companion object {
-        // Singleton instance
-        @Volatile
-        private var INSTANCE: NetworkUtils? = null
-        
         // Connection timeout in ms
         private const val CONNECTION_TIMEOUT = 5000
         
@@ -49,15 +50,6 @@ class NetworkUtils private constructor(private val context: Context) {
         
         // Used to convert bytes to KB
         private const val BYTES_TO_KB = 1024
-        
-        /**
-         * Get or initialize the NetworkUtils singleton
-         */
-        fun getInstance(context: Context): NetworkUtils {
-            return INSTANCE ?: synchronized(this) {
-                INSTANCE ?: NetworkUtils(context.applicationContext).also { INSTANCE = it }
-            }
-        }
     }
     
     init {
@@ -190,6 +182,13 @@ class NetworkUtils private constructor(private val context: Context) {
             val hasInternet = hasInternetAccess()
             callback(hasInternet)
         }
+    }
+    
+    /**
+     * Coroutine-friendly method to check internet connectivity
+     */
+    suspend fun hasInternetAccessSuspend(): Boolean = withContext(Dispatchers.IO) {
+        hasInternetAccess()
     }
     
     /**

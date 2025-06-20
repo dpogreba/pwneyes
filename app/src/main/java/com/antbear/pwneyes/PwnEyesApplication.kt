@@ -3,6 +3,7 @@ package com.antbear.pwneyes
 import android.app.Application
 import android.content.SharedPreferences
 import android.util.Log
+import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.preference.PreferenceManager
@@ -13,6 +14,7 @@ import com.antbear.pwneyes.health.ConnectionHealthService
 import com.antbear.pwneyes.util.AdsManagerBase
 import com.antbear.pwneyes.util.CrashReporter
 import com.antbear.pwneyes.util.NetworkUtils
+import java.io.File
 
 // TODO: Uncomment this when Hilt is properly configured
 // import dagger.hilt.android.HiltAndroidApp
@@ -20,18 +22,30 @@ import com.antbear.pwneyes.util.NetworkUtils
 class PwnEyesApplication : Application() {
     private val TAG = "PwnEyesApplication"
     
-    // Use lazy initialization to handle potential exceptions
+    // Use lazy initialization with more robust error handling
     private val database by lazy { 
         try {
-            AppDatabase.getDatabase(this)
+            Log.d(TAG, "Initializing Room database")
+            val db = AppDatabase.getDatabase(this)
+            Log.d(TAG, "Room database initialized successfully")
+            db
         } catch (e: Exception) {
-            Log.e(TAG, "Error initializing database", e)
+            Log.e(TAG, "Error initializing database: ${e.message}", e)
             null
         }
     }
     
+    // Create a repository that can handle null database
     val repository by lazy { 
-        ConnectionRepository(database?.connectionDao() ?: throw IllegalStateException("Database not initialized"))
+        try {
+            val dao = database?.connectionDao()
+            Log.d(TAG, "Creating repository with DAO: ${dao != null}")
+            ConnectionRepository(dao)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error creating repository", e)
+            // Create a fallback repository that won't crash
+            ConnectionRepository(null)
+        }
     }
     
     val connectionHealthService by lazy {
@@ -120,27 +134,76 @@ class PwnEyesApplication : Application() {
             // Initialize the AdsManager with the BillingManager
             Log.d(TAG, "About to initialize AdsManager with BillingManager")
             
-            // Use the base class initialization which will handle flavor-specific implementation internally
-            Log.d(TAG, "Using AdsManagerBase initialization")
-            try {
-                AdsManagerBase.initialize(this, billingManager)
-                Log.d(TAG, "AdsManagerBase initialization completed")
-            } catch (ex: Exception) {
-                Log.e(TAG, "Error during AdsManagerBase initialization", ex)
+            // Determine which flavor we're running
+            val packageName = applicationContext.packageName
+            Log.d(TAG, "Package name: $packageName")
+            
+            // Direct initialization without reflection
+            if (packageName.endsWith(".free")) {
+                Log.d(TAG, "Using direct FreeAdsManager initialization")
+                try {
+                    com.antbear.pwneyes.util.FreeAdsManager.initialize(this, billingManager)
+                    Log.d(TAG, "FreeAdsManager initialized successfully")
+                } catch (ex: Exception) {
+                    Log.e(TAG, "Error initializing FreeAdsManager directly: ${ex.message}", ex)
+                }
+            } else if (packageName.endsWith(".paid")) {
+                Log.d(TAG, "Skipping ads initialization for paid version")
+                // Paid version doesn't need ads - initializing the base class is enough
+                AdsManagerBase.INSTANCE = object : AdsManagerBase {
+                    override fun setDebugPremiumMode(enabled: Boolean) {}
+                    override fun loadBannerAd(adContainer: ViewGroup) {
+                        adContainer.visibility = ViewGroup.GONE
+                    }
+                    override fun cleanup() {}
+                }
+            } else {
+                Log.d(TAG, "Unknown package suffix, using no-op AdsManager")
+                // Create a no-op implementation that won't crash
+                AdsManagerBase.INSTANCE = object : AdsManagerBase {
+                    override fun setDebugPremiumMode(enabled: Boolean) {}
+                    override fun loadBannerAd(adContainer: ViewGroup) {
+                        adContainer.visibility = ViewGroup.GONE
+                    }
+                    override fun cleanup() {}
+                }
             }
             
-            Log.d(TAG, "AdsManager initialization attempted")
+            Log.d(TAG, "AdsManager initialization completed")
         } catch (e: Exception) {
-            Log.e(TAG, "Error during AdsManager initialization process", e)
+            Log.e(TAG, "Error during AdsManager initialization process: ${e.message}", e)
+            
+            // Create a fallback no-op implementation
+            AdsManagerBase.INSTANCE = object : AdsManagerBase {
+                override fun setDebugPremiumMode(enabled: Boolean) {}
+                override fun loadBannerAd(adContainer: ViewGroup) {
+                    adContainer.visibility = ViewGroup.GONE
+                }
+                override fun cleanup() {}
+            }
         }
         
-        // Initialize Room database with a more robust approach
+        // Create schema directory if it doesn't exist
+        try {
+            val schemaDir = File(filesDir, "schemas")
+            if (!schemaDir.exists()) {
+                schemaDir.mkdirs()
+                Log.d(TAG, "Created schemas directory: ${schemaDir.absolutePath}")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error creating schemas directory: ${e.message}", e)
+        }
+            
+        // Force database initialization by accessing it
         try {
             Log.d(TAG, "Ensuring database is initialized")
-            val dbInstance = AppDatabase.getDatabase(this)
-            Log.d(TAG, "Database initialized successfully")
+            if (database != null) {
+                Log.d(TAG, "Database accessed successfully")
+            } else {
+                Log.w(TAG, "Database is null - will use fallback in-memory implementation")
+            }
         } catch (e: Exception) {
-            Log.e(TAG, "Critical error initializing database", e)
+            Log.e(TAG, "Critical error accessing database: ${e.message}", e)
             // Don't crash the app, but log the error
         }
         

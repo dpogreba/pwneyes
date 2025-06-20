@@ -172,12 +172,23 @@ class NetworkUtils(private val context: Context) {
     }
     
     /**
-     * Check internet connectivity asynchronously and call the provided callback
+     * Check internet connectivity asynchronously and call the provided callback on the main thread
      */
     fun checkInternetAsync(callback: (Boolean) -> Unit) {
         thread {
-            val hasInternet = hasInternetAccess()
-            callback(hasInternet)
+            try {
+                val hasInternet = hasInternetAccess()
+                // Use main thread for the callback to ensure UI operations like Toast are safe
+                android.os.Handler(android.os.Looper.getMainLooper()).post {
+                    callback(hasInternet)
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error checking internet access", e)
+                // Ensure callback is still called even on error
+                android.os.Handler(android.os.Looper.getMainLooper()).post {
+                    callback(false)
+                }
+            }
         }
     }
     

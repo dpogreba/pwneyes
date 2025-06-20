@@ -98,6 +98,18 @@ class PwnEyesApplication : Application() {
             Log.e(TAG, "Error initializing crash reporter", e)
         }
         
+        // Initialize network utils early to detect connectivity
+        try {
+            Log.d(TAG, "Initializing NetworkUtils")
+            if (networkUtils == null) {
+                Log.e(TAG, "NetworkUtils could not be initialized, connectivity monitoring won't be available")
+            } else {
+                Log.d(TAG, "Network status: " + (networkUtils?.getNetworkInfoForLogging() ?: "Unknown"))
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error initializing network utils", e)
+        }
+        
         try {
             applyTheme()
         } catch (e: Exception) {

@@ -18,11 +18,11 @@ import com.antbear.pwneyes.billing.BillingManager
 import com.antbear.pwneyes.databinding.ActivityMainBinding
 import com.antbear.pwneyes.navigation.NavigationManager
 import com.antbear.pwneyes.util.NetworkUtils
-import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@AndroidEntryPoint
+// TODO: Uncomment when Hilt is properly configured
+// import dagger.hilt.android.AndroidEntryPoint
+// @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     
     private val TAG = "MainActivity"
@@ -33,9 +33,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var toggle: ActionBarDrawerToggle
     private lateinit var navigationManager: NavigationManager
     
-    // Inject dependencies
-    @Inject lateinit var billingManager: BillingManager
-    @Inject lateinit var networkUtils: NetworkUtils
+    // Dependencies - now manually obtained from Application class
+    private var billingManager: BillingManager? = null
+    private var networkUtils: NetworkUtils? = null
     
     // Track premium status
     private var isPremium = false
@@ -44,6 +44,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         try {
+            // Get dependencies from application instance
+            billingManager = (application as PwnEyesApplication).billingManager
+            networkUtils = (application as PwnEyesApplication).networkUtils
+            
             // Setup billing and observe premium status changes
             setupBilling()
             
@@ -65,11 +69,13 @@ class MainActivity : AppCompatActivity() {
     
     private fun setupBilling() {
         try {
-            // Observe premium status changes
-            billingManager.premiumStatus.observe(this) { premium ->
-                isPremium = premium
-                invalidateOptionsMenu() // Refresh the options menu
-                Log.d(TAG, "Premium status updated: $isPremium")
+            // Observe premium status changes if billing manager is available
+            billingManager?.let { manager ->
+                manager.premiumStatus.observe(this) { premium ->
+                    isPremium = premium
+                    invalidateOptionsMenu() // Refresh the options menu
+                    Log.d(TAG, "Premium status updated: $isPremium")
+                }
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error initializing billing manager", e)
@@ -81,13 +87,17 @@ class MainActivity : AppCompatActivity() {
     private fun checkNetworkConnectivity() {
         lifecycleScope.launch {
             try {
-                val hasInternet = networkUtils.hasInternetAccessSuspend()
-                if (!hasInternet) {
-                    Toast.makeText(
-                        this@MainActivity, 
-                        "No internet connection detected. Some features may not work properly.", 
-                        Toast.LENGTH_LONG
-                    ).show()
+                networkUtils?.let { utils ->
+                    // Use old API until we implement Coroutines fully
+                    utils.checkInternetAsync { hasInternet ->
+                        if (!hasInternet) {
+                            Toast.makeText(
+                                this@MainActivity, 
+                                "No internet connection detected. Some features may not work properly.", 
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
+                    }
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error checking network connectivity", e)
@@ -176,7 +186,7 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         try {
             // Remove premium status observer to prevent memory leaks
-            billingManager.premiumStatus.removeObservers(this)
+            billingManager?.premiumStatus?.removeObservers(this)
             
             // Release any other resources
             binding.drawerLayout.removeDrawerListener(toggle)

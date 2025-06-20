@@ -13,12 +13,12 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.antbear.pwneyes.databinding.FragmentConnectionViewerBinding
-import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.util.Base64
-import javax.inject.Inject
 
-@AndroidEntryPoint
+// TODO: Uncomment when Hilt is properly configured
+// import dagger.hilt.android.AndroidEntryPoint
+// @AndroidEntryPoint
 class ConnectionViewerFragment : Fragment() {
     private val TAG = "ConnectionViewerFragment"
     
@@ -26,8 +26,8 @@ class ConnectionViewerFragment : Fragment() {
     private val binding get() = _binding!!
     private val args: ConnectionViewerFragmentArgs by navArgs()
     
-    // Inject WebViewManager
-    @Inject lateinit var webViewManager: WebViewManager
+    // Web view manager - manually instantiated
+    private lateinit var webViewManager: WebViewManager
     
     // Variables to preserve WebView state across orientation changes
     private var webViewState: Bundle? = null
@@ -47,6 +47,9 @@ class ConnectionViewerFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentConnectionViewerBinding.inflate(inflater, container, false)
+        
+        // Initialize WebViewManager
+        webViewManager = WebViewManager(requireContext())
         
         setupWebView()
         setupControlButtons()

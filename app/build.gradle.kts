@@ -4,7 +4,8 @@ plugins {
     id("androidx.navigation.safeargs.kotlin")
     id("kotlin-kapt") // Add this for annotation processing
     id("kotlin-parcelize") // Add this for parcelable support
-    id("com.google.dagger.hilt.android") // Add Hilt for dependency injection
+    // Hilt plugin commented out until properly set up in buildscript
+    // id("com.google.dagger.hilt.android")
 }
 
 android {

@@ -4,12 +4,12 @@
 
 This release includes significant architecture improvements to enhance the maintainability, performance, and scalability of the application:
 
-### Dependency Injection with Hilt
+### Improved Architecture (DI Ready)
 
-- Implemented Hilt for dependency injection, replacing manual singleton management
+- Added infrastructure for Dependency Injection (commented for future activation)
 - Created centralized DI module in `AppModule.kt` for application-wide dependencies
-- Modified `PwnEyesApplication` to use Hilt annotations
-- Added proper dependency injection to all key components
+- Prepared application for Hilt integration
+- Improved object lifecycle management
 
 ### WebView Enhancement
 

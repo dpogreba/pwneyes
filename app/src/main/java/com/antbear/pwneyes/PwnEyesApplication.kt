@@ -1,29 +1,87 @@
 package com.antbear.pwneyes
 
 import android.app.Application
+import android.content.SharedPreferences
 import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.preference.PreferenceManager
 import com.antbear.pwneyes.billing.BillingManager
+import com.antbear.pwneyes.data.AppDatabase
 import com.antbear.pwneyes.data.ConnectionRepository
 import com.antbear.pwneyes.health.ConnectionHealthService
 import com.antbear.pwneyes.util.AdsManagerBase
 import com.antbear.pwneyes.util.CrashReporter
 import com.antbear.pwneyes.util.NetworkUtils
-import dagger.hilt.android.HiltAndroidApp
-import javax.inject.Inject
 
-@HiltAndroidApp
+// TODO: Uncomment this when Hilt is properly configured
+// import dagger.hilt.android.HiltAndroidApp
+// @HiltAndroidApp
 class PwnEyesApplication : Application() {
     private val TAG = "PwnEyesApplication"
     
-    // Injected dependencies
-    @Inject lateinit var repository: ConnectionRepository
-    @Inject lateinit var connectionHealthService: ConnectionHealthService
-    @Inject lateinit var networkUtils: NetworkUtils
+    // Use lazy initialization to handle potential exceptions
+    private val database by lazy { 
+        try {
+            AppDatabase.getDatabase(this)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error initializing database", e)
+            null
+        }
+    }
     
-    // Optional dependencies that might be null
-    @Inject lateinit var billingManager: BillingManager
+    val repository by lazy { 
+        ConnectionRepository(database?.connectionDao() ?: throw IllegalStateException("Database not initialized"))
+    }
+    
+    val connectionHealthService by lazy {
+        try {
+            val connectionDao = database?.connectionDao() 
+                ?: throw IllegalStateException("Database not initialized")
+            ConnectionHealthService(this, connectionDao)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error initializing connection health service", e)
+            null
+        }
+    }
+    
+    val billingManager by lazy { 
+        try {
+            // Check if device has Google Play Services first
+            val playServicesAvailable = try {
+                val status = com.google.android.gms.common.GoogleApiAvailability.getInstance()
+                    .isGooglePlayServicesAvailable(this)
+                status == com.google.android.gms.common.ConnectionResult.SUCCESS
+            } catch (e: Exception) {
+                Log.w(TAG, "Error checking Google Play Services availability", e)
+                false
+            }
+            
+            if (playServicesAvailable) {
+                Log.d(TAG, "Google Play Services available, initializing BillingManager...")
+                val manager = BillingManager(this)
+                Log.d(TAG, "BillingManager initialized successfully")
+                manager
+            } else {
+                Log.w(TAG, "Google Play Services unavailable, skipping BillingManager initialization")
+                null
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error initializing billing manager", e)
+            null
+        }
+    }
+    
+    // Network utilities for network status monitoring and error handling
+    val networkUtils by lazy {
+        try {
+            Log.d(TAG, "Initializing NetworkUtils")
+            NetworkUtils.getInstance(this)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error initializing NetworkUtils", e)
+            null
+        }
+    }
     
     override fun onCreate() {
         super.onCreate()
@@ -60,7 +118,7 @@ class PwnEyesApplication : Application() {
         // Start connection health monitoring
         try {
             Log.d(TAG, "Starting connection health monitoring")
-            connectionHealthService.startMonitoring()
+            connectionHealthService?.startMonitoring()
         } catch (e: Exception) {
             Log.e(TAG, "Error starting connection health monitoring", e)
         }
@@ -71,15 +129,15 @@ class PwnEyesApplication : Application() {
         
         // Stop connection health monitoring
         try {
-            connectionHealthService.stopMonitoring()
-            connectionHealthService.cleanup()
+            connectionHealthService?.stopMonitoring()
+            connectionHealthService?.cleanup()
         } catch (e: Exception) {
             Log.e(TAG, "Error stopping connection health service", e)
         }
         
         // Stop network monitoring
         try {
-            networkUtils.stopNetworkMonitoring()
+            networkUtils?.stopNetworkMonitoring()
         } catch (e: Exception) {
             Log.e(TAG, "Error stopping network monitoring", e)
         }

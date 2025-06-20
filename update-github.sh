@@ -48,8 +48,19 @@ echo "Enter a commit message that describes your changes:"
 read -p "Commit message: " COMMIT_MESSAGE
 
 if [ -z "$COMMIT_MESSAGE" ]; then
-    COMMIT_MESSAGE="Improved architecture with Hilt DI, WebViewManager, and coroutines"
-    echo "Using default commit message: $COMMIT_MESSAGE"
+    COMMIT_MESSAGE="Improved architecture: Added WebViewManager, NavigationManager, and DI-ready structure
+
+- Enhanced WebView scrolling with improved touch handling and GestureDetector
+- Added centralized WebViewManager for better JavaScript injection and WebView configuration
+- Created NavigationManager for improved navigation flow
+- Refactored code to be more modular and maintainable
+- Prepared infrastructure for future Hilt integration
+- See release_notes_v10.18.md for complete details"
+    
+    echo "Using default commit message."
+    echo "-----------------------------------"
+    echo "$COMMIT_MESSAGE"
+    echo "-----------------------------------"
 fi
 
 git commit -m "$COMMIT_MESSAGE"

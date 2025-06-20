@@ -119,19 +119,39 @@ class PwnEyesApplication : Application() {
         try {
             // Initialize the AdsManager with the BillingManager
             Log.d(TAG, "About to initialize AdsManager with BillingManager")
-            // Initialize AdsManager even if billingManager is null 
-            // (it will handle the null case internally)
-            // Flavor-specific AdsManager implementation will be used
-            AdsManagerBase.initialize(this, billingManager)
-            Log.d(TAG, "AdsManager initialized")
+            
+            // Use the base class initialization which will handle flavor-specific implementation internally
+            Log.d(TAG, "Using AdsManagerBase initialization")
+            try {
+                AdsManagerBase.initialize(this, billingManager)
+                Log.d(TAG, "AdsManagerBase initialization completed")
+            } catch (ex: Exception) {
+                Log.e(TAG, "Error during AdsManagerBase initialization", ex)
+            }
+            
+            Log.d(TAG, "AdsManager initialization attempted")
         } catch (e: Exception) {
-            Log.e(TAG, "Error initializing AdsManager", e)
+            Log.e(TAG, "Error during AdsManager initialization process", e)
         }
         
-        // Start connection health monitoring
+        // Initialize Room database with a more robust approach
         try {
-            Log.d(TAG, "Starting connection health monitoring")
-            connectionHealthService?.startMonitoring()
+            Log.d(TAG, "Ensuring database is initialized")
+            val dbInstance = AppDatabase.getDatabase(this)
+            Log.d(TAG, "Database initialized successfully")
+        } catch (e: Exception) {
+            Log.e(TAG, "Critical error initializing database", e)
+            // Don't crash the app, but log the error
+        }
+        
+        // Start connection health monitoring only if the database initialization was successful
+        try {
+            if (database != null) {
+                Log.d(TAG, "Starting connection health monitoring")
+                connectionHealthService?.startMonitoring()
+            } else {
+                Log.w(TAG, "Skipping connection health monitoring due to database initialization failure")
+            }
         } catch (e: Exception) {
             Log.e(TAG, "Error starting connection health monitoring", e)
         }

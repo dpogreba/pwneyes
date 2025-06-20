@@ -1,23 +1,52 @@
 package com.antbear.pwneyes.data
 
+import android.util.Log
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 
-class ConnectionRepository(private val connectionDao: ConnectionDao) {
-    val allConnections: LiveData<List<Connection>> = connectionDao.getAllConnections()
+open class ConnectionRepository(private val connectionDao: ConnectionDao?) {
+    private val TAG = "ConnectionRepository"
+    
+    open val allConnections: LiveData<List<Connection>> = connectionDao?.getAllConnections() 
+        ?: MutableLiveData<List<Connection>>(emptyList())
 
-    suspend fun insert(connection: Connection) {
-        connectionDao.insert(connection)
+    open suspend fun insert(connection: Connection) {
+        try {
+            connectionDao?.insert(connection) ?: run {
+                Log.e(TAG, "Cannot insert connection, DAO is null")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error inserting connection", e)
+        }
     }
 
-    suspend fun delete(connection: Connection) {
-        connectionDao.delete(connection)
+    open suspend fun delete(connection: Connection) {
+        try {
+            connectionDao?.delete(connection) ?: run {
+                Log.e(TAG, "Cannot delete connection, DAO is null")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error deleting connection", e)
+        }
     }
 
-    suspend fun update(connection: Connection) {
-        connectionDao.update(connection)
+    open suspend fun update(connection: Connection) {
+        try {
+            connectionDao?.update(connection) ?: run {
+                Log.e(TAG, "Cannot update connection, DAO is null")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error updating connection", e)
+        }
     }
 
-    suspend fun deleteAll() {
-        connectionDao.deleteAll()
+    open suspend fun deleteAll() {
+        try {
+            connectionDao?.deleteAll() ?: run {
+                Log.e(TAG, "Cannot delete all connections, DAO is null")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error deleting all connections", e)
+        }
     }
-} 
+}

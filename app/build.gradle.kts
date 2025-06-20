@@ -2,8 +2,8 @@ plugins {
     id("com.android.application")
     id("kotlin-android")
     id("androidx.navigation.safeargs.kotlin")
-    // Removed kapt plugin to fix build issues
     id("kotlin-parcelize") // Add this for parcelable support
+    // No kapt or ksp - we'll handle annotation processing manually
 }
 
 android {
@@ -187,7 +187,7 @@ tasks.withType<JavaCompile>().configureEach {
     options.forkOptions.jvmArgs = listOf("-Xmx2g")
 }
 
-// Kapt removed
+// No kapt configuration needed
 
 dependencies {
     implementation("androidx.core:core-ktx:1.12.0")
@@ -205,13 +205,10 @@ dependencies {
     implementation("androidx.navigation:navigation-fragment-ktx:2.5.3")
     implementation("androidx.navigation:navigation-ui-ktx:2.5.3")
     
-    // Room database
+    // Room database (runtime only, no annotation processing)
     implementation("androidx.room:room-runtime:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
-    // Commented out due to kapt issues
-    // kapt("androidx.room:room-compiler:2.6.1") {
-    //     exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-metadata-jvm")
-    // }
+    // No annotation processor for Room - we'll use pre-generated code and runtime fallbacks
     
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")

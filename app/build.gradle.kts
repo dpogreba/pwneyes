@@ -136,7 +136,7 @@ android {
     
     buildFeatures {
         viewBinding = true
-        // Use the proper setting for buildConfig
+        // Explicitly set buildConfig without using the deprecated property
         buildConfig = true
         // Enable data binding support
         dataBinding = true
@@ -161,8 +161,30 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach 
 
 // Suppress warnings for experimental options
 android {
-    // Set buildToolsVersion explicitly to avoid warnings
-    buildToolsVersion = "33.0.1"
+    // Update buildToolsVersion to minimum supported version
+    buildToolsVersion = "34.0.0"
+    
+    // Explicitly disable experimental features that cause warnings
+    experimentalProperties["android.experimental.enableNewResourceShrinker.preciseShrinking"] = false
+    experimentalProperties["android.proguard.enableRulesExtraction"] = true
+    experimentalProperties["android.suppressUnsupportedOptionWarnings"] = false
+}
+
+// Add JVM arguments to fix Kotlin daemon issues
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+    compilerOptions {
+        // Use proper Kotlin compiler optimization options
+        freeCompilerArgs.addAll(listOf(
+            "-opt-in=kotlin.RequiresOptIn",
+            "-Xskip-prerelease-check"
+        ))
+    }
+}
+
+// Configure Gradle daemon settings to avoid connection issues
+tasks.withType<JavaCompile>().configureEach {
+    options.isFork = true
+    options.forkOptions.jvmArgs = listOf("-Xmx2g")
 }
 
 // Kapt removed

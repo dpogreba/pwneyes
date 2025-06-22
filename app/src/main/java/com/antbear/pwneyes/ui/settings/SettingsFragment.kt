@@ -303,5 +303,8 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
         }
         
         AppCompatDelegate.setDefaultNightMode(mode)
+        
+        // Persist the selected theme across app restarts
+        sharedPreferences.edit().putInt("night_mode", mode).apply()
     }
 }

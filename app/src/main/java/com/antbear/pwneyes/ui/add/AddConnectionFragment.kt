@@ -92,6 +92,8 @@ class AddConnectionFragment : Fragment() {
 
         // Clean up URL - remove any duplicate http:// or https://
         url = when {
+            url.startsWith("http://http://") -> url.replace("http://http://", "http://")
+            url.startsWith("https://https://") -> url.replace("https://https://", "https://")
             url.startsWith("http://") || url.startsWith("https://") -> url
             else -> "http://$url"
         }

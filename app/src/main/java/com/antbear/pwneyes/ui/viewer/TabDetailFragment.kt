@@ -56,14 +56,32 @@ class TabDetailFragment : Fragment() {
     
     private fun setupToolbar() {
         binding.toolbar.apply {
-            title = "TAB DETAIL: ${args.tabName.uppercase()}"
+            // Clear the title since we're using a custom title layout
+            title = ""
             setNavigationOnClickListener {
                 findNavController().navigateUp()
             }
         }
+
+        // Setup the back arrow click listener
+        binding.backArrow.setOnClickListener {
+            findNavController().navigateUp()
+        }
+
+        // Format the URL properly for the indicator
+        val formattedUrl = try {
+            val url = java.net.URL(args.url)
+            val host = url.host
+            val port = if (url.port == -1) "" else ":${url.port}"
+            val path = if (url.path.isEmpty() || url.path == "/") "/plugins" else url.path
+            
+            "$host$port$path"
+        } catch (e: Exception) {
+            "${args.url}/plugins"
+        }
         
-        // Set the tab name in the indicator
-        binding.tabDetailIndicator.text = "🔍 ${args.tabName.uppercase()} TAB 🔍"
+        // Set the URL in the indicator
+        binding.tabDetailIndicator.text = formattedUrl
     }
     
     private fun setupControlButtons() {

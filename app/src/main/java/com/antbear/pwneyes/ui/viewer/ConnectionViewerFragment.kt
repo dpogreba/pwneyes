@@ -47,19 +47,22 @@ class ConnectionViewerFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentConnectionViewerBinding.inflate(inflater, container, false)
-        
+
         // Initialize WebViewManager
         webViewManager = WebViewManager(requireContext())
-        
+
+        // Set the connection name in the toolbar
+        binding.connectionTitle.text = args.name
+
         setupWebView()
         setupControlButtons()
         observeWebViewLoadingState()
-        
+
         // Restore WebView state if it exists
         webViewState?.let { state ->
             binding.webView.restoreState(state)
         }
-        
+
         return binding.root
     }
     
@@ -140,45 +143,49 @@ class ConnectionViewerFragment : Fragment() {
                 }
                 Log.d(TAG, "Added port 8080 to URL: $url")
             }
-            
+
+            // Ensure URL ends with "/plugins"
+            if (!url.endsWith("/plugins")) {
+                url = if (url.endsWith("/")) {
+                    url + "plugins"
+                } else {
+                    url + "/plugins"
+                }
+                Log.d(TAG, "Ensured URL ends with /plugins: $url")
+            }
+
             Log.i(TAG, "Navigating directly to Plugins tab")
             Log.i(TAG, "URL: $url")
-            
+
             // Create navigation action with explicit details
             val action = ConnectionViewerFragmentDirections.actionConnectionViewerToTabDetail(
                 url = url,
-                tabName = "Plugins Tab",  // Make tab name very explicit
+                tabName = "Plugins",  // Make tab name very explicit
                 tabSelector = "plugins",
                 username = args.username,
                 password = args.password
             )
-            
-            // Show a big visible message
-            context?.let {
-                Toast.makeText(
-                    it, 
-                    "⚠️ NAVIGATING TO PLUGINS TAB ⚠️", 
-                    Toast.LENGTH_LONG
-                ).show()
-            }
-            
-            // Add a small delay to ensure toast is visible
-            android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-                // Navigate to the tab detail fragment
-                findNavController().navigate(action)
-                Log.i(TAG, "Navigation completed")
-            }, 300)
-            
+
+            // Create an animation to slide right
+            val navOptions = androidx.navigation.NavOptions.Builder()
+                .setEnterAnim(android.R.anim.slide_in_left)
+                .setExitAnim(android.R.anim.slide_out_right)
+                .build()
+
+            // Navigate to the tab detail fragment with animation
+            findNavController().navigate(action, navOptions)
+            Log.i(TAG, "Navigation completed")
+
         } catch (e: Exception) {
             // Log any exceptions
             Log.e(TAG, "Error navigating to Plugins tab: ${e.message}")
             Log.e(TAG, "Stack trace: ${e.stackTraceToString()}")
-            
+
             // Show error toast
             context?.let {
                 Toast.makeText(
-                    it, 
-                    "ERROR: ${e.message}", 
+                    it,
+                    "ERROR: ${e.message}",
                     Toast.LENGTH_LONG
                 ).show()
             }

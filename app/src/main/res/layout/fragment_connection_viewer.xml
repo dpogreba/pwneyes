@@ -12,21 +12,52 @@
         android:layout_height="match_parent"
         android:animateLayoutChanges="true">
 
-    <!-- Direct Plugins Button - Fixed position at top-right -->
-    <Button
-        android:id="@+id/pluginsTabButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="PLUGINS"
-        android:textStyle="bold"
-        android:backgroundTint="#2196F3"
-        android:textColor="#FFFFFF"
-        android:layout_margin="16dp"
-        android:padding="12dp"
-        android:elevation="8dp"
+    <!-- Top Navigation Bar -->
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/connectionToolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="#6200EE"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:visibility="visible" />
+        app:titleTextColor="#FFFFFF">
+        
+        <!-- Tab buttons in the toolbar -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+            
+            <TextView
+                android:id="@+id/connectionTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Device Name"
+                android:textColor="#FFFFFF"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:maxLines="1"
+                android:ellipsize="end"/>
+                
+            <Button
+                android:id="@+id/pluginsTabButton"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="PLUGINS"
+                android:textStyle="bold"
+                android:backgroundTint="#8E24AA"
+                android:textColor="#FFFFFF"
+                android:layout_marginEnd="8dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                android:elevation="4dp"/>
+        </LinearLayout>
+    </androidx.appcompat.widget.Toolbar>
 
     <WebView
         android:id="@+id/webView"
@@ -45,7 +76,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/connectionToolbar" />
         
     <!-- Control buttons overlay to ensure visibility -->
     <LinearLayout
@@ -91,7 +122,7 @@
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/connectionToolbar" />
 
     <LinearLayout
         android:id="@+id/errorLayout"

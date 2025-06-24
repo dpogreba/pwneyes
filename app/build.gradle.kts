@@ -251,9 +251,9 @@ dependencies {
     // Manual dependency injection is used instead
     
     // Core Kotlin dependencies
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:2.1.0")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.1.0")
-    implementation("org.jetbrains.kotlin:kotlin-reflect:2.1.0")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:2.0.0")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.0.0")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:2.0.0")
     
     // JSON parsing
     implementation("com.google.code.gson:gson:2.10.1")
@@ -282,12 +282,12 @@ dependencies {
     // Force compatible versions
     configurations.all {
         resolutionStrategy {
-            // Force newer version of kotlinx-metadata-jvm to support Kotlin 2.1
+            // Force newer version of kotlinx-metadata-jvm to support Kotlin 2.0
             force("org.jetbrains.kotlinx:kotlinx-metadata-jvm:0.7.0")
             // Force compatible kotlin reflection version
-            force("org.jetbrains.kotlin:kotlin-reflect:2.1.0")
-            force("org.jetbrains.kotlin:kotlin-stdlib:2.1.0")
-            force("org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.1.0")
+            force("org.jetbrains.kotlin:kotlin-reflect:2.0.0")
+            force("org.jetbrains.kotlin:kotlin-stdlib:2.0.0")
+            force("org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.0.0")
         }
     }
     
@@ -295,7 +295,7 @@ dependencies {
     configurations.all {
         resolutionStrategy.eachDependency {
             if (requested.group == "org.jetbrains.kotlin") {
-                useVersion("2.1.0")
+                useVersion("2.0.0")
             }
             if (requested.group == "org.jetbrains.kotlinx" && 
                 requested.name == "kotlinx-metadata-jvm") {

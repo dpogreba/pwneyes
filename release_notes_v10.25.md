@@ -1,8 +1,8 @@
 # PwnEyes v10.25 - Build System Update
 
-## Technical Improvement: Android Gradle Plugin Upgrade and Kotlin 2.1 Compatibility Fixes
+## Technical Improvement: Android Gradle Plugin Upgrade and Kotlin Compatibility Fixes
 
-This update brings PwnEyes up to date with the latest Android Gradle Plugin (AGP) version 8.3.0, providing several improvements to the build system. It also fixes Kotlin 2.1 compatibility issues with annotation processing.
+This update brings PwnEyes up to date with the latest Android Gradle Plugin (AGP) version 8.3.0, providing several improvements to the build system. It also ensures proper compatibility between Kotlin and annotation processing tools.
 
 ### Key Improvements
 
@@ -21,15 +21,15 @@ This update brings PwnEyes up to date with the latest Android Gradle Plugin (AGP
    - Improved handling of Android resources
 
 4. **Better Kotlin Integration**
-   - Enhanced compatibility with Kotlin 2.1
+   - Optimized for Kotlin 2.0 compatibility
    - More reliable Kotlin DSL support in build scripts
    - Improved Kotlin compiler integration
-   - Fixed KAPT compatibility issues with Kotlin 2.1
+   - Fixed KAPT compatibility issues with Room
 
 5. **Fixed Build Issues**
-   - Resolved Room compiler error with Kotlin 2.1 metadata
-   - Updated kotlinx-metadata-jvm to version 0.7.0
-   - Added proper KAPT configuration for Kotlin 2.1
+   - Resolved Room compiler errors with Kotlin metadata
+   - Configured kotlinx-metadata-jvm version 0.7.0 for improved compatibility
+   - Added proper KAPT configuration for annotation processing
    - Adjusted experimental property settings to reduce warnings
 
 ### Developer Benefits
@@ -39,4 +39,4 @@ This update brings PwnEyes up to date with the latest Android Gradle Plugin (AGP
 - **Future-Proofing**: Readiness for upcoming Android features and SDK versions
 - **Fewer Build Warnings**: Resolved several deprecated API usages
 
-This update is purely infrastructure-focused and has no user-facing changes. It builds upon the Kotlin 2.1 update (v10.24) to ensure the build system is fully up to date with the latest standards.
+This update is purely infrastructure-focused and has no user-facing changes. It ensures optimal build system compatibility with current Kotlin and Android Gradle Plugin versions.

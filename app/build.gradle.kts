@@ -15,8 +15,8 @@ android {
         applicationId = "com.antbear.pwneyes"
         minSdk = 24
         targetSdk = 34
-        versionCode = 28
-        versionName = "10.24"
+        versionCode = 29
+        versionName = "10.25"
         
         // Explicitly disable baseline profiles to fix installation issues
         ndk {
@@ -166,7 +166,7 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach 
 
 // Suppress warnings for experimental options
 android {
-    // Update buildToolsVersion to minimum supported version
+    // Update buildToolsVersion to match Android Gradle Plugin 8.3.0
     buildToolsVersion = "34.0.0"
     
     // Explicitly disable experimental features that cause warnings

@@ -1,0 +1,332 @@
+Index: gradle/libs.versions.toml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>[versions]\r\nagp = \"7.4.2\" \r\ngradle = \"7.4.2\"\r\nkotlin = \"2.1.0\"\r\ncoreKtx = \"1.15.0\"\r\njunit = \"4.13.2\"\r\njunitVersion = \"1.2.1\"\r\nespressoCore = \"3.6.1\"\r\nappcompat = \"1.7.0\"\r\nkotlinGradlePlugin = \"2.1.0\"\r\nmaterial = \"1.12.0\"\r\nconstraintlayout = \"2.2.0\"\r\nlifecycleLivedataKtx = \"2.8.7\"\r\nlifecycleViewmodelKtx = \"2.8.7\"\r\nnavigationFragmentKtx = \"2.5.3\"\r\nnavigationUiKtx = \"2.5.3\"\r\n# Coroutines\r\ncoroutines = \"1.7.1\"\r\n# Security\r\nsecurity-crypto = \"1.1.0-alpha06\"\r\n# Lifecycle\r\nlifecycle = \"2.6.2\"\r\n# Room\r\nroom = \"2.6.1\"\r\n# Hilt - for dependency injection\r\nhilt = \"2.48\"\r\n# DataStore - modern replacement for SharedPreferences\r\ndatastore = \"1.0.0\"\r\n\r\n[libraries]\r\nandroidx-core-ktx = { group = \"androidx.core\", name = \"core-ktx\", version.ref = \"coreKtx\" }\r\nandroidx-navigation-safe-args-gradle-plugin = { module = \"androidx.navigation:navigation-safe-args-gradle-plugin\", version.ref = \"navigationFragmentKtx\" }\r\ngradle = { module = \"com.android.tools.build:gradle\", version.ref = \"gradle\" }\r\njunit = { group = \"junit\", name = \"junit\", version.ref = \"junit\" }\r\nandroidx-junit = { group = \"androidx.test.ext\", name = \"junit\", version.ref = \"junitVersion\" }\r\nandroidx-espresso-core = { group = \"androidx.test.espresso\", name = \"espresso-core\", version.ref = \"espressoCore\" }\r\nandroidx-appcompat = { group = \"androidx.appcompat\", name = \"appcompat\", version.ref = \"appcompat\" }\r\nkotlin-gradle-plugin = { module = \"org.jetbrains.kotlin:kotlin-gradle-plugin\", version.ref = \"kotlinGradlePlugin\" }\r\nmaterial = { group = \"com.google.android.material\", name = \"material\", version.ref = \"material\" }\r\nandroidx-constraintlayout = { module = \"androidx.constraintlayout:constraintlayout\", version = \"2.1.4\" }\r\nandroidx-lifecycle-livedata-ktx = { group = \"androidx.lifecycle\", name = \"lifecycle-livedata-ktx\", version.ref = \"lifecycleLivedataKtx\" }\r\nandroidx-lifecycle-viewmodel-ktx = { group = \"androidx.lifecycle\", name = \"lifecycle-viewmodel-ktx\", version.ref = \"lifecycleViewmodelKtx\" }\r\nandroidx-navigation-fragment-ktx = { group = \"androidx.navigation\", name = \"navigation-fragment-ktx\", version.ref = \"navigationFragmentKtx\" }\r\nandroidx-navigation-ui-ktx = { group = \"androidx.navigation\", name = \"navigation-ui-ktx\", version.ref = \"navigationUiKtx\" }\r\n\r\n# Coroutines\r\nkotlinx-coroutines-core = { group = \"org.jetbrains.kotlinx\", name = \"kotlinx-coroutines-core\", version.ref = \"coroutines\" }\r\nkotlinx-coroutines-android = { group = \"org.jetbrains.kotlinx\", name = \"kotlinx-coroutines-android\", version.ref = \"coroutines\" }\r\n\r\n# Security\r\nandroidx-security-crypto = { group = \"androidx.security\", name = \"security-crypto\", version.ref = \"security-crypto\" }\r\n\r\n# Lifecycle\r\nandroidx-lifecycle-runtime-ktx = { group = \"androidx.lifecycle\", name = \"lifecycle-runtime-ktx\", version.ref = \"lifecycle\" }\r\nandroidx-lifecycle-viewmodel-savedstate = { group = \"androidx.lifecycle\", name = \"lifecycle-viewmodel-savedstate\", version.ref = \"lifecycle\" }\r\n\r\n# Room\r\nandroidx-room-runtime = { group = \"androidx.room\", name = \"room-runtime\", version.ref = \"room\" }\r\nandroidx-room-ktx = { group = \"androidx.room\", name = \"room-ktx\", version.ref = \"room\" }\r\nandroidx-room-compiler = { group = \"androidx.room\", name = \"room-compiler\", version.ref = \"room\" }\r\n\r\n# Hilt for dependency injection\r\nhilt-android = { group = \"com.google.dagger\", name = \"hilt-android\", version.ref = \"hilt\" }\r\nhilt-compiler = { group = \"com.google.dagger\", name = \"hilt-android-compiler\", version.ref = \"hilt\" }\r\n\r\n# DataStore\r\nandroidx-datastore-preferences = { group = \"androidx.datastore\", name = \"datastore-preferences\", version.ref = \"datastore\" }\r\n\r\n[plugins]\r\nandroid-application = { id = \"com.android.application\", version.ref = \"agp\" }\r\nkotlin-android = { id = \"org.jetbrains.kotlin.android\", version.ref = \"kotlin\" }\r\nhilt-android = { id = \"com.google.dagger.hilt.android\", version.ref = \"hilt\" }\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/gradle/libs.versions.toml b/gradle/libs.versions.toml
+--- a/gradle/libs.versions.toml	(revision 35141e136d061de1c6faea87e449366903f0a69f)
++++ b/gradle/libs.versions.toml	(date 1750433552028)
+@@ -1,17 +1,15 @@
+ [versions]
+-agp = "7.4.2" 
+-gradle = "7.4.2"
+-kotlin = "2.1.0"
+-coreKtx = "1.15.0"
++agp = "8.2.0"
++kotlin = "1.9.22"
++coreKtx = "1.12.0"
+ junit = "4.13.2"
+-junitVersion = "1.2.1"
+-espressoCore = "3.6.1"
+-appcompat = "1.7.0"
+-kotlinGradlePlugin = "2.1.0"
+-material = "1.12.0"
+-constraintlayout = "2.2.0"
+-lifecycleLivedataKtx = "2.8.7"
+-lifecycleViewmodelKtx = "2.8.7"
++junitVersion = "1.1.5"
++espressoCore = "3.5.1"
++appcompat = "1.6.1"
++material = "1.11.0"
++constraintlayout = "2.1.4"
++lifecycleLivedataKtx = "2.6.2"
++lifecycleViewmodelKtx = "2.6.2"
+ navigationFragmentKtx = "2.5.3"
+ navigationUiKtx = "2.5.3"
+ # Coroutines
+@@ -30,14 +28,12 @@
+ [libraries]
+ androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+ androidx-navigation-safe-args-gradle-plugin = { module = "androidx.navigation:navigation-safe-args-gradle-plugin", version.ref = "navigationFragmentKtx" }
+-gradle = { module = "com.android.tools.build:gradle", version.ref = "gradle" }
+ junit = { group = "junit", name = "junit", version.ref = "junit" }
+ androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
+ androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+ androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+-kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlinGradlePlugin" }
+ material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+-androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version = "2.1.4" }
++androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayout" }
+ androidx-lifecycle-livedata-ktx = { group = "androidx.lifecycle", name = "lifecycle-livedata-ktx", version.ref = "lifecycleLivedataKtx" }
+ androidx-lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelKtx" }
+ androidx-navigation-fragment-ktx = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "navigationFragmentKtx" }
+Index: build.gradle.kts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>// Top-level build file where you can add configuration options common to all sub-projects/modules.\r\nbuildscript {\r\n    repositories {\r\n        google()\r\n        mavenCentral()\r\n        maven { url = uri(\"https://jitpack.io\") }\r\n        maven { url = uri(\"https://plugins.gradle.org/m2/\") }\r\n    }\r\n    dependencies {\r\n        classpath(libs.gradle)\r\n        classpath(libs.kotlin.gradle.plugin)\r\n        classpath(libs.androidx.navigation.safe.args.gradle.plugin)\r\n    }\r\n}\r\n\r\n// Add repositories for all projects\r\nallprojects {\r\n    repositories {\r\n        google()\r\n        mavenCentral()\r\n        maven { url = uri(\"https://jitpack.io\") }\r\n        maven { url = uri(\"https://maven.pkg.jetbrains.space/public/p/kotlinx-html/maven\") }\r\n        maven { url = uri(\"https://dl.bintray.com/kotlin/kotlin-eap\") }\r\n    }\r\n}\r\n\r\ntasks.register(\"clean\", Delete::class) {\r\n    delete(layout.buildDirectory)\r\n}\r\n\r\ntasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {\r\n    compilerOptions {\r\n        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)\r\n        freeCompilerArgs.add(\"-Xjvm-default=all\")\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/build.gradle.kts b/build.gradle.kts
+--- a/build.gradle.kts	(revision 35141e136d061de1c6faea87e449366903f0a69f)
++++ b/build.gradle.kts	(date 1750433552037)
+@@ -1,36 +1,9 @@
+-// Top-level build file where you can add configuration options common to all sub-projects/modules.
+-buildscript {
+-    repositories {
+-        google()
+-        mavenCentral()
+-        maven { url = uri("https://jitpack.io") }
+-        maven { url = uri("https://plugins.gradle.org/m2/") }
+-    }
+-    dependencies {
+-        classpath(libs.gradle)
+-        classpath(libs.kotlin.gradle.plugin)
+-        classpath(libs.androidx.navigation.safe.args.gradle.plugin)
+-    }
+-}
+-
+-// Add repositories for all projects
+-allprojects {
+-    repositories {
+-        google()
+-        mavenCentral()
+-        maven { url = uri("https://jitpack.io") }
+-        maven { url = uri("https://maven.pkg.jetbrains.space/public/p/kotlinx-html/maven") }
+-        maven { url = uri("https://dl.bintray.com/kotlin/kotlin-eap") }
+-    }
++plugins {
++    alias(libs.plugins.android.application) apply false
++    alias(libs.plugins.kotlin.android) apply false
++    id("androidx.navigation.safeargs.kotlin") version "2.5.3" apply false
+ }
+ 
+ tasks.register("clean", Delete::class) {
+     delete(layout.buildDirectory)
+ }
+-
+-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+-    compilerOptions {
+-        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+-        freeCompilerArgs.add("-Xjvm-default=all")
+-    }
+-}
+Index: settings.gradle.kts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>pluginManagement {\r\n    repositories {\r\n        google()\r\n        mavenCentral()\r\n        gradlePluginPortal()\r\n    }\r\n}\r\n\r\ndependencyResolutionManagement {\r\n    repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)\r\n    repositories {\r\n        google()\r\n        mavenCentral()\r\n        maven { url = uri(\"https://jitpack.io\") }\r\n        maven { url = uri(\"https://maven.pkg.jetbrains.space/public/p/kotlinx-html/maven\") }\r\n        maven { url = uri(\"https://dl.bintray.com/kotlin/kotlin-eap\") }\r\n    }\r\n}\r\n\r\nrootProject.name = \"PwnEyes\"\r\ninclude(\":app\")\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/settings.gradle.kts b/settings.gradle.kts
+--- a/settings.gradle.kts	(revision 35141e136d061de1c6faea87e449366903f0a69f)
++++ b/settings.gradle.kts	(date 1750433552063)
+@@ -5,9 +5,8 @@
+         gradlePluginPortal()
+     }
+ }
+-
+ dependencyResolutionManagement {
+-    repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
++    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+     repositories {
+         google()
+         mavenCentral()
+@@ -16,6 +15,5 @@
+         maven { url = uri("https://dl.bintray.com/kotlin/kotlin-eap") }
+     }
+ }
+-
+ rootProject.name = "PwnEyes"
+-include(":app")
++include(":app")
+\ No newline at end of file
+Index: .idea/studiobot.xml
+===================================================================
+diff --git a/.idea/studiobot.xml b/.idea/studiobot.xml
+deleted file mode 100644
+--- a/.idea/studiobot.xml	(revision 35141e136d061de1c6faea87e449366903f0a69f)
++++ /dev/null	(revision 35141e136d061de1c6faea87e449366903f0a69f)
+@@ -1,6 +0,0 @@
+-<?xml version="1.0" encoding="UTF-8"?>
+-<project version="4">
+-  <component name="StudioBotProjectSettings">
+-    <option name="shareContext" value="OptedIn" />
+-  </component>
+-</project>
+\ No newline at end of file
+Index: .idea/.gitignore
+===================================================================
+diff --git a/.idea/.gitignore b/.idea/.gitignore
+deleted file mode 100644
+--- a/.idea/.gitignore	(revision 35141e136d061de1c6faea87e449366903f0a69f)
++++ /dev/null	(revision 35141e136d061de1c6faea87e449366903f0a69f)
+@@ -1,3 +0,0 @@
+-# Default ignored files
+-/shelf/
+-/workspace.xml
+Index: .idea/kotlinc.xml
+===================================================================
+diff --git a/.idea/kotlinc.xml b/.idea/kotlinc.xml
+deleted file mode 100644
+--- a/.idea/kotlinc.xml	(revision 35141e136d061de1c6faea87e449366903f0a69f)
++++ /dev/null	(revision 35141e136d061de1c6faea87e449366903f0a69f)
+@@ -1,6 +0,0 @@
+-<?xml version="1.0" encoding="UTF-8"?>
+-<project version="4">
+-  <component name="KotlinJpsPluginSettings">
+-    <option name="version" value="1.9.24" />
+-  </component>
+-</project>
+\ No newline at end of file
+Index: .idea/deploymentTargetSelector.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"deploymentTargetSelector\">\r\n    <selectionStates>\r\n      <SelectionState runConfigName=\"app\">\r\n        <option name=\"selectionMode\" value=\"DROPDOWN\" />\r\n        <DropdownSelection timestamp=\"2025-02-10T11:50:11.306065900Z\">\r\n          <Target type=\"DEFAULT_BOOT\">\r\n            <handle>\r\n              <DeviceId pluginId=\"LocalEmulator\" identifier=\"path=C:\\Users\\derek\\.android\\avd\\Pixel_9_Pro_XL_API_35.avd\" />\r\n            </handle>\r\n          </Target>\r\n        </DropdownSelection>\r\n        <DialogSelection />\r\n      </SelectionState>\r\n    </selectionStates>\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/deploymentTargetSelector.xml b/.idea/deploymentTargetSelector.xml
+--- a/.idea/deploymentTargetSelector.xml	(revision 35141e136d061de1c6faea87e449366903f0a69f)
++++ b/.idea/deploymentTargetSelector.xml	(date 1750433552095)
+@@ -4,14 +4,6 @@
+     <selectionStates>
+       <SelectionState runConfigName="app">
+         <option name="selectionMode" value="DROPDOWN" />
+-        <DropdownSelection timestamp="2025-02-10T11:50:11.306065900Z">
+-          <Target type="DEFAULT_BOOT">
+-            <handle>
+-              <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\derek\.android\avd\Pixel_9_Pro_XL_API_35.avd" />
+-            </handle>
+-          </Target>
+-        </DropdownSelection>
+-        <DialogSelection />
+       </SelectionState>
+     </selectionStates>
+   </component>
+Index: .idea/gradle.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"GradleMigrationSettings\" migrationVersion=\"1\" />\r\n  <component name=\"GradleSettings\">\r\n    <option name=\"linkedExternalProjectsSettings\">\r\n      <GradleProjectSettings>\r\n        <option name=\"testRunner\" value=\"CHOOSE_PER_TEST\" />\r\n        <option name=\"externalProjectPath\" value=\"$PROJECT_DIR$\" />\r\n        <option name=\"gradleHome\" value=\"$PROJECT_DIR$/../../../../Gradle/gradle-8.0\" />\r\n        <option name=\"gradleJvm\" value=\"17\" />\r\n        <option name=\"modules\">\r\n          <set>\r\n            <option value=\"$PROJECT_DIR$\" />\r\n            <option value=\"$PROJECT_DIR$/app\" />\r\n          </set>\r\n        </option>\r\n        <option name=\"resolveExternalAnnotations\" value=\"false\" />\r\n      </GradleProjectSettings>\r\n    </option>\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/gradle.xml b/.idea/gradle.xml
+--- a/.idea/gradle.xml	(revision 35141e136d061de1c6faea87e449366903f0a69f)
++++ b/.idea/gradle.xml	(date 1750433552102)
+@@ -6,15 +6,13 @@
+       <GradleProjectSettings>
+         <option name="testRunner" value="CHOOSE_PER_TEST" />
+         <option name="externalProjectPath" value="$PROJECT_DIR$" />
+-        <option name="gradleHome" value="$PROJECT_DIR$/../../../../Gradle/gradle-8.0" />
+-        <option name="gradleJvm" value="17" />
++        <option name="gradleJvm" value="#GRADLE_LOCAL_JAVA_HOME" />
+         <option name="modules">
+           <set>
+             <option value="$PROJECT_DIR$" />
+             <option value="$PROJECT_DIR$/app" />
+           </set>
+         </option>
+-        <option name="resolveExternalAnnotations" value="false" />
+       </GradleProjectSettings>
+     </option>
+   </component>
+Index: app/src/main/java/com/antbear/pwneyes/ui/add/AddConnectionFragment.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.antbear.pwneyes.ui.add\r\n\r\nimport android.os.Bundle\r\nimport android.view.LayoutInflater\r\nimport android.view.View\r\nimport android.view.ViewGroup\r\nimport android.widget.Toast\r\nimport androidx.fragment.app.Fragment\r\nimport androidx.fragment.app.activityViewModels\r\nimport androidx.navigation.fragment.findNavController\r\nimport androidx.navigation.fragment.navArgs\r\nimport com.antbear.pwneyes.databinding.FragmentAddConnectionBinding\r\nimport com.antbear.pwneyes.data.Connection\r\nimport com.antbear.pwneyes.ui.home.SharedViewModel\r\n\r\nclass AddConnectionFragment : Fragment() {\r\n\r\n    private var _binding: FragmentAddConnectionBinding? = null\r\n    private val binding get() = _binding!!\r\n    private val sharedViewModel: SharedViewModel by activityViewModels()\r\n    \r\n    // Use the generated NavArgs class\r\n    private val args: AddConnectionFragmentArgs by navArgs()\r\n    \r\n    // Variables to store existing connection details for edit mode\r\n    private var isEditMode = false\r\n    private var connectionId: Long = 0\r\n    \r\n    override fun onCreateView(\r\n        inflater: LayoutInflater, container: ViewGroup?,\r\n        savedInstanceState: Bundle?\r\n    ): View {\r\n        _binding = FragmentAddConnectionBinding.inflate(inflater, container, false)\r\n        return binding.root\r\n    }\r\n    \r\n    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {\r\n        super.onViewCreated(view, savedInstanceState)\r\n        \r\n        // Get arguments using the generated NavArgs class\r\n        isEditMode = args.isEditMode\r\n        \r\n        if (isEditMode) {\r\n            // We're in edit mode, so load the connection details\r\n            connectionId = args.connectionId\r\n            val name = args.connectionName ?: \"\"\r\n            val url = args.connectionUrl ?: \"\"\r\n            \r\n            // Set the form fields with the connection details\r\n            binding.editTextConnectionName.setText(name)\r\n            binding.editTextConnectionUrl.setText(url)\r\n            \r\n            // Update the UI to indicate edit mode\r\n            binding.buttonSave.text = \"Update\"\r\n            binding.textViewTitle.text = \"Edit Connection\"\r\n        }\r\n        \r\n        setupSaveButton()\r\n    }\r\n\r\n    private fun setupSaveButton() {\r\n        binding.buttonSave.setOnClickListener {\r\n            val connection = validateAndCreateConnection()\r\n            if (connection != null) {\r\n                if (isEditMode) {\r\n                    // Update existing connection\r\n                    sharedViewModel.updateConnection(connection)\r\n                    Toast.makeText(requireContext(), \"Connection updated\", Toast.LENGTH_SHORT).show()\r\n                } else {\r\n                    // Add new connection\r\n                    sharedViewModel.addConnection(connection)\r\n                    Toast.makeText(requireContext(), \"Connection saved\", Toast.LENGTH_SHORT).show()\r\n                }\r\n                findNavController().navigateUp()\r\n            }\r\n        }\r\n    }\r\n\r\n    private fun validateAndCreateConnection(): Connection? {\r\n        val name = binding.editTextConnectionName.text.toString().trim()\r\n        var url = binding.editTextConnectionUrl.text.toString().trim()\r\n\r\n        if (name.isEmpty()) {\r\n            binding.editTextConnectionName.error = \"Name is required\"\r\n            return null\r\n        }\r\n\r\n        if (url.isEmpty()) {\r\n            binding.editTextConnectionUrl.error = \"URL is required\"\r\n            return null\r\n        }\r\n\r\n        // Clean up URL - remove any duplicate http:// or https://\r\n        url = when {\r\n            url.startsWith(\"http://\") || url.startsWith(\"https://\") -> url\r\n            else -> \"http://$url\"\r\n        }\r\n\r\n        return Connection(\r\n            id = if (isEditMode) connectionId else 0, // Use existing ID when editing\r\n            name = name,\r\n            url = url,\r\n            username = \"\",\r\n            password = \"\",\r\n            isConnected = false\r\n        )\r\n    }\r\n\r\n    override fun onDestroyView() {\r\n        super.onDestroyView()\r\n        _binding = null\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/antbear/pwneyes/ui/add/AddConnectionFragment.kt b/app/src/main/java/com/antbear/pwneyes/ui/add/AddConnectionFragment.kt
+--- a/app/src/main/java/com/antbear/pwneyes/ui/add/AddConnectionFragment.kt	(revision 35141e136d061de1c6faea87e449366903f0a69f)
++++ b/app/src/main/java/com/antbear/pwneyes/ui/add/AddConnectionFragment.kt	(date 1750433552109)
+@@ -92,6 +92,8 @@
+ 
+         // Clean up URL - remove any duplicate http:// or https://
+         url = when {
++            url.startsWith("http://http://") -> url.replace("http://http://", "http://")
++            url.startsWith("https://https://") -> url.replace("https://https://", "https://")
+             url.startsWith("http://") || url.startsWith("https://") -> url
+             else -> "http://$url"
+         }
+Index: .idea/misc.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><project version=\"4\">\r\n  <component name=\"ExternalStorageConfigurationManager\" enabled=\"true\" />\r\n  <component name=\"ProjectRootManager\" version=\"2\" languageLevel=\"JDK_17\" default=\"true\" project-jdk-name=\"17\" project-jdk-type=\"JavaSDK\">\r\n    <output url=\"file://$PROJECT_DIR$/build/classes\" />\r\n  </component>\r\n  <component name=\"ProjectType\">\r\n    <option name=\"id\" value=\"Android\" />\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/misc.xml b/.idea/misc.xml
+--- a/.idea/misc.xml	(revision 35141e136d061de1c6faea87e449366903f0a69f)
++++ b/.idea/misc.xml	(date 1750433552119)
+@@ -1,3 +1,4 @@
++<?xml version="1.0" encoding="UTF-8"?>
+ <project version="4">
+   <component name="ExternalStorageConfigurationManager" enabled="true" />
+   <component name="ProjectRootManager" version="2" languageLevel="JDK_17" default="true" project-jdk-name="17" project-jdk-type="JavaSDK">
+Index: gradle/wrapper/gradle-wrapper.properties
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+># Timestamp when the wrapper was last updated\r\n#Fri Jan 24 03:33:36 MST 2025\r\n\r\ndistributionBase=GRADLE_USER_HOME\r\ndistributionPath=wrapper/dists\r\n\r\n# Use the latest stable Gradle version compatible with AGP (Android Gradle Plugin)\r\ndistributionUrl=https\\://services.gradle.org/distributions/gradle-8.9-bin.zip\r\n\r\nzipStoreBase=GRADLE_USER_HOME\r\nzipStorePath=wrapper/dists\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>ISO-8859-1
+===================================================================
+diff --git a/gradle/wrapper/gradle-wrapper.properties b/gradle/wrapper/gradle-wrapper.properties
+--- a/gradle/wrapper/gradle-wrapper.properties	(revision 35141e136d061de1c6faea87e449366903f0a69f)
++++ b/gradle/wrapper/gradle-wrapper.properties	(date 1750433552129)
+@@ -5,7 +5,7 @@
+ distributionPath=wrapper/dists
+ 
+ # Use the latest stable Gradle version compatible with AGP (Android Gradle Plugin)
+-distributionUrl=https\://services.gradle.org/distributions/gradle-8.9-bin.zip
++distributionUrl=https\://services.gradle.org/distributions/gradle-8.11.1-bin.zip
+ 
+ zipStoreBase=GRADLE_USER_HOME
+ zipStorePath=wrapper/dists
+Index: .idea/vcs.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"VcsDirectoryMappings\">\r\n    <mapping directory=\"$PROJECT_DIR$\" vcs=\"Git\" />\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/vcs.xml b/.idea/vcs.xml
+--- a/.idea/vcs.xml	(revision 35141e136d061de1c6faea87e449366903f0a69f)
++++ b/.idea/vcs.xml	(date 1750433552154)
+@@ -1,6 +1,6 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <project version="4">
+   <component name="VcsDirectoryMappings">
+-    <mapping directory="$PROJECT_DIR$" vcs="Git" />
++    <mapping directory="" vcs="Git" />
+   </component>
+ </project>
+\ No newline at end of file
+Index: app/src/main/java/com/antbear/pwneyes/ui/settings/SettingsFragment.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.antbear.pwneyes.ui.settings\r\n\r\nimport android.app.AlertDialog\r\nimport android.content.Intent\r\nimport android.content.SharedPreferences\r\nimport android.net.Uri\r\nimport android.os.Bundle\r\nimport android.util.Log\r\nimport android.widget.Toast\r\nimport androidx.appcompat.app.AppCompatDelegate\r\nimport androidx.fragment.app.activityViewModels\r\nimport androidx.lifecycle.Observer\r\nimport androidx.preference.ListPreference\r\nimport androidx.preference.Preference\r\nimport androidx.preference.PreferenceFragmentCompat\r\nimport androidx.preference.PreferenceManager\r\nimport androidx.preference.PreferenceCategory\r\nimport androidx.preference.PreferenceScreen\r\nimport androidx.preference.SwitchPreference\r\nimport com.antbear.pwneyes.BuildConfig\r\nimport com.antbear.pwneyes.PwnEyesApplication\r\nimport com.antbear.pwneyes.R\r\nimport com.antbear.pwneyes.billing.BillingManager\r\nimport com.antbear.pwneyes.ui.home.SharedViewModel\r\n\r\nclass SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedPreferenceChangeListener {\r\n    private val TAG = \"SettingsFragment\"\r\n    private val sharedViewModel: SharedViewModel by activityViewModels()\r\n    private lateinit var sharedPreferences: SharedPreferences\r\n    private var billingManager: BillingManager? = null\r\n    private var isPremium = false\r\n\r\n    override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {\r\n        setPreferencesFromResource(R.xml.preferences, rootKey)\r\n        \r\n        // Initialize SharedPreferences\r\n        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext())\r\n        \r\n        // Initialize BillingManager\r\n        try {\r\n            billingManager = (requireActivity().application as PwnEyesApplication).billingManager\r\n            \r\n            // Observe premium status changes if billing manager is available\r\n            billingManager?.let { manager ->\r\n                // Premium status observer\r\n                manager.premiumStatus.observe(this, Observer { premium ->\r\n                    isPremium = premium\r\n                    updatePremiumPreferencesVisibility()\r\n                })\r\n                \r\n                // Connection state observer\r\n                manager.connectionState.observe(this, Observer { state ->\r\n                    when (state) {\r\n                        BillingManager.STATE_DISCONNECTED -> {\r\n                            Log.d(TAG, \"Billing service disconnected\")\r\n                            updateBillingState(false, \"Billing service disconnected\")\r\n                            updateBillingStatusUI(state, manager.lastErrorMessage.value)\r\n                        }\r\n                        BillingManager.STATE_CONNECTING -> {\r\n                            Log.d(TAG, \"Connecting to billing service...\")\r\n                            updateBillingState(false, \"Connecting to billing service...\")\r\n                            updateBillingStatusUI(state, null)\r\n                        }\r\n                        BillingManager.STATE_CONNECTED -> {\r\n                            Log.d(TAG, \"Billing service connected\")\r\n                            updateBillingState(true, null)\r\n                            updateBillingStatusUI(state, null)\r\n                        }\r\n                        BillingManager.STATE_ERROR -> {\r\n                            val errorMsg = manager.lastErrorMessage.value ?: \"Unknown error\"\r\n                            Log.e(TAG, \"Billing service error: $errorMsg\")\r\n                            updateBillingState(false, errorMsg)\r\n                            updateBillingStatusUI(state, errorMsg)\r\n                        }\r\n                    }\r\n                })\r\n            }\r\n        } catch (e: Exception) {\r\n            Log.e(TAG, \"Error accessing billing manager\", e)\r\n            isPremium = false\r\n            updateBillingState(false, \"Failed to initialize billing\")\r\n        }\r\n        \r\n        // Set up the erase all preference\r\n        findPreference<Preference>(\"erase_all\")?.setOnPreferenceClickListener {\r\n            showEraseAllConfirmationDialog()\r\n            true\r\n        }\r\n        \r\n        // Set up theme preference\r\n        val themePreference = findPreference<ListPreference>(\"theme_preference\")\r\n        themePreference?.summaryProvider = Preference.SummaryProvider<ListPreference> { preference ->\r\n            \"Selected: ${preference.entry}\"\r\n        }\r\n        \r\n        // Set up remove ads preference\r\n        findPreference<Preference>(\"remove_ads\")?.setOnPreferenceClickListener {\r\n            if (billingManager != null) {\r\n                billingManager?.launchPurchaseFlow(requireActivity())\r\n            } else {\r\n                Toast.makeText(requireContext(), getString(R.string.toast_billing_unavailable), Toast.LENGTH_SHORT).show()\r\n            }\r\n            true\r\n        }\r\n        \r\n        // Set up restore purchases preference\r\n        findPreference<Preference>(\"restore_purchases\")?.setOnPreferenceClickListener {\r\n            if (billingManager != null) {\r\n                billingManager?.restorePurchases()\r\n                Toast.makeText(requireContext(), getString(R.string.toast_restoring_purchases), Toast.LENGTH_SHORT).show()\r\n            } else {\r\n                Toast.makeText(requireContext(), getString(R.string.toast_billing_unavailable), Toast.LENGTH_SHORT).show()\r\n            }\r\n            true\r\n        }\r\n        \r\n        // Set up Buy Me Coffee preference\r\n        findPreference<Preference>(\"buy_me_coffee\")?.setOnPreferenceClickListener {\r\n            try {\r\n                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(\"https://buymeacoffee.com/ltldrk\"))\r\n                startActivity(intent)\r\n            } catch (e: Exception) {\r\n                Log.e(TAG, \"Error opening Buy Me Coffee link\", e)\r\n                Toast.makeText(requireContext(), getString(R.string.toast_browser_error), Toast.LENGTH_SHORT).show()\r\n            }\r\n            true\r\n        }\r\n        \r\n        // Set up Contact Us preference\r\n        findPreference<Preference>(\"contact_us\")?.setOnPreferenceClickListener {\r\n            try {\r\n                val emailAddress = \"PwnEyes@proton.me\"\r\n                \r\n                // Create a more general intent that more apps can handle\r\n                val intent = Intent(Intent.ACTION_SEND).apply {\r\n                    type = \"message/rfc822\" // Standard email MIME type\r\n                    putExtra(Intent.EXTRA_EMAIL, arrayOf(emailAddress))\r\n                    putExtra(Intent.EXTRA_SUBJECT, \"FROM PWNEYES ANDROID\")\r\n                    \r\n                    // Include app version in the email body\r\n                    val appVersion = \"App Version: ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})\"\r\n                    val deviceInfo = \"Device: ${android.os.Build.MANUFACTURER} ${android.os.Build.MODEL}, Android ${android.os.Build.VERSION.RELEASE}\"\r\n                    putExtra(Intent.EXTRA_TEXT, \"----------\\n\\n\\n----------\\n$appVersion\\n$deviceInfo\")\r\n                }\r\n                \r\n                // Create and show chooser dialog with all compatible apps\r\n                val chooser = Intent.createChooser(intent, \"Contact Support\")\r\n                startActivity(chooser)\r\n            } catch (e: Exception) {\r\n                Log.e(TAG, \"Error launching email intent\", e)\r\n                Toast.makeText(requireContext(), getString(R.string.toast_email_error), Toast.LENGTH_SHORT).show()\r\n            }\r\n            true\r\n        }\r\n        \r\n        // Initial update of premium preferences visibility\r\n        updatePremiumPreferencesVisibility()\r\n    }\r\n    \r\n    /**\r\n     * Updates the UI based on the billing connection state\r\n     */\r\n    private fun updateBillingState(isConnected: Boolean, errorMessage: String?) {\r\n        try {\r\n            val removeAdsPreference = findPreference<Preference>(\"remove_ads\")\r\n            val restorePurchasesPreference = findPreference<Preference>(\"restore_purchases\")\r\n            \r\n            // Enable/disable based on connection status\r\n            removeAdsPreference?.isEnabled = isConnected\r\n            restorePurchasesPreference?.isEnabled = isConnected\r\n            \r\n            // Update summary to show connection status\r\n            if (!isConnected) {\r\n                removeAdsPreference?.summary = errorMessage ?: \"Billing service not available\"\r\n                restorePurchasesPreference?.summary = errorMessage ?: \"Billing service not available\"\r\n            } else {\r\n                // Clear error message if connected\r\n                if (isPremium) {\r\n                    removeAdsPreference?.summary = getString(R.string.premium_status)\r\n                } else {\r\n                    removeAdsPreference?.summary = getString(R.string.pref_remove_ads_summary)\r\n                }\r\n                restorePurchasesPreference?.summary = getString(R.string.pref_restore_purchases_summary)\r\n            }\r\n            \r\n            Log.d(TAG, \"Updated billing state UI. isConnected: $isConnected, errorMessage: $errorMessage\")\r\n        } catch (e: Exception) {\r\n            Log.e(TAG, \"Error updating billing state UI\", e)\r\n        }\r\n    }\r\n    \r\n    private fun updatePremiumPreferencesVisibility() {\r\n        try {\r\n            val removeAdsPreference = findPreference<Preference>(\"remove_ads\")\r\n            val restorePurchasesPreference = findPreference<Preference>(\"restore_purchases\")\r\n            val premiumCategory = findPreference<PreferenceScreen>(\"premium_category\")\r\n            \r\n            // Hide \"Remove Ads\" option if user is already premium\r\n            removeAdsPreference?.isVisible = !isPremium && billingManager != null\r\n            \r\n            // Show \"Restore Purchases\" only if billing is available\r\n            restorePurchasesPreference?.isVisible = billingManager != null\r\n            \r\n            // Update summary if user is premium\r\n            if (isPremium) {\r\n                removeAdsPreference?.summary = getString(R.string.premium_status)\r\n            }\r\n            \r\n            Log.d(TAG, \"Updated premium preferences. isPremium: $isPremium, billingAvailable: ${billingManager != null}\")\r\n        } catch (e: Exception) {\r\n            Log.e(TAG, \"Error updating premium preferences visibility\", e)\r\n        }\r\n    }\r\n    \r\n    private fun showEraseAllConfirmationDialog() {\r\n        AlertDialog.Builder(requireContext())\r\n            .setTitle(getString(R.string.dialog_erase_all_title))\r\n            .setMessage(getString(R.string.dialog_erase_all_message))\r\n            .setPositiveButton(getString(R.string.dialog_erase_all_confirm)) { _, _ -> \r\n                sharedViewModel.deleteAllConnections()\r\n                Toast.makeText(requireContext(), getString(R.string.toast_connections_deleted), Toast.LENGTH_SHORT).show()\r\n            }\r\n            .setNegativeButton(getString(R.string.dialog_cancel), null)\r\n            .show()\r\n    }\r\n    \r\n    override fun onResume() {\r\n        super.onResume()\r\n        sharedPreferences.registerOnSharedPreferenceChangeListener(this)\r\n    }\r\n    \r\n    override fun onPause() {\r\n        super.onPause()\r\n        sharedPreferences.unregisterOnSharedPreferenceChangeListener(this)\r\n    }\r\n    \r\n    override fun onDestroy() {\r\n        try {\r\n            // Remove LiveData observers to prevent memory leaks\r\n            billingManager?.let { manager ->\r\n                manager.premiumStatus.removeObservers(this)\r\n                manager.connectionState.removeObservers(this)\r\n                manager.lastErrorMessage.removeObservers(this)\r\n            }\r\n        } catch (e: Exception) {\r\n            Log.e(TAG, \"Error removing observers in onDestroy\", e)\r\n        }\r\n        \r\n        super.onDestroy()\r\n    }\r\n    \r\n    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {\r\n        if (key == \"theme_preference\" && sharedPreferences != null) {\r\n            applyTheme(sharedPreferences)\r\n        }\r\n    }\r\n    \r\n    /**\r\n     * Updates the billing status UI based on connection state\r\n     * Note: Retry is now handled automatically in the background\r\n     */\r\n    private fun updateBillingStatusUI(state: Int, errorMessage: String?) {\r\n        try {\r\n            val retryBillingPreference = findPreference<Preference>(\"retry_billing\")\r\n            val billingStatusPreference = findPreference<Preference>(\"billing_status\")\r\n            \r\n            // Always hide the retry button as retries are now automatic\r\n            retryBillingPreference?.isVisible = false\r\n            \r\n            // Update status text with current state information\r\n            val statusText = when (state) {\r\n                BillingManager.STATE_CONNECTING -> getString(R.string.billing_connecting)\r\n                BillingManager.STATE_CONNECTED -> \"Connected to Google Play Billing\"\r\n                BillingManager.STATE_DISCONNECTED -> getString(R.string.billing_disconnected)\r\n                BillingManager.STATE_ERROR -> getString(R.string.billing_error, errorMessage ?: \"Unknown error\")\r\n                else -> \"Unknown billing state\"\r\n            }\r\n            \r\n            // Show status preference when needed\r\n            billingStatusPreference?.isVisible = true\r\n            billingStatusPreference?.title = getString(R.string.billing_connection_status, statusText)\r\n            \r\n            // For error states, also show detailed error message as summary\r\n            if (state == BillingManager.STATE_ERROR && !errorMessage.isNullOrEmpty()) {\r\n                billingStatusPreference?.summary = errorMessage\r\n            } else {\r\n                billingStatusPreference?.summary = null\r\n            }\r\n            \r\n            Log.d(TAG, \"Updated billing status UI. State: $state, Message: $errorMessage\")\r\n        } catch (e: Exception) {\r\n            Log.e(TAG, \"Error updating billing status UI\", e)\r\n        }\r\n    }\r\n    \r\n    private fun applyTheme(sharedPreferences: SharedPreferences) {\r\n        val themeValue = sharedPreferences.getString(\"theme_preference\", \"system\") ?: \"system\"\r\n        \r\n        val mode = when (themeValue) {\r\n            \"light\" -> AppCompatDelegate.MODE_NIGHT_NO\r\n            \"dark\" -> AppCompatDelegate.MODE_NIGHT_YES\r\n            else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM\r\n        }\r\n        \r\n        AppCompatDelegate.setDefaultNightMode(mode)\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/antbear/pwneyes/ui/settings/SettingsFragment.kt b/app/src/main/java/com/antbear/pwneyes/ui/settings/SettingsFragment.kt
+--- a/app/src/main/java/com/antbear/pwneyes/ui/settings/SettingsFragment.kt	(revision 35141e136d061de1c6faea87e449366903f0a69f)
++++ b/app/src/main/java/com/antbear/pwneyes/ui/settings/SettingsFragment.kt	(date 1750433552161)
+@@ -303,5 +303,8 @@
+         }
+         
+         AppCompatDelegate.setDefaultNightMode(mode)
++        
++        // Persist the selected theme across app restarts
++        sharedPreferences.edit().putInt("night_mode", mode).apply()
+     }
+ }
+Index: gradle.properties
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+># Project-wide Gradle settings.\r\n# IDE (e.g. Android Studio) users:\r\n# Gradle settings configured through the IDE *will override*\r\n# any settings specified in this file.\r\n# For more details on how to configure your build environment visit\r\n# http://www.gradle.org/docs/current/userguide/build_environment.html\r\n# Specifies the JVM arguments used for the daemon process.\r\n# The setting is particularly useful for tweaking memory settings.\r\norg.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8\r\n# Disable JDK check in Android Gradle Plugin\r\nandroid.suppressUnsupportedCompileSdk=34\r\nandroid.suppressUnsupportedOptionWarnings=android.suppressUnsupportedCompileSdk\r\n# When configured, Gradle will run in incubating parallel mode.\r\n# This option should only be used with decoupled projects. More details, visit\r\n# http://www.gradle.org/docs/current/userguide/multi_project_builds.html#sec:decoupled_projects\r\n# org.gradle.parallel=true\r\n# AndroidX package structure to make it clearer which packages are bundled with the\r\n# Android operating system, and which are packaged with your app's APK\r\n# https://developer.android.com/topic/libraries/support-library/androidx-rn\r\nandroid.useAndroidX=true\r\n# Kotlin code style for this project: \"official\" or \"obsolete\":\r\nkotlin.code.style=official\r\n# Enables namespacing of each library's R class so that its R class includes only the\r\n# resources declared in the library itself and none from the library's dependencies,\r\n# thereby reducing the size of the R class for that library\r\nandroid.nonTransitiveRClass=true\r\n\r\n# Disable baseline profiles completely\r\nandroid.enableR8.fullMode=false\r\nandroid.enableProfileInstaller=false\r\nandroid.enableGradleProfiler=false\r\nandroid.experimental.enableProfileData=false\r\nandroid.enableProfileableModuleAndroidText=false\r\nandroid.proguard.enableRulesExtraction=false\r\nandroid.enableBaselineProfile=false\r\n\r\n# Acknowledge experimental options\r\nandroid.experimental.enableNewResourceShrinker=true\r\nandroid.experimental.enableNewResourceShrinker.preciseShrinking=true\r\nandroid.experimental.proguardKeepRules=true\r\nandroid.experimentalProperties=true\r\n\r\n# Force Java 11 for all Kotlin compilation\r\nkotlin.jvm.target.validation.mode=warning\r\nkotlin.daemon.jvmargs=-Xmx2048m\r\nkapt.use.worker.api=true\r\nkapt.incremental.apt=true\r\nkapt.include.compile.classpath=false\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>ISO-8859-1
+===================================================================
+diff --git a/gradle.properties b/gradle.properties
+--- a/gradle.properties	(revision 35141e136d061de1c6faea87e449366903f0a69f)
++++ b/gradle.properties	(date 1750433552170)
+@@ -46,3 +46,5 @@
+ kapt.use.worker.api=true
+ kapt.incremental.apt=true
+ kapt.include.compile.classpath=false
++android.defaults.buildfeatures.buildconfig=true
++android.nonFinalResIds=false

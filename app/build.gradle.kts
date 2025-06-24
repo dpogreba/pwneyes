@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     id("kotlin-android")
     id("androidx.navigation.safeargs.kotlin")
+    id("kotlin-kapt") // Add this for annotation processing
     id("kotlin-parcelize") // Add this for parcelable support
     // Annotation processing for Room will be handled by runtime
 }
@@ -150,6 +151,10 @@ android {
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_11.toString()
     }
+
+    kapt {
+        correctErrorTypes = true
+    }
 }
 
 // Make sure all Kotlin compile tasks use Java 11
@@ -209,6 +214,9 @@ dependencies {
     implementation("androidx.room:room-runtime:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
     // No annotation processor for Room - we'll use fallbacks instead
+    kapt("androidx.room:room-compiler:2.6.1") {
+        exclude(module = "kotlinx-metadata-jvm", group = "org.jetbrains.kotlinx")
+    }
     
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
@@ -275,5 +283,11 @@ dependencies {
                 useVersion("0.3.0")
             }
         }
+    }
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
     }
 }

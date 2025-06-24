@@ -1,0 +1,1081 @@
+Index: app/build.gradle.kts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>plugins {\r\n    id(\"com.android.application\")\r\n    id(\"kotlin-android\")\r\n    id(\"androidx.navigation.safeargs.kotlin\")\r\n    id(\"kotlin-kapt\") // Add this for annotation processing\r\n    id(\"kotlin-parcelize\") // Add this for parcelable support\r\n}\r\n\r\nandroid {\r\n    namespace = \"com.antbear.pwneyes\"\r\n    compileSdk = 34\r\n\r\n    defaultConfig {\r\n        applicationId = \"com.antbear.pwneyes\"\r\n        minSdk = 24\r\n        targetSdk = 34\r\n        versionCode = 26\r\n        versionName = \"10.17\"\r\n        \r\n        // Explicitly disable baseline profiles to fix installation issues\r\n        ndk {\r\n            abiFilters.clear()\r\n        }\r\n\r\n        testInstrumentationRunner = \"androidx.test.runner.AndroidJUnitRunner\"\r\n    }\r\n    \r\n    // Disable lint checks for now\r\n    lint {\r\n        abortOnError = false\r\n    }\r\n\r\n    // Configure product flavors for correct package name on Google Play\r\n    flavorDimensions += \"version\"\r\n    productFlavors {\r\n        create(\"free\") {\r\n            dimension = \"version\"\r\n            applicationIdSuffix = \".free\"\r\n            versionNameSuffix = \"-free\"\r\n        }\r\n        create(\"paid\") {\r\n            dimension = \"version\"\r\n            applicationIdSuffix = \".paid\"\r\n            versionNameSuffix = \"-paid\"\r\n        }\r\n    }\r\n    \r\n    // Limit build variants (only generate free variants by default)\r\n    // This reduces the number of build variants from 4 to 2\r\n    androidComponents {\r\n        beforeVariants { variantBuilder ->\r\n            // Only generate free variants by default, unless a paid-specific task is explicitly requested\r\n            if (variantBuilder.flavorName == \"paid\") {\r\n                val paidTaskRequested = gradle.startParameter.taskNames.any { \r\n                    it.contains(\"paid\", ignoreCase = true) \r\n                }\r\n                \r\n                if (!paidTaskRequested) {\r\n                    variantBuilder.enable = false\r\n                }\r\n            }\r\n        }\r\n    }\r\n    \r\n    // Configure source sets to ensure proper flavor-specific class selection\r\n    sourceSets {\r\n        getByName(\"main\") {\r\n            java.srcDirs(\"src/main/java\")\r\n        }\r\n        getByName(\"free\") {\r\n            java.srcDirs(\"src/free/java\")\r\n        }\r\n        getByName(\"paid\") {\r\n            java.srcDirs(\"src/paid/java\")\r\n        }\r\n    }\r\n\r\n    signingConfigs {\r\n        // Use debug signing config for temporary testing\r\n        getByName(\"debug\") {\r\n            // Debug keystore is automatically created by Android build system\r\n        }\r\n        \r\n        // Release signing config with proper keystore\r\n        create(\"release\") {\r\n            // Check if the keystore file exists\r\n            val keystoreFile = file(\"pwneyes.keystore.jks\")\r\n            \r\n            // Only use the keystore if it exists\r\n            if (keystoreFile.exists()) {\r\n                storeFile = keystoreFile\r\n                storePassword = \"android\" // Default password, can be overridden\r\n                keyAlias = \"pwneyes\"\r\n                keyPassword = \"android\" // Default password, can be overridden\r\n            }\r\n        }\r\n    }\r\n\r\n    // Check if we should skip signing\r\n    val skipSigning = project.hasProperty(\"skipSigning\") && \r\n                      project.property(\"skipSigning\") == \"true\"\r\n                      \r\n    buildTypes {\r\n        release {\r\n            isMinifyEnabled = false\r\n            proguardFiles(getDefaultProguardFile(\"proguard-android-optimize.txt\"), \"proguard-rules.pro\")\r\n            \r\n            // Use release signing config for Google Play Store uploads, unless skipSigning is true\r\n            if (!skipSigning) {\r\n                signingConfig = signingConfigs.getByName(\"release\")\r\n            } else {\r\n                // Use debug signing config when skipSigning is true\r\n                signingConfig = signingConfigs.getByName(\"debug\")\r\n            }\r\n            \r\n            // Disable baseline profiles\r\n            proguardFile(\"baseline-profiles-rules.pro\")\r\n        }\r\n        debug {\r\n            // Disable baseline profiles\r\n            proguardFile(\"baseline-profiles-rules.pro\")\r\n            \r\n            // Use debug signing for debug builds\r\n            signingConfig = signingConfigs.getByName(\"debug\")\r\n        }\r\n    }\r\n    \r\n    buildFeatures {\r\n        viewBinding = true\r\n        // This is marked as deprecated but still needed\r\n        buildConfig = true\r\n        // Enable data binding support\r\n        dataBinding = true\r\n    }\r\n\r\n    compileOptions {\r\n        sourceCompatibility = JavaVersion.VERSION_11\r\n        targetCompatibility = JavaVersion.VERSION_11\r\n    }\r\n    \r\n    kotlinOptions {\r\n        jvmTarget = JavaVersion.VERSION_11.toString()\r\n    }\r\n}\r\n\r\n// Make sure all Kotlin compile tasks use Java 11\r\ntasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {\r\n    compilerOptions {\r\n        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)\r\n    }\r\n}\r\n\r\ndependencies {\r\n    implementation(\"androidx.core:core-ktx:1.12.0\")\r\n    implementation(\"androidx.appcompat:appcompat:1.6.1\")\r\n    implementation(\"com.google.android.material:material:1.11.0\")\r\n    implementation(\"androidx.constraintlayout:constraintlayout:2.1.4\")\r\n    implementation(\"androidx.lifecycle:lifecycle-livedata-ktx:2.6.2\")\r\n    implementation(\"androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2\")\r\n    implementation(\"androidx.navigation:navigation-fragment-ktx:2.5.3\")\r\n    implementation(\"androidx.navigation:navigation-ui-ktx:2.5.3\")\r\n    implementation(\"androidx.room:room-runtime:2.6.1\")\r\n    implementation(\"androidx.room:room-ktx:2.6.1\")\r\n    implementation(\"com.google.code.gson:gson:2.10.1\")\r\n    \r\n    // Core Kotlin dependencies\r\n    implementation(\"org.jetbrains.kotlin:kotlin-stdlib:2.1.0\")\r\n    implementation(\"org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.1.0\")\r\n    implementation(\"org.jetbrains.kotlin:kotlin-reflect:2.1.0\")\r\n    \r\n    // Room compiler annotation processor - needed for code generation\r\n    kapt(\"androidx.room:room-compiler:2.6.1\") {\r\n        // Force Room to use our specific kotlinx-metadata-jvm version\r\n        exclude(group = \"org.jetbrains.kotlinx\", module = \"kotlinx-metadata-jvm\")\r\n    }\r\n    \r\n    // Try with an older, more compatible version of kotlinx-metadata-jvm\r\n    implementation(\"org.jetbrains.kotlinx:kotlinx-metadata-jvm:0.3.0\")\r\n    kapt(\"org.jetbrains.kotlinx:kotlinx-metadata-jvm:0.3.0\")\r\n    \r\n    implementation(\"androidx.preference:preference:1.2.0\")\r\n    // Google Play Billing Library for in-app purchases\r\n    implementation(\"com.android.billingclient:billing-ktx:6.0.1\")\r\n    // Google Ads - now used conditionally based on premium status\r\n    implementation(\"com.google.android.gms:play-services-ads:22.6.0\")\r\n    // WorkManager for background tasks\r\n    implementation(\"androidx.work:work-runtime-ktx:2.7.1\")\r\n    testImplementation(\"junit:junit:4.13.2\")\r\n    androidTestImplementation(\"androidx.test.ext:junit:1.1.5\")\r\n    androidTestImplementation(\"androidx.test.espresso:espresso-core:3.5.1\")\r\n    \r\n    // Explicitly exclude the profileinstaller\r\n    configurations.all {\r\n        exclude(group = \"androidx.profileinstaller\", module = \"profileinstaller\")\r\n    }\r\n    \r\n    // Force compatible versions\r\n    configurations.all {\r\n        resolutionStrategy {\r\n            // Force older version of kotlinx-metadata-jvm\r\n            force(\"org.jetbrains.kotlinx:kotlinx-metadata-jvm:0.3.0\")\r\n            // Force compatible kotlin reflection version\r\n            force(\"org.jetbrains.kotlin:kotlin-reflect:2.1.0\")\r\n            force(\"org.jetbrains.kotlin:kotlin-stdlib:2.1.0\")\r\n            force(\"org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.1.0\")\r\n            \r\n            // Try to resolve any Kotlin-related version conflicts\r\n            eachDependency { details ->\r\n                if (details.requested.group == \"org.jetbrains.kotlin\") {\r\n                    details.useVersion(\"2.1.0\")\r\n                }\r\n                if (details.requested.group == \"org.jetbrains.kotlinx\" && \r\n                    details.requested.name == \"kotlinx-metadata-jvm\") {\r\n                    details.useVersion(\"0.3.0\")\r\n                }\r\n            }\r\n        }\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/build.gradle.kts b/app/build.gradle.kts
+--- a/app/build.gradle.kts	(revision 24239367c21fa63b0c7e4ea80c644a222082f2e0)
++++ b/app/build.gradle.kts	(date 1750374009762)
+@@ -1,9 +1,9 @@
+ plugins {
+-    id("com.android.application")
+-    id("kotlin-android")
++    alias(libs.plugins.android.application)
++    alias(libs.plugins.kotlin.android)
+     id("androidx.navigation.safeargs.kotlin")
+-    id("kotlin-kapt") // Add this for annotation processing
+-    id("kotlin-parcelize") // Add this for parcelable support
++    id("kotlin-kapt")
++    id("kotlin-parcelize")
+ }
+ 
+ android {
+@@ -16,21 +16,14 @@
+         targetSdk = 34
+         versionCode = 26
+         versionName = "10.17"
+-        
+-        // Explicitly disable baseline profiles to fix installation issues
+-        ndk {
+-            abiFilters.clear()
+-        }
+ 
+         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+     }
+-    
+-    // Disable lint checks for now
++
+     lint {
+         abortOnError = false
+     }
+ 
+-    // Configure product flavors for correct package name on Google Play
+     flavorDimensions += "version"
+     productFlavors {
+         create("free") {
+@@ -44,92 +37,34 @@
+             versionNameSuffix = "-paid"
+         }
+     }
+-    
+-    // Limit build variants (only generate free variants by default)
+-    // This reduces the number of build variants from 4 to 2
+-    androidComponents {
+-        beforeVariants { variantBuilder ->
+-            // Only generate free variants by default, unless a paid-specific task is explicitly requested
+-            if (variantBuilder.flavorName == "paid") {
+-                val paidTaskRequested = gradle.startParameter.taskNames.any { 
+-                    it.contains("paid", ignoreCase = true) 
+-                }
+-                
+-                if (!paidTaskRequested) {
+-                    variantBuilder.enable = false
+-                }
+-            }
+-        }
+-    }
+-    
+-    // Configure source sets to ensure proper flavor-specific class selection
+-    sourceSets {
+-        getByName("main") {
+-            java.srcDirs("src/main/java")
+-        }
+-        getByName("free") {
+-            java.srcDirs("src/free/java")
+-        }
+-        getByName("paid") {
+-            java.srcDirs("src/paid/java")
+-        }
+-    }
+ 
+     signingConfigs {
+-        // Use debug signing config for temporary testing
+-        getByName("debug") {
+-            // Debug keystore is automatically created by Android build system
+-        }
+-        
+-        // Release signing config with proper keystore
++        getByName("debug") {}
+         create("release") {
+-            // Check if the keystore file exists
+             val keystoreFile = file("pwneyes.keystore.jks")
+-            
+-            // Only use the keystore if it exists
+             if (keystoreFile.exists()) {
+                 storeFile = keystoreFile
+-                storePassword = "android" // Default password, can be overridden
++                storePassword = "android"
+                 keyAlias = "pwneyes"
+-                keyPassword = "android" // Default password, can be overridden
++                keyPassword = "android"
+             }
+         }
+     }
+ 
+-    // Check if we should skip signing
+-    val skipSigning = project.hasProperty("skipSigning") && 
+-                      project.property("skipSigning") == "true"
+-                      
+     buildTypes {
+         release {
+             isMinifyEnabled = false
+             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+-            
+-            // Use release signing config for Google Play Store uploads, unless skipSigning is true
+-            if (!skipSigning) {
+-                signingConfig = signingConfigs.getByName("release")
+-            } else {
+-                // Use debug signing config when skipSigning is true
+-                signingConfig = signingConfigs.getByName("debug")
+-            }
+-            
+-            // Disable baseline profiles
+-            proguardFile("baseline-profiles-rules.pro")
++            signingConfig = signingConfigs.getByName("release")
+         }
+         debug {
+-            // Disable baseline profiles
+-            proguardFile("baseline-profiles-rules.pro")
+-            
+-            // Use debug signing for debug builds
+             signingConfig = signingConfigs.getByName("debug")
+         }
+     }
+-    
++
+     buildFeatures {
+         viewBinding = true
+-        // This is marked as deprecated but still needed
+         buildConfig = true
+-        // Enable data binding support
+         dataBinding = true
+     }
+ 
+@@ -137,83 +72,38 @@
+         sourceCompatibility = JavaVersion.VERSION_11
+         targetCompatibility = JavaVersion.VERSION_11
+     }
+-    
++
+     kotlinOptions {
+-        jvmTarget = JavaVersion.VERSION_11.toString()
++        jvmTarget = "11"
+     }
+-}
+ 
+-// Make sure all Kotlin compile tasks use Java 11
+-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+-    compilerOptions {
+-        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
++    kapt {
++        correctErrorTypes = true
+     }
+ }
+ 
+ dependencies {
+-    implementation("androidx.core:core-ktx:1.12.0")
+-    implementation("androidx.appcompat:appcompat:1.6.1")
+-    implementation("com.google.android.material:material:1.11.0")
+-    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.2")
+-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
+-    implementation("androidx.navigation:navigation-fragment-ktx:2.5.3")
+-    implementation("androidx.navigation:navigation-ui-ktx:2.5.3")
++    implementation(libs.androidx.core.ktx)
++    implementation(libs.androidx.appcompat)
++    implementation(libs.material)
++    implementation(libs.androidx.constraintlayout)
++    implementation(libs.androidx.lifecycle.livedata.ktx)
++    implementation(libs.androidx.lifecycle.viewmodel.ktx)
++    implementation(libs.androidx.navigation.fragment.ktx)
++    implementation(libs.androidx.navigation.ui.ktx)
++
+     implementation("androidx.room:room-runtime:2.6.1")
+     implementation("androidx.room:room-ktx:2.6.1")
++    kapt("androidx.room:room-compiler:2.6.1")
++
+     implementation("com.google.code.gson:gson:2.10.1")
+-    
+-    // Core Kotlin dependencies
+-    implementation("org.jetbrains.kotlin:kotlin-stdlib:2.1.0")
+-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.1.0")
+-    implementation("org.jetbrains.kotlin:kotlin-reflect:2.1.0")
+-    
+-    // Room compiler annotation processor - needed for code generation
+-    kapt("androidx.room:room-compiler:2.6.1") {
+-        // Force Room to use our specific kotlinx-metadata-jvm version
+-        exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-metadata-jvm")
+-    }
+-    
+-    // Try with an older, more compatible version of kotlinx-metadata-jvm
+-    implementation("org.jetbrains.kotlinx:kotlinx-metadata-jvm:0.3.0")
+-    kapt("org.jetbrains.kotlinx:kotlinx-metadata-jvm:0.3.0")
+-    
++
+     implementation("androidx.preference:preference:1.2.0")
+-    // Google Play Billing Library for in-app purchases
+     implementation("com.android.billingclient:billing-ktx:6.0.1")
+-    // Google Ads - now used conditionally based on premium status
+     implementation("com.google.android.gms:play-services-ads:22.6.0")
+-    // WorkManager for background tasks
+     implementation("androidx.work:work-runtime-ktx:2.7.1")
+-    testImplementation("junit:junit:4.13.2")
+-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
+-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+-    
+-    // Explicitly exclude the profileinstaller
+-    configurations.all {
+-        exclude(group = "androidx.profileinstaller", module = "profileinstaller")
+-    }
+-    
+-    // Force compatible versions
+-    configurations.all {
+-        resolutionStrategy {
+-            // Force older version of kotlinx-metadata-jvm
+-            force("org.jetbrains.kotlinx:kotlinx-metadata-jvm:0.3.0")
+-            // Force compatible kotlin reflection version
+-            force("org.jetbrains.kotlin:kotlin-reflect:2.1.0")
+-            force("org.jetbrains.kotlin:kotlin-stdlib:2.1.0")
+-            force("org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.1.0")
+-            
+-            // Try to resolve any Kotlin-related version conflicts
+-            eachDependency { details ->
+-                if (details.requested.group == "org.jetbrains.kotlin") {
+-                    details.useVersion("2.1.0")
+-                }
+-                if (details.requested.group == "org.jetbrains.kotlinx" && 
+-                    details.requested.name == "kotlinx-metadata-jvm") {
+-                    details.useVersion("0.3.0")
+-                }
+-            }
+-        }
+-    }
++
++    testImplementation(libs.junit)
++    androidTestImplementation(libs.androidx.junit)
++    androidTestImplementation(libs.androidx.espresso.core)
+ }
+Index: gradle/libs.versions.toml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>[versions]\r\nagp = \"7.4.2\" \r\ngradle = \"7.4.2\"\r\nkotlin = \"2.1.0\"\r\ncoreKtx = \"1.15.0\"\r\njunit = \"4.13.2\"\r\njunitVersion = \"1.2.1\"\r\nespressoCore = \"3.6.1\"\r\nappcompat = \"1.7.0\"\r\nkotlinGradlePlugin = \"2.1.0\"\r\nmaterial = \"1.12.0\"\r\nconstraintlayout = \"2.2.0\"\r\nlifecycleLivedataKtx = \"2.8.7\"\r\nlifecycleViewmodelKtx = \"2.8.7\"\r\nnavigationFragmentKtx = \"2.5.3\"\r\nnavigationUiKtx = \"2.5.3\"\r\n\r\n[libraries]\r\nandroidx-core-ktx = { group = \"androidx.core\", name = \"core-ktx\", version.ref = \"coreKtx\" }\r\nandroidx-navigation-safe-args-gradle-plugin = { module = \"androidx.navigation:navigation-safe-args-gradle-plugin\", version.ref = \"navigationFragmentKtx\" }\r\ngradle = { module = \"com.android.tools.build:gradle\", version.ref = \"gradle\" }\r\njunit = { group = \"junit\", name = \"junit\", version.ref = \"junit\" }\r\nandroidx-junit = { group = \"androidx.test.ext\", name = \"junit\", version.ref = \"junitVersion\" }\r\nandroidx-espresso-core = { group = \"androidx.test.espresso\", name = \"espresso-core\", version.ref = \"espressoCore\" }\r\nandroidx-appcompat = { group = \"androidx.appcompat\", name = \"appcompat\", version.ref = \"appcompat\" }\r\nkotlin-gradle-plugin = { module = \"org.jetbrains.kotlin:kotlin-gradle-plugin\", version.ref = \"kotlinGradlePlugin\" }\r\nmaterial = { group = \"com.google.android.material\", name = \"material\", version.ref = \"material\" }\r\nandroidx-constraintlayout = { module = \"androidx.constraintlayout:constraintlayout\", version = \"2.1.4\" }\r\nandroidx-lifecycle-livedata-ktx = { group = \"androidx.lifecycle\", name = \"lifecycle-livedata-ktx\", version.ref = \"lifecycleLivedataKtx\" }\r\nandroidx-lifecycle-viewmodel-ktx = { group = \"androidx.lifecycle\", name = \"lifecycle-viewmodel-ktx\", version.ref = \"lifecycleViewmodelKtx\" }\r\nandroidx-navigation-fragment-ktx = { group = \"androidx.navigation\", name = \"navigation-fragment-ktx\", version.ref = \"navigationFragmentKtx\" }\r\nandroidx-navigation-ui-ktx = { group = \"androidx.navigation\", name = \"navigation-ui-ktx\", version.ref = \"navigationUiKtx\" }\r\n\r\n[plugins]\r\nandroid-application = { id = \"com.android.application\", version.ref = \"agp\" }\r\nkotlin-android = { id = \"org.jetbrains.kotlin.android\", version.ref = \"kotlin\" }\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/gradle/libs.versions.toml b/gradle/libs.versions.toml
+--- a/gradle/libs.versions.toml	(revision 24239367c21fa63b0c7e4ea80c644a222082f2e0)
++++ b/gradle/libs.versions.toml	(date 1750373492067)
+@@ -1,31 +1,27 @@
+ [versions]
+-agp = "7.4.2" 
+-gradle = "7.4.2"
+-kotlin = "2.1.0"
+-coreKtx = "1.15.0"
++agp = "8.2.0"
++kotlin = "1.9.22"
++coreKtx = "1.12.0"
+ junit = "4.13.2"
+-junitVersion = "1.2.1"
+-espressoCore = "3.6.1"
+-appcompat = "1.7.0"
+-kotlinGradlePlugin = "2.1.0"
+-material = "1.12.0"
+-constraintlayout = "2.2.0"
+-lifecycleLivedataKtx = "2.8.7"
+-lifecycleViewmodelKtx = "2.8.7"
++junitVersion = "1.1.5"
++espressoCore = "3.5.1"
++appcompat = "1.6.1"
++material = "1.11.0"
++constraintlayout = "2.1.4"
++lifecycleLivedataKtx = "2.6.2"
++lifecycleViewmodelKtx = "2.6.2"
+ navigationFragmentKtx = "2.5.3"
+ navigationUiKtx = "2.5.3"
+ 
+ [libraries]
+ androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+ androidx-navigation-safe-args-gradle-plugin = { module = "androidx.navigation:navigation-safe-args-gradle-plugin", version.ref = "navigationFragmentKtx" }
+-gradle = { module = "com.android.tools.build:gradle", version.ref = "gradle" }
+ junit = { group = "junit", name = "junit", version.ref = "junit" }
+ androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
+ androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+ androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+-kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlinGradlePlugin" }
+ material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+-androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version = "2.1.4" }
++androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayout" }
+ androidx-lifecycle-livedata-ktx = { group = "androidx.lifecycle", name = "lifecycle-livedata-ktx", version.ref = "lifecycleLivedataKtx" }
+ androidx-lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelKtx" }
+ androidx-navigation-fragment-ktx = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "navigationFragmentKtx" }
+@@ -33,4 +29,4 @@
+ 
+ [plugins]
+ android-application = { id = "com.android.application", version.ref = "agp" }
+-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
++kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+\ No newline at end of file
+Index: build.gradle.kts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>// Top-level build file where you can add configuration options common to all sub-projects/modules.\r\nbuildscript {\r\n    repositories {\r\n        google()\r\n        mavenCentral()\r\n        maven { url = uri(\"https://jitpack.io\") }\r\n        maven { url = uri(\"https://plugins.gradle.org/m2/\") }\r\n    }\r\n    dependencies {\r\n        classpath(libs.gradle)\r\n        classpath(libs.kotlin.gradle.plugin)\r\n        classpath(libs.androidx.navigation.safe.args.gradle.plugin)\r\n    }\r\n}\r\n\r\n// Add repositories for all projects\r\nallprojects {\r\n    repositories {\r\n        google()\r\n        mavenCentral()\r\n        maven { url = uri(\"https://jitpack.io\") }\r\n        maven { url = uri(\"https://maven.pkg.jetbrains.space/public/p/kotlinx-html/maven\") }\r\n        maven { url = uri(\"https://dl.bintray.com/kotlin/kotlin-eap\") }\r\n    }\r\n}\r\n\r\ntasks.register(\"clean\", Delete::class) {\r\n    delete(layout.buildDirectory)\r\n}\r\n\r\ntasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {\r\n    compilerOptions {\r\n        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)\r\n        freeCompilerArgs.add(\"-Xjvm-default=all\")\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/build.gradle.kts b/build.gradle.kts
+--- a/build.gradle.kts	(revision 24239367c21fa63b0c7e4ea80c644a222082f2e0)
++++ b/build.gradle.kts	(date 1750373437304)
+@@ -1,36 +1,9 @@
+-// Top-level build file where you can add configuration options common to all sub-projects/modules.
+-buildscript {
+-    repositories {
+-        google()
+-        mavenCentral()
+-        maven { url = uri("https://jitpack.io") }
+-        maven { url = uri("https://plugins.gradle.org/m2/") }
+-    }
+-    dependencies {
+-        classpath(libs.gradle)
+-        classpath(libs.kotlin.gradle.plugin)
+-        classpath(libs.androidx.navigation.safe.args.gradle.plugin)
+-    }
+-}
+-
+-// Add repositories for all projects
+-allprojects {
+-    repositories {
+-        google()
+-        mavenCentral()
+-        maven { url = uri("https://jitpack.io") }
+-        maven { url = uri("https://maven.pkg.jetbrains.space/public/p/kotlinx-html/maven") }
+-        maven { url = uri("https://dl.bintray.com/kotlin/kotlin-eap") }
+-    }
++plugins {
++    alias(libs.plugins.android.application) apply false
++    alias(libs.plugins.kotlin.android) apply false
++    id("androidx.navigation.safeargs.kotlin") version "2.5.3" apply false
+ }
+ 
+ tasks.register("clean", Delete::class) {
+     delete(layout.buildDirectory)
+ }
+-
+-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+-    compilerOptions {
+-        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+-        freeCompilerArgs.add("-Xjvm-default=all")
+-    }
+-}
+Index: settings.gradle.kts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>pluginManagement {\r\n    repositories {\r\n        google()\r\n        mavenCentral()\r\n        gradlePluginPortal()\r\n    }\r\n}\r\n\r\ndependencyResolutionManagement {\r\n    repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)\r\n    repositories {\r\n        google()\r\n        mavenCentral()\r\n        maven { url = uri(\"https://jitpack.io\") }\r\n        maven { url = uri(\"https://maven.pkg.jetbrains.space/public/p/kotlinx-html/maven\") }\r\n        maven { url = uri(\"https://dl.bintray.com/kotlin/kotlin-eap\") }\r\n    }\r\n}\r\n\r\nrootProject.name = \"PwnEyes\"\r\ninclude(\":app\")\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/settings.gradle.kts b/settings.gradle.kts
+--- a/settings.gradle.kts	(revision 24239367c21fa63b0c7e4ea80c644a222082f2e0)
++++ b/settings.gradle.kts	(date 1750373657544)
+@@ -5,9 +5,8 @@
+         gradlePluginPortal()
+     }
+ }
+-
+ dependencyResolutionManagement {
+-    repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
++    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+     repositories {
+         google()
+         mavenCentral()
+@@ -16,6 +15,5 @@
+         maven { url = uri("https://dl.bintray.com/kotlin/kotlin-eap") }
+     }
+ }
+-
+ rootProject.name = "PwnEyes"
+-include(":app")
++include(":app")
+\ No newline at end of file
+Index: .idea/studiobot.xml
+===================================================================
+diff --git a/.idea/studiobot.xml b/.idea/studiobot.xml
+deleted file mode 100644
+--- a/.idea/studiobot.xml	(revision 24239367c21fa63b0c7e4ea80c644a222082f2e0)
++++ /dev/null	(revision 24239367c21fa63b0c7e4ea80c644a222082f2e0)
+@@ -1,6 +0,0 @@
+-<?xml version="1.0" encoding="UTF-8"?>
+-<project version="4">
+-  <component name="StudioBotProjectSettings">
+-    <option name="shareContext" value="OptedIn" />
+-  </component>
+-</project>
+\ No newline at end of file
+Index: .idea/.gitignore
+===================================================================
+diff --git a/.idea/.gitignore b/.idea/.gitignore
+deleted file mode 100644
+--- a/.idea/.gitignore	(revision 24239367c21fa63b0c7e4ea80c644a222082f2e0)
++++ /dev/null	(revision 24239367c21fa63b0c7e4ea80c644a222082f2e0)
+@@ -1,3 +0,0 @@
+-# Default ignored files
+-/shelf/
+-/workspace.xml
+Index: .idea/kotlinc.xml
+===================================================================
+diff --git a/.idea/kotlinc.xml b/.idea/kotlinc.xml
+deleted file mode 100644
+--- a/.idea/kotlinc.xml	(revision 24239367c21fa63b0c7e4ea80c644a222082f2e0)
++++ /dev/null	(revision 24239367c21fa63b0c7e4ea80c644a222082f2e0)
+@@ -1,6 +0,0 @@
+-<?xml version="1.0" encoding="UTF-8"?>
+-<project version="4">
+-  <component name="KotlinJpsPluginSettings">
+-    <option name="version" value="1.9.24" />
+-  </component>
+-</project>
+\ No newline at end of file
+Index: app/src/main/java/com/antbear/pwneyes/ui/add/AddConnectionFragment.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.antbear.pwneyes.ui.add\r\n\r\nimport android.os.Bundle\r\nimport android.view.LayoutInflater\r\nimport android.view.View\r\nimport android.view.ViewGroup\r\nimport android.widget.Toast\r\nimport androidx.fragment.app.Fragment\r\nimport androidx.fragment.app.activityViewModels\r\nimport androidx.navigation.fragment.findNavController\r\nimport androidx.navigation.fragment.navArgs\r\nimport com.antbear.pwneyes.databinding.FragmentAddConnectionBinding\r\nimport com.antbear.pwneyes.data.Connection\r\nimport com.antbear.pwneyes.ui.home.SharedViewModel\r\n\r\nclass AddConnectionFragment : Fragment() {\r\n\r\n    private var _binding: FragmentAddConnectionBinding? = null\r\n    private val binding get() = _binding!!\r\n    private val sharedViewModel: SharedViewModel by activityViewModels()\r\n    \r\n    // Use the generated NavArgs class\r\n    private val args: AddConnectionFragmentArgs by navArgs()\r\n    \r\n    // Variables to store existing connection details for edit mode\r\n    private var isEditMode = false\r\n    private var connectionId: Long = 0\r\n    \r\n    override fun onCreateView(\r\n        inflater: LayoutInflater, container: ViewGroup?,\r\n        savedInstanceState: Bundle?\r\n    ): View {\r\n        _binding = FragmentAddConnectionBinding.inflate(inflater, container, false)\r\n        return binding.root\r\n    }\r\n    \r\n    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {\r\n        super.onViewCreated(view, savedInstanceState)\r\n        \r\n        // Get arguments using the generated NavArgs class\r\n        isEditMode = args.isEditMode\r\n        \r\n        if (isEditMode) {\r\n            // We're in edit mode, so load the connection details\r\n            connectionId = args.connectionId\r\n            val name = args.connectionName ?: \"\"\r\n            val url = args.connectionUrl ?: \"\"\r\n            \r\n            // Set the form fields with the connection details\r\n            binding.editTextConnectionName.setText(name)\r\n            binding.editTextConnectionUrl.setText(url)\r\n            \r\n            // Update the UI to indicate edit mode\r\n            binding.buttonSave.text = \"Update\"\r\n            binding.textViewTitle.text = \"Edit Connection\"\r\n        }\r\n        \r\n        setupSaveButton()\r\n    }\r\n\r\n    private fun setupSaveButton() {\r\n        binding.buttonSave.setOnClickListener {\r\n            val connection = validateAndCreateConnection()\r\n            if (connection != null) {\r\n                if (isEditMode) {\r\n                    // Update existing connection\r\n                    sharedViewModel.updateConnection(connection)\r\n                    Toast.makeText(requireContext(), \"Connection updated\", Toast.LENGTH_SHORT).show()\r\n                } else {\r\n                    // Add new connection\r\n                    sharedViewModel.addConnection(connection)\r\n                    Toast.makeText(requireContext(), \"Connection saved\", Toast.LENGTH_SHORT).show()\r\n                }\r\n                findNavController().navigateUp()\r\n            }\r\n        }\r\n    }\r\n\r\n    private fun validateAndCreateConnection(): Connection? {\r\n        val name = binding.editTextConnectionName.text.toString().trim()\r\n        var url = binding.editTextConnectionUrl.text.toString().trim()\r\n\r\n        if (name.isEmpty()) {\r\n            binding.editTextConnectionName.error = \"Name is required\"\r\n            return null\r\n        }\r\n\r\n        if (url.isEmpty()) {\r\n            binding.editTextConnectionUrl.error = \"URL is required\"\r\n            return null\r\n        }\r\n\r\n        // Clean up URL - remove any duplicate http:// or https://\r\n        url = when {\r\n            url.startsWith(\"http://\") || url.startsWith(\"https://\") -> url\r\n            else -> \"http://$url\"\r\n        }\r\n\r\n        return Connection(\r\n            id = if (isEditMode) connectionId else 0, // Use existing ID when editing\r\n            name = name,\r\n            url = url,\r\n            username = \"\",\r\n            password = \"\",\r\n            isConnected = false\r\n        )\r\n    }\r\n\r\n    override fun onDestroyView() {\r\n        super.onDestroyView()\r\n        _binding = null\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/antbear/pwneyes/ui/add/AddConnectionFragment.kt b/app/src/main/java/com/antbear/pwneyes/ui/add/AddConnectionFragment.kt
+--- a/app/src/main/java/com/antbear/pwneyes/ui/add/AddConnectionFragment.kt	(revision 24239367c21fa63b0c7e4ea80c644a222082f2e0)
++++ b/app/src/main/java/com/antbear/pwneyes/ui/add/AddConnectionFragment.kt	(date 1750346166829)
+@@ -92,6 +92,8 @@
+ 
+         // Clean up URL - remove any duplicate http:// or https://
+         url = when {
++            url.startsWith("http://http://") -> url.replace("http://http://", "http://")
++            url.startsWith("https://https://") -> url.replace("https://https://", "https://")
+             url.startsWith("http://") || url.startsWith("https://") -> url
+             else -> "http://$url"
+         }
+Index: .idea/misc.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><project version=\"4\">\r\n  <component name=\"ExternalStorageConfigurationManager\" enabled=\"true\" />\r\n  <component name=\"ProjectRootManager\" version=\"2\" languageLevel=\"JDK_17\" default=\"true\" project-jdk-name=\"17\" project-jdk-type=\"JavaSDK\">\r\n    <output url=\"file://$PROJECT_DIR$/build/classes\" />\r\n  </component>\r\n  <component name=\"ProjectType\">\r\n    <option name=\"id\" value=\"Android\" />\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/misc.xml b/.idea/misc.xml
+--- a/.idea/misc.xml	(revision 24239367c21fa63b0c7e4ea80c644a222082f2e0)
++++ b/.idea/misc.xml	(date 1750374093824)
+@@ -1,3 +1,4 @@
++<?xml version="1.0" encoding="UTF-8"?>
+ <project version="4">
+   <component name="ExternalStorageConfigurationManager" enabled="true" />
+   <component name="ProjectRootManager" version="2" languageLevel="JDK_17" default="true" project-jdk-name="17" project-jdk-type="JavaSDK">
+Index: .idea/deploymentTargetSelector.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"deploymentTargetSelector\">\r\n    <selectionStates>\r\n      <SelectionState runConfigName=\"app\">\r\n        <option name=\"selectionMode\" value=\"DROPDOWN\" />\r\n        <DropdownSelection timestamp=\"2025-02-10T11:50:11.306065900Z\">\r\n          <Target type=\"DEFAULT_BOOT\">\r\n            <handle>\r\n              <DeviceId pluginId=\"LocalEmulator\" identifier=\"path=C:\\Users\\derek\\.android\\avd\\Pixel_9_Pro_XL_API_35.avd\" />\r\n            </handle>\r\n          </Target>\r\n        </DropdownSelection>\r\n        <DialogSelection />\r\n      </SelectionState>\r\n    </selectionStates>\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/deploymentTargetSelector.xml b/.idea/deploymentTargetSelector.xml
+--- a/.idea/deploymentTargetSelector.xml	(revision 24239367c21fa63b0c7e4ea80c644a222082f2e0)
++++ b/.idea/deploymentTargetSelector.xml	(date 1750381171476)
+@@ -4,14 +4,6 @@
+     <selectionStates>
+       <SelectionState runConfigName="app">
+         <option name="selectionMode" value="DROPDOWN" />
+-        <DropdownSelection timestamp="2025-02-10T11:50:11.306065900Z">
+-          <Target type="DEFAULT_BOOT">
+-            <handle>
+-              <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\derek\.android\avd\Pixel_9_Pro_XL_API_35.avd" />
+-            </handle>
+-          </Target>
+-        </DropdownSelection>
+-        <DialogSelection />
+       </SelectionState>
+     </selectionStates>
+   </component>
+Index: app/src/main/java/com/antbear/pwneyes/MainActivity.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.antbear.pwneyes\r\n\r\nimport android.os.Bundle\r\nimport android.util.Log\r\nimport android.view.Menu\r\nimport android.view.MenuItem\r\nimport android.widget.Toast\r\nimport androidx.appcompat.app.AppCompatActivity\r\nimport androidx.appcompat.app.ActionBarDrawerToggle\r\nimport androidx.appcompat.app.AppCompatDelegate\r\nimport androidx.drawerlayout.widget.DrawerLayout\r\nimport androidx.lifecycle.Observer\r\nimport androidx.navigation.NavController\r\nimport androidx.navigation.fragment.NavHostFragment\r\nimport androidx.navigation.ui.AppBarConfiguration\r\nimport androidx.navigation.ui.NavigationUI\r\nimport androidx.navigation.ui.setupActionBarWithNavController\r\nimport androidx.navigation.ui.setupWithNavController\r\nimport com.antbear.pwneyes.billing.BillingManager\r\nimport com.antbear.pwneyes.databinding.ActivityMainBinding\r\nimport com.antbear.pwneyes.util.AdsManagerBase\r\n\r\nclass MainActivity : AppCompatActivity() {\r\n    \r\n    private val TAG = \"MainActivity\"\r\n    \r\n    private lateinit var binding: ActivityMainBinding\r\n    private lateinit var navController: NavController\r\n    private lateinit var appBarConfiguration: AppBarConfiguration\r\n    private lateinit var toggle: ActionBarDrawerToggle\r\n    private var billingManager: BillingManager? = null\r\n    private var isPremium = false\r\n\r\n    override fun onCreate(savedInstanceState: Bundle?) {\r\n        super.onCreate(savedInstanceState)\r\n\r\n        try {\r\n            // Get the billing manager from the application\r\n            billingManager = (application as PwnEyesApplication).billingManager\r\n            \r\n            // Observe premium status changes if billing manager is available\r\n            billingManager?.let { manager ->\r\n                manager.premiumStatus.observe(this, Observer { premium ->\r\n                    isPremium = premium\r\n                    invalidateOptionsMenu() // Refresh the options menu\r\n                })\r\n            }\r\n        } catch (e: Exception) {\r\n            Log.e(TAG, \"Error initializing billing manager in MainActivity\", e)\r\n            // Default to not premium if there's an error\r\n            isPremium = false\r\n        }\r\n\r\n        // Inflate layout using ViewBinding\r\n        binding = ActivityMainBinding.inflate(layoutInflater)\r\n        setContentView(binding.root)\r\n\r\n        try {\r\n            // Set up Toolbar as the ActionBar\r\n            setSupportActionBar(binding.toolbar)\r\n\r\n            // Set up NavHostFragment and NavController\r\n            val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment_content_main)\r\n                    as? NavHostFragment \r\n            \r\n            if (navHostFragment == null) {\r\n                Log.e(TAG, \"NavHostFragment not found in activity_main.xml\")\r\n                Toast.makeText(this, \"Navigation error\", Toast.LENGTH_SHORT).show()\r\n                return\r\n            }\r\n            \r\n            navController = navHostFragment.navController\r\n\r\n            // Configure AppBarConfiguration with top-level destinations and the DrawerLayout\r\n            appBarConfiguration = AppBarConfiguration(\r\n                setOf(R.id.homeFragment, R.id.addConnectionFragment, R.id.nav_settings),\r\n                binding.drawerLayout\r\n            )\r\n\r\n            // Link the ActionBar and NavigationView with the NavController\r\n            setupActionBarWithNavController(navController, appBarConfiguration)\r\n            \r\n            // Set up custom navigation item selection listener\r\n            binding.navView.setNavigationItemSelectedListener { menuItem ->\r\n                try {\r\n                    // Close drawer first to improve perceived responsiveness\r\n                    binding.drawerLayout.closeDrawers()\r\n                    \r\n                    // Log the navigation attempt\r\n                    Log.d(TAG, \"Navigation item selected: ${menuItem.title}\")\r\n                    \r\n                    // Handle navigation based on the selected item's ID\r\n                    when (menuItem.itemId) {\r\n                        R.id.homeFragment -> {\r\n                            // Force navigation to home even if we're already there\r\n                            navController.popBackStack(R.id.homeFragment, false)\r\n                            navController.navigate(R.id.homeFragment)\r\n                            true\r\n                        }\r\n                        R.id.addConnectionFragment -> {\r\n                            navController.navigate(R.id.addConnectionFragment)\r\n                            true\r\n                        }\r\n                        R.id.nav_settings -> {\r\n                            navController.navigate(R.id.nav_settings)\r\n                            true\r\n                        }\r\n                        else -> false\r\n                    }\r\n                } catch (e: Exception) {\r\n                    Log.e(TAG, \"Error navigating to selected item\", e)\r\n                    Toast.makeText(this, \"Navigation error: ${e.message}\", Toast.LENGTH_SHORT).show()\r\n                    false\r\n                }\r\n            }\r\n\r\n            // Set up the ActionBarDrawerToggle to display the default hamburger icon on the top left\r\n            toggle = ActionBarDrawerToggle(\r\n                this,\r\n                binding.drawerLayout,\r\n                binding.toolbar,\r\n                R.string.navigation_drawer_open,   // Ensure these strings exist in res/values/strings.xml\r\n                R.string.navigation_drawer_close\r\n            )\r\n            binding.drawerLayout.addDrawerListener(toggle)\r\n            toggle.syncState()\r\n            \r\n            // Make sure we start at the home fragment\r\n            if (savedInstanceState == null) {\r\n                navController.navigate(R.id.homeFragment)\r\n            }\r\n        } catch (e: Exception) {\r\n            Log.e(TAG, \"Error setting up navigation\", e)\r\n            Toast.makeText(this, \"Error initializing application\", Toast.LENGTH_SHORT).show()\r\n        }\r\n    }\r\n\r\n    override fun onCreateOptionsMenu(menu: Menu): Boolean {\r\n        // Return false to hide the menu (three dots in top-right corner)\r\n        return false\r\n    }\r\n\r\n    override fun onOptionsItemSelected(item: MenuItem): Boolean {\r\n        return try {\r\n            when (item.itemId) {\r\n                R.id.action_settings -> {\r\n                    navController.navigate(R.id.nav_settings)\r\n                    true\r\n                }\r\n                else -> super.onOptionsItemSelected(item)\r\n            }\r\n        } catch (e: Exception) {\r\n            Log.e(TAG, \"Error handling menu item selection\", e)\r\n            super.onOptionsItemSelected(item)\r\n        }\r\n    }\r\n\r\n    override fun onSupportNavigateUp(): Boolean {\r\n        return try {\r\n            NavigationUI.navigateUp(navController, appBarConfiguration) || super.onSupportNavigateUp()\r\n        } catch (e: Exception) {\r\n            Log.e(TAG, \"Error navigating up\", e)\r\n            super.onSupportNavigateUp()\r\n        }\r\n    }\r\n    \r\n    override fun onDestroy() {\r\n        try {\r\n            // Remove premium status observer to prevent memory leaks\r\n            billingManager?.premiumStatus?.removeObservers(this)\r\n            \r\n            // Release any other resources\r\n            binding.drawerLayout.removeDrawerListener(toggle)\r\n        } catch (e: Exception) {\r\n            Log.e(TAG, \"Error in onDestroy\", e)\r\n        }\r\n        \r\n        super.onDestroy()\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/antbear/pwneyes/MainActivity.kt b/app/src/main/java/com/antbear/pwneyes/MainActivity.kt
+--- a/app/src/main/java/com/antbear/pwneyes/MainActivity.kt	(revision 24239367c21fa63b0c7e4ea80c644a222082f2e0)
++++ b/app/src/main/java/com/antbear/pwneyes/MainActivity.kt	(date 1750346240985)
+@@ -19,9 +19,10 @@
+ import com.antbear.pwneyes.billing.BillingManager
+ import com.antbear.pwneyes.databinding.ActivityMainBinding
+ import com.antbear.pwneyes.util.AdsManagerBase
++import androidx.preference.PreferenceManager
+ 
+ class MainActivity : AppCompatActivity() {
+-    
++
+     private val TAG = "MainActivity"
+     
+     private lateinit var binding: ActivityMainBinding
+@@ -34,6 +35,11 @@
+     override fun onCreate(savedInstanceState: Bundle?) {
+         super.onCreate(savedInstanceState)
+ 
++        // Load the persisted theme
++        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
++        val nightMode = sharedPreferences.getInt("night_mode", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
++        AppCompatDelegate.setDefaultNightMode(nightMode)
++
+         try {
+             // Get the billing manager from the application
+             billingManager = (application as PwnEyesApplication).billingManager
+Index: .idea/gradle.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"GradleMigrationSettings\" migrationVersion=\"1\" />\r\n  <component name=\"GradleSettings\">\r\n    <option name=\"linkedExternalProjectsSettings\">\r\n      <GradleProjectSettings>\r\n        <option name=\"testRunner\" value=\"CHOOSE_PER_TEST\" />\r\n        <option name=\"externalProjectPath\" value=\"$PROJECT_DIR$\" />\r\n        <option name=\"gradleHome\" value=\"$PROJECT_DIR$/../../../../Gradle/gradle-8.0\" />\r\n        <option name=\"gradleJvm\" value=\"17\" />\r\n        <option name=\"modules\">\r\n          <set>\r\n            <option value=\"$PROJECT_DIR$\" />\r\n            <option value=\"$PROJECT_DIR$/app\" />\r\n          </set>\r\n        </option>\r\n        <option name=\"resolveExternalAnnotations\" value=\"false\" />\r\n      </GradleProjectSettings>\r\n    </option>\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/gradle.xml b/.idea/gradle.xml
+--- a/.idea/gradle.xml	(revision 24239367c21fa63b0c7e4ea80c644a222082f2e0)
++++ b/.idea/gradle.xml	(date 1750429031743)
+@@ -6,15 +6,13 @@
+       <GradleProjectSettings>
+         <option name="testRunner" value="CHOOSE_PER_TEST" />
+         <option name="externalProjectPath" value="$PROJECT_DIR$" />
+-        <option name="gradleHome" value="$PROJECT_DIR$/../../../../Gradle/gradle-8.0" />
+-        <option name="gradleJvm" value="17" />
++        <option name="gradleJvm" value="#GRADLE_LOCAL_JAVA_HOME" />
+         <option name="modules">
+           <set>
+             <option value="$PROJECT_DIR$" />
+             <option value="$PROJECT_DIR$/app" />
+           </set>
+         </option>
+-        <option name="resolveExternalAnnotations" value="false" />
+       </GradleProjectSettings>
+     </option>
+   </component>
+Index: gradle/wrapper/gradle-wrapper.properties
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+># Timestamp when the wrapper was last updated\r\n#Fri Jan 24 03:33:36 MST 2025\r\n\r\ndistributionBase=GRADLE_USER_HOME\r\ndistributionPath=wrapper/dists\r\n\r\n# Use the latest stable Gradle version compatible with AGP (Android Gradle Plugin)\r\ndistributionUrl=https\\://services.gradle.org/distributions/gradle-8.9-bin.zip\r\n\r\nzipStoreBase=GRADLE_USER_HOME\r\nzipStorePath=wrapper/dists\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>ISO-8859-1
+===================================================================
+diff --git a/gradle/wrapper/gradle-wrapper.properties b/gradle/wrapper/gradle-wrapper.properties
+--- a/gradle/wrapper/gradle-wrapper.properties	(revision 24239367c21fa63b0c7e4ea80c644a222082f2e0)
++++ b/gradle/wrapper/gradle-wrapper.properties	(date 1750284008367)
+@@ -5,7 +5,7 @@
+ distributionPath=wrapper/dists
+ 
+ # Use the latest stable Gradle version compatible with AGP (Android Gradle Plugin)
+-distributionUrl=https\://services.gradle.org/distributions/gradle-8.9-bin.zip
++distributionUrl=https\://services.gradle.org/distributions/gradle-8.11.1-bin.zip
+ 
+ zipStoreBase=GRADLE_USER_HOME
+ zipStorePath=wrapper/dists
+Index: .idea/vcs.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"VcsDirectoryMappings\">\r\n    <mapping directory=\"$PROJECT_DIR$\" vcs=\"Git\" />\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/vcs.xml b/.idea/vcs.xml
+--- a/.idea/vcs.xml	(revision 24239367c21fa63b0c7e4ea80c644a222082f2e0)
++++ b/.idea/vcs.xml	(date 1750381171476)
+@@ -1,6 +1,6 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <project version="4">
+   <component name="VcsDirectoryMappings">
+-    <mapping directory="$PROJECT_DIR$" vcs="Git" />
++    <mapping directory="" vcs="Git" />
+   </component>
+ </project>
+\ No newline at end of file
+Index: app/src/main/java/com/antbear/pwneyes/ui/viewer/ConnectionViewerFragment.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.antbear.pwneyes.ui.viewer\r\n\r\nimport android.graphics.Bitmap\r\nimport android.os.Bundle\r\nimport android.view.LayoutInflater\r\nimport android.view.View\r\nimport android.view.ViewGroup\r\nimport android.webkit.*\r\nimport android.widget.Toast\r\nimport androidx.fragment.app.Fragment\r\nimport androidx.navigation.fragment.findNavController\r\nimport androidx.navigation.fragment.navArgs\r\nimport com.antbear.pwneyes.databinding.FragmentConnectionViewerBinding\r\nimport java.util.Base64\r\n\r\nclass ConnectionViewerFragment : Fragment() {\r\n    private var _binding: FragmentConnectionViewerBinding? = null\r\n    private val binding get() = _binding!!\r\n    private val args: ConnectionViewerFragmentArgs by navArgs()\r\n    \r\n    // Variables to preserve WebView state across orientation changes\r\n    private var webViewState: Bundle? = null\r\n    private var lastUrl: String? = null\r\n    private var lastScrollX: Int = 0\r\n    private var lastScrollY: Int = 0\r\n\r\n    override fun onCreate(savedInstanceState: Bundle?) {\r\n        super.onCreate(savedInstanceState)\r\n        // Retain this fragment across configuration changes\r\n        retainInstance = true\r\n    }\r\n\r\n    override fun onCreateView(\r\n        inflater: LayoutInflater,\r\n        container: ViewGroup?,\r\n        savedInstanceState: Bundle?\r\n    ): View {\r\n        _binding = FragmentConnectionViewerBinding.inflate(inflater, container, false)\r\n        setupWebView()\r\n        setupControlButtons()\r\n        \r\n        // Restore WebView state if it exists\r\n        webViewState?.let { state ->\r\n            binding.webView.restoreState(state)\r\n        }\r\n        \r\n        return binding.root\r\n    }\r\n    \r\n    private fun setupControlButtons() {\r\n        // Set up direct Plugins navigation button\r\n        binding.pluginsTabButton.setOnClickListener {\r\n            navigateToPluginsTab()\r\n        }\r\n        \r\n        // Set up click listeners for our overlay buttons\r\n        binding.btnShutdown.setOnClickListener {\r\n            executeJavaScriptCommand(\"shutdown\")\r\n        }\r\n        \r\n        binding.btnReboot.setOnClickListener {\r\n            executeJavaScriptCommand(\"reboot\")\r\n        }\r\n        \r\n        binding.btnRestart.setOnClickListener {\r\n            executeJavaScriptCommand(\"restart_manu\")\r\n        }\r\n    }\r\n    \r\n    /**\r\n     * Direct method to navigate to the Plugins tab\r\n     * This bypasses all the JavaScript detection complexity\r\n     */\r\n    private fun navigateToPluginsTab() {\r\n        try {\r\n            // Ensure URL has port 8080 if needed\r\n            var url = args.url\r\n            if (!url.contains(\":8080\") && !url.contains(\":443\") && !url.contains(\":80\")) {\r\n                url = if (url.endsWith(\"/\")) {\r\n                    url.substring(0, url.length - 1) + \":8080/\"\r\n                } else {\r\n                    url + \":8080\"\r\n                }\r\n                android.util.Log.d(\"DirectNavigation\", \"Added port 8080 to URL: $url\")\r\n            }\r\n            \r\n            android.util.Log.i(\"DirectNavigation\", \"Navigating directly to Plugins tab\")\r\n            android.util.Log.i(\"DirectNavigation\", \"URL: $url\")\r\n            \r\n            // Create navigation action with explicit details\r\n            val action = ConnectionViewerFragmentDirections.actionConnectionViewerToTabDetail(\r\n                url = url,\r\n                tabName = \"Plugins Tab\",  // Make tab name very explicit\r\n                tabSelector = \"plugins\",\r\n                username = args.username,\r\n                password = args.password\r\n            )\r\n            \r\n            // Show a big visible message\r\n            context?.let {\r\n                Toast.makeText(\r\n                    it, \r\n                    \"⚠\uFE0F NAVIGATING TO PLUGINS TAB ⚠\uFE0F\", \r\n                    Toast.LENGTH_LONG\r\n                ).show()\r\n            }\r\n            \r\n            // Add a small delay to ensure toast is visible\r\n            android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({\r\n                // Navigate to the tab detail fragment\r\n                findNavController().navigate(action)\r\n                android.util.Log.i(\"DirectNavigation\", \"Navigation completed\")\r\n            }, 300)\r\n            \r\n        } catch (e: Exception) {\r\n            // Log any exceptions\r\n            android.util.Log.e(\"DirectNavigation\", \"Error navigating to Plugins tab: ${e.message}\")\r\n            android.util.Log.e(\"DirectNavigation\", \"Stack trace: ${e.stackTraceToString()}\")\r\n            \r\n            // Show error toast\r\n            context?.let {\r\n                Toast.makeText(\r\n                    it, \r\n                    \"ERROR: ${e.message}\", \r\n                    Toast.LENGTH_LONG\r\n                ).show()\r\n            }\r\n        }\r\n    }\r\n    \r\n    private fun executeJavaScriptCommand(command: String) {\r\n        val js = when (command) {\r\n            \"shutdown\" -> \"\"\"\r\n                (function() {\r\n                    // Find shutdown button and click it\r\n                    var shutdownButtons = Array.from(document.querySelectorAll('*')).filter(function(el) {\r\n                        var text = el.textContent || el.innerText || '';\r\n                        return text.toLowerCase().includes('shutdown');\r\n                    });\r\n                    \r\n                    if (shutdownButtons.length > 0) {\r\n                        console.log('Found shutdown button, clicking...');\r\n                        shutdownButtons[0].click();\r\n                        return 'Shutdown button clicked';\r\n                    } else {\r\n                        console.log('No shutdown button found');\r\n                        // Try to trigger a shutdown via URL/form if applicable\r\n                        return 'No shutdown button found';\r\n                    }\r\n                })();\r\n            \"\"\"\r\n            \"reboot\" -> \"\"\"\r\n                (function() {\r\n                    // Find reboot button and click it\r\n                    var rebootButtons = Array.from(document.querySelectorAll('*')).filter(function(el) {\r\n                        var text = el.textContent || el.innerText || '';\r\n                        return text.toLowerCase().includes('reboot');\r\n                    });\r\n                    \r\n                    if (rebootButtons.length > 0) {\r\n                        console.log('Found reboot button, clicking...');\r\n                        rebootButtons[0].click();\r\n                        return 'Reboot button clicked';\r\n                    } else {\r\n                        console.log('No reboot button found');\r\n                        // Try to trigger a reboot via URL/form if applicable\r\n                        return 'No reboot button found';\r\n                    }\r\n                })();\r\n            \"\"\"\r\n            \"restart_manu\" -> \"\"\"\r\n                (function() {\r\n                    // Find MANU restart button and click it\r\n                    var restartButtons = Array.from(document.querySelectorAll('*')).filter(function(el) {\r\n                        var text = el.textContent || el.innerText || '';\r\n                        return text.toLowerCase().includes('restart') && text.toLowerCase().includes('manu');\r\n                    });\r\n                    \r\n                    if (restartButtons.length > 0) {\r\n                        console.log('Found restart MANU button, clicking...');\r\n                        restartButtons[0].click();\r\n                        return 'Restart MANU button clicked';\r\n                    } else {\r\n                        console.log('No restart MANU button found');\r\n                        // Try to find any restart button\r\n                        var anyRestartButtons = Array.from(document.querySelectorAll('*')).filter(function(el) {\r\n                            var text = el.textContent || el.innerText || '';\r\n                            return text.toLowerCase().includes('restart');\r\n                        });\r\n                        \r\n                        if (anyRestartButtons.length > 0) {\r\n                            console.log('Found generic restart button, clicking...');\r\n                            anyRestartButtons[0].click();\r\n                            return 'Generic restart button clicked';\r\n                        }\r\n                        \r\n                        return 'No restart buttons found';\r\n                    }\r\n                })();\r\n            \"\"\"\r\n            else -> \"\"\"\r\n                (function() {\r\n                    console.log('Unknown command: $command');\r\n                    return 'Unknown command';\r\n                })();\r\n            \"\"\"\r\n        }\r\n        \r\n        binding.webView.evaluateJavascript(js.trimIndent()) { result ->\r\n            android.util.Log.d(\"WebCommandExecution\", \"Command: $command, Result: $result\")\r\n            \r\n            // Show a toast confirmation\r\n            val message = when {\r\n                result.contains(\"clicked\") -> \"Command sent: $command\"\r\n                result.contains(\"No\") -> \"Could not find button for: $command\"\r\n                else -> \"Command execution failed\"\r\n            }\r\n            \r\n            context?.let {\r\n                Toast.makeText(it, message, Toast.LENGTH_SHORT).show()\r\n            }\r\n        }\r\n    }\r\n\r\n    private fun setupWebView() {\r\n        // Configure WebView to handle orientation changes better\r\n        binding.webView.apply {\r\n            // Set an ID to help with state restoration\r\n            id = View.generateViewId()\r\n            \r\n            // Set hardware acceleration for better performance\r\n            setLayerType(View.LAYER_TYPE_HARDWARE, null)\r\n            \r\n            // Enable WebView debugging (requires Chrome DevTools)\r\n            WebView.setWebContentsDebuggingEnabled(true)\r\n            settings.apply {\r\n                // Enable JavaScript and DOM storage\r\n                javaScriptEnabled = true\r\n                domStorageEnabled = true\r\n                \r\n                // Enable zooming capabilities\r\n                setSupportZoom(true)\r\n                builtInZoomControls = true\r\n                displayZoomControls = false\r\n                \r\n                // Critical settings for proper viewport rendering and scrolling\r\n                loadWithOverviewMode = true\r\n                useWideViewPort = true\r\n                \r\n                // Take drastic measures - use extremely small scale to ensure all content fits\r\n                setInitialScale(50) // 50% of original size to force everything into view\r\n                \r\n                // Enable zoom controls to allow user to adjust view as needed\r\n                builtInZoomControls = true\r\n                displayZoomControls = false\r\n                setSupportZoom(true)\r\n                \r\n                // Enable caching for better performance (modern approach)\r\n                cacheMode = WebSettings.LOAD_DEFAULT\r\n                \r\n                // Additional settings for better web experience\r\n                setGeolocationEnabled(false)\r\n                \r\n                // Allow cross-domain AJAX requests if needed for some APIs\r\n                allowContentAccess = true\r\n                allowFileAccess = true\r\n                \r\n                // Enable JavaScript dialogs\r\n                javaScriptCanOpenWindowsAutomatically = true\r\n                setSupportMultipleWindows(true)\r\n                \r\n                // Set default text encoding\r\n                defaultTextEncodingName = \"UTF-8\"\r\n                \r\n                // Allow mixed content - needed for some older web interfaces\r\n                mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW\r\n            }\r\n            \r\n            // Enable scroll bars and ensure scrolling works\r\n            isVerticalScrollBarEnabled = true\r\n            isHorizontalScrollBarEnabled = true\r\n            scrollBarStyle = View.SCROLLBARS_INSIDE_OVERLAY\r\n            overScrollMode = View.OVER_SCROLL_ALWAYS\r\n            \r\n            // Ensure layout is handled properly for scrolling\r\n            layoutParams = ViewGroup.LayoutParams(\r\n                ViewGroup.LayoutParams.MATCH_PARENT,\r\n                ViewGroup.LayoutParams.MATCH_PARENT\r\n            )\r\n            \r\n            // Use extreme scaling to ensure bottom controls are visible\r\n            setInitialScale(50)\r\n            \r\n            // Add explicit bottom padding to push content up\r\n            setPadding(0, 0, 0, 200) // Add 200px padding at bottom\r\n            \r\n            // Implement direct touch handling with custom scrolling\r\n            setOnTouchListener(CustomWebViewTouchListener())\r\n\r\n            // Set WebChromeClient to handle JavaScript dialogs\r\n            webChromeClient = object : WebChromeClient() {\r\n                override fun onProgressChanged(view: WebView?, newProgress: Int) {\r\n                    if (newProgress < 100) {\r\n                        binding.progressBar.visibility = View.VISIBLE\r\n                        binding.progressBar.progress = newProgress\r\n                    } else {\r\n                        binding.progressBar.visibility = View.GONE\r\n                    }\r\n                }\r\n                \r\n                override fun onJsAlert(view: WebView?, url: String?, message: String?, result: JsResult): Boolean {\r\n                    try {\r\n                        val context = view?.context ?: return false\r\n                        val alertDialog = android.app.AlertDialog.Builder(context)\r\n                            .setTitle(\"Alert\")\r\n                            .setMessage(message)\r\n                            .setPositiveButton(\"OK\") { _, _ -> \r\n                                result.confirm()\r\n                            }\r\n                            .setCancelable(true)\r\n                            .setOnCancelListener {\r\n                                result.cancel()\r\n                            }\r\n                            .create()\r\n                        \r\n                        alertDialog.show()\r\n                    } catch (e: Exception) {\r\n                        result.cancel()\r\n                    }\r\n                    return true\r\n                }\r\n                \r\n                override fun onJsConfirm(view: WebView?, url: String?, message: String?, result: JsResult): Boolean {\r\n                    try {\r\n                        val context = view?.context ?: return false\r\n                        \r\n                        // Check if this is the shutdown confirmation\r\n                        val isShutdown = message?.contains(\"shutdown\", ignoreCase = true) ?: false\r\n                        \r\n                        val title = if (isShutdown) \"Shutdown Confirmation\" else \"Confirmation\"\r\n                        val positiveButton = if (isShutdown) \"Shutdown\" else \"OK\"\r\n                        \r\n                        val confirmDialog = android.app.AlertDialog.Builder(context)\r\n                            .setTitle(title)\r\n                            .setMessage(message)\r\n                            .setPositiveButton(positiveButton) { _, _ -> \r\n                                result.confirm()\r\n                            }\r\n                            .setNegativeButton(\"Cancel\") { _, _ -> \r\n                                result.cancel()\r\n                            }\r\n                            .setCancelable(true)\r\n                            .setOnCancelListener {\r\n                                result.cancel()\r\n                            }\r\n                            .create()\r\n                        \r\n                        confirmDialog.show()\r\n                    } catch (e: Exception) {\r\n                        result.cancel()\r\n                    }\r\n                    return true\r\n                }\r\n                \r\n                override fun onJsPrompt(view: WebView?, url: String?, message: String?, defaultValue: String?, result: JsPromptResult): Boolean {\r\n                    try {\r\n                        val context = view?.context ?: return false\r\n                        val input = android.widget.EditText(context)\r\n                        input.setText(defaultValue)\r\n                        \r\n                        val promptDialog = android.app.AlertDialog.Builder(context)\r\n                            .setTitle(\"Prompt\")\r\n                            .setMessage(message)\r\n                            .setView(input)\r\n                            .setPositiveButton(\"OK\") { _, _ -> \r\n                                result.confirm(input.text.toString())\r\n                            }\r\n                            .setNegativeButton(\"Cancel\") { _, _ -> \r\n                                result.cancel()\r\n                            }\r\n                            .setCancelable(true)\r\n                            .setOnCancelListener {\r\n                                result.cancel()\r\n                            }\r\n                            .create()\r\n                        \r\n                        promptDialog.show()\r\n                    } catch (e: Exception) {\r\n                        result.cancel()\r\n                    }\r\n                    return true\r\n                }\r\n                \r\n                override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {\r\n                    consoleMessage?.let {\r\n                        android.util.Log.d(\"WebConsole\", \"${it.message()} -- From line ${it.lineNumber()} of ${it.sourceId()}\")\r\n                    }\r\n                    return true\r\n                }\r\n            }\r\n            \r\n            webViewClient = object : WebViewClient() {\r\n                override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {\r\n                    // Keep all navigation within the WebView\r\n                    return false\r\n                }\r\n\r\n                override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {\r\n                    super.onPageStarted(view, url, favicon)\r\n                    binding.progressBar.visibility = View.VISIBLE\r\n                }\r\n\r\n                override fun onPageFinished(view: WebView?, url: String?) {\r\n                    super.onPageFinished(view, url)\r\n                    binding.progressBar.visibility = View.GONE\r\n                    \r\n                    // Save last URL for state restoration\r\n                    lastUrl = url\r\n                    \r\n                    // Force immediate extreme zoom out to show all content\r\n                    view?.postDelayed({\r\n                        // Use multiple zoom outs to force everything visible\r\n                        for (i in 1..5) {\r\n                            view.zoomOut()\r\n                        }\r\n                        \r\n                        // Try to scroll to extreme bottom to ensure it's loaded\r\n                        val heightGuess = 10000 // Much larger guess to ensure we reach bottom\r\n                        view.scrollTo(0, heightGuess)\r\n                        \r\n                        // Wait longer before scrolling back to top\r\n                        view.postDelayed({\r\n                            // Scroll to show most content but ensure bottom is visible\r\n                            view.scrollTo(0, 100)\r\n                            \r\n                            // Add a direct pixel offset to the rendering to show bottom of page\r\n                            view.evaluateJavascript(\"\"\"\r\n                                (function() {\r\n                                    // Direct offset of the entire content to show bottom\r\n                                    document.body.style.transform = 'translateY(-150px)';\r\n                                    document.body.style.marginBottom = '300px';\r\n                                    document.documentElement.style.height = 'calc(100% - 200px)';\r\n                                    return 'Applied extreme transform';\r\n                                })();\r\n                            \"\"\".trimIndent(), null)\r\n                        }, 500)\r\n                    }, 500)\r\n                    \r\n                    // Inject enhanced JavaScript to ensure content is scrollable, including nested areas\r\n                    view?.evaluateJavascript(\"\"\"\r\n                        (function() {\r\n                            // Store current scroll position for orientation changes\r\n                            window.addEventListener('scroll', function() {\r\n                                window.scrollXPos = window.scrollX;\r\n                                window.scrollYPos = window.scrollY;\r\n                            });\r\n                            \r\n                            // More aggressive scrolling function with touch handling\r\n                            function makeScrollable(element) {\r\n                                if (!element) return;\r\n                                \r\n                                // Force height to ensure scrollability\r\n                                element.style.height = element.scrollHeight > element.clientHeight ? '100%' : 'auto';\r\n                                element.style.maxHeight = 'none';\r\n                                \r\n                                // Force all overflow settings\r\n                                element.style.overflow = 'auto';\r\n                                element.style.overflowX = 'auto';\r\n                                element.style.overflowY = 'auto';\r\n                                element.style.webkitOverflowScrolling = 'touch';\r\n                                \r\n                                // Add specific CSS for touch devices\r\n                                element.style.touchAction = 'pan-y';\r\n                                \r\n                                // Ensure the element is not preventing scroll\r\n                                element.style.position = element.style.position === 'fixed' ? 'absolute' : element.style.position;\r\n                                \r\n                                // Add data attribute for debugging\r\n                                element.setAttribute('data-made-scrollable', 'true');\r\n                            }\r\n                            \r\n                            // Apply scrolling to document and body\r\n                            document.documentElement.style.height = 'auto';\r\n                            document.documentElement.style.overflow = 'auto';\r\n                            document.body.style.height = 'auto';\r\n                            document.body.style.overflow = 'auto';\r\n                            document.body.style.webkitOverflowScrolling = 'touch';\r\n                            \r\n                            // Force all containers to be scrollable - target everything\r\n                            var allElements = document.querySelectorAll('*');\r\n                            for (var i = 0; i < allElements.length; i++) {\r\n                                // Skip certain elements that shouldn't be scrollable\r\n                                var tagName = allElements[i].tagName.toLowerCase();\r\n                                if (tagName === 'script' || tagName === 'style' || tagName === 'meta' || tagName === 'link') {\r\n                                    continue;\r\n                                }\r\n                                \r\n                                // Check if this might be a content container\r\n                                var style = window.getComputedStyle(allElements[i]);\r\n                                if (style.display !== 'none' && style.visibility !== 'hidden' && \r\n                                    (style.overflow === 'hidden' || allElements[i].scrollHeight > allElements[i].clientHeight)) {\r\n                                    makeScrollable(allElements[i]);\r\n                                }\r\n                            }\r\n                            \r\n                            // Specifically target elements that might be in the Plugin tab\r\n                            var specialSelectors = [\r\n                                '.plugin', '.plugin-content', '.tab-content', '.main-content', \r\n                                '[id*=\"plugin\"]', '[id*=\"tab\"]', '[class*=\"plugin\"]', '[class*=\"tab\"]',\r\n                                'iframe', 'frame', '.scrollable', '[role=\"main\"]'\r\n                            ];\r\n                            \r\n                            specialSelectors.forEach(function(selector) {\r\n                                try {\r\n                                    var elements = document.querySelectorAll(selector);\r\n                                    for (var i = 0; i < elements.length; i++) {\r\n                                        makeScrollable(elements[i]);\r\n                                        \r\n                                        // Also make all children scrollable\r\n                                        var children = elements[i].querySelectorAll('*');\r\n                                        for (var j = 0; j < children.length; j++) {\r\n                                            makeScrollable(children[j]);\r\n                                        }\r\n                                    }\r\n                                } catch (e) {\r\n                                    console.error('Error applying scrollable to ' + selector, e);\r\n                                }\r\n                            });\r\n                            \r\n                            // Add touch event listeners to handle custom scrolling on problematic elements\r\n                            var touchStartY = 0;\r\n                            var scrollingElement = null;\r\n                            \r\n                            document.addEventListener('touchstart', function(e) {\r\n                                touchStartY = e.touches[0].clientY;\r\n                                var target = e.target;\r\n                                \r\n                                // Find scrollable parent\r\n                                while (target && !isScrollable(target)) {\r\n                                    target = target.parentElement;\r\n                                }\r\n                                \r\n                                scrollingElement = target;\r\n                            }, { passive: false });\r\n                            \r\n                            document.addEventListener('touchmove', function(e) {\r\n                                if (!scrollingElement) return;\r\n                                \r\n                                var touchY = e.touches[0].clientY;\r\n                                var deltaY = touchStartY - touchY;\r\n                                \r\n                                scrollingElement.scrollTop += deltaY;\r\n                                touchStartY = touchY;\r\n                                \r\n                                // Prevent default only if we're handling the scroll\r\n                                if (Math.abs(deltaY) > 5) {\r\n                                    e.preventDefault();\r\n                                }\r\n                            }, { passive: false });\r\n                            \r\n                            function isScrollable(element) {\r\n                                if (!element) return false;\r\n                                var style = window.getComputedStyle(element);\r\n                                return style.overflowY === 'auto' || style.overflowY === 'scroll' || \r\n                                       element.scrollHeight > element.clientHeight;\r\n                            }\r\n                            \r\n                            // Log information about content dimensions for debugging\r\n                            console.log('Document height: ' + document.documentElement.scrollHeight);\r\n                            console.log('Viewport height: ' + window.innerHeight);\r\n                            \r\n                            // Force a small delay then reflow to ensure scrollbars appear if needed\r\n                            setTimeout(function() {\r\n                                window.dispatchEvent(new Event('resize'));\r\n                                \r\n                                // Restore scroll position if it exists\r\n                                if (typeof window.scrollXPos !== 'undefined' && typeof window.scrollYPos !== 'undefined') {\r\n                                    window.scrollTo(window.scrollXPos, window.scrollYPos);\r\n                                }\r\n                                \r\n                                // Extreme viewport manipulation to force all content to fit\r\n                                var meta = document.querySelector('meta[name=\"viewport\"]');\r\n                                if (!meta) {\r\n                                    meta = document.createElement('meta');\r\n                                    meta.name = 'viewport';\r\n                                    document.head.appendChild(meta);\r\n                                }\r\n                                meta.content = 'width=device-width, initial-scale=0.5, maximum-scale=3.0, user-scalable=yes';\r\n                                \r\n                                // Force all content to be visible by manipulating root styles\r\n                                document.documentElement.style.height = 'auto';\r\n                                document.documentElement.style.overflow = 'visible';\r\n                                document.documentElement.style.position = 'relative';\r\n                                document.documentElement.style.paddingBottom = '400px';\r\n                                \r\n                                // Make body smaller to fit within the viewport\r\n                                document.body.style.transform = 'scale(0.9)';\r\n                                document.body.style.transformOrigin = 'top center';\r\n                                document.body.style.marginBottom = '300px';\r\n                                \r\n                                // Extreme method to find and move bottom controls\r\n                                var possibleButtons = document.querySelectorAll('*');\r\n                                var foundControls = false;\r\n                                \r\n                                // Check for shutdown/reboot text in any element\r\n                                for (var i = 0; i < possibleButtons.length; i++) {\r\n                                    var el = possibleButtons[i];\r\n                                    var text = el.innerText || el.textContent;\r\n                                    \r\n                                    if (text && (text.indexOf('Shutdown') >= 0 || \r\n                                                text.indexOf('Reboot') >= 0 || \r\n                                                text.indexOf('MANU') >= 0)) {\r\n                                        // Found control element - move it into view!\r\n                                        console.log('FOUND CONTROL ELEMENT: ' + text);\r\n                                        foundControls = true;\r\n                                        \r\n                                        // Force it to fixed position at bottom of screen\r\n                                        el.style.position = 'fixed';\r\n                                        el.style.bottom = '50px';\r\n                                        el.style.left = '50%';\r\n                                        el.style.transform = 'translateX(-50%)';\r\n                                        el.style.zIndex = '9999';\r\n                                        el.style.backgroundColor = 'rgba(255,0,0,0.3)';\r\n                                        el.style.padding = '10px';\r\n                                        el.style.border = '2px solid red';\r\n                                    }\r\n                                }\r\n                                \r\n                                // If we found controls, dramatically modify the page to show them\r\n                                if (foundControls) {\r\n                                    // Force entire body to be shorter\r\n                                    document.body.style.height = '70vh';\r\n                                    document.body.style.overflow = 'visible';\r\n                                    document.documentElement.style.height = '70vh';\r\n                                }\r\n                                \r\n                                // As a fallback, add a huge bottom margin anyway\r\n                                document.body.style.paddingBottom = '250px';\r\n                                document.body.style.marginBottom = '250px';\r\n                                \r\n                                // Force bottom margin for any bottom toolbars, navigation, etc.\r\n                                var possibleBottomBars = document.querySelectorAll('.toolbar, .navbar, .navigation, nav, footer, .footer, .controls, .bottom-controls');\r\n                                possibleBottomBars.forEach(function(bar) {\r\n                                    var rect = bar.getBoundingClientRect();\r\n                                    if (rect.bottom > window.innerHeight * 0.8) {\r\n                                        bar.style.marginBottom = '80px';\r\n                                        console.log('Adjusted bottom bar');\r\n                                    }\r\n                                });\r\n                                \r\n                                console.log('Enhanced scrolling applied to all elements');\r\n                            }, 500);\r\n                        })();\r\n                    \"\"\".trimIndent(), null)\r\n                    \r\n                    // Save scroll position after page has fully loaded\r\n                    view?.postDelayed({\r\n                        lastScrollX = view.scrollX\r\n                        lastScrollY = view.scrollY\r\n                    }, 1000)\r\n                }\r\n\r\n                override fun onReceivedError(\r\n                    view: WebView?,\r\n                    request: WebResourceRequest?,\r\n                    error: WebResourceError?\r\n                ) {\r\n                    super.onReceivedError(view, request, error)\r\n                    binding.progressBar.visibility = View.GONE\r\n                    showError(\"Failed to load: ${error?.description}\")\r\n                }\r\n\r\n                override fun onReceivedHttpAuthRequest(\r\n                    view: WebView?,\r\n                    handler: HttpAuthHandler?,\r\n                    host: String?,\r\n                    realm: String?\r\n                ) {\r\n                    if (args.username.isNotEmpty()) {\r\n                        handler?.proceed(args.username, args.password)\r\n                    } else {\r\n                        super.onReceivedHttpAuthRequest(view, handler, host, realm)\r\n                    }\r\n                }\r\n            }\r\n\r\n            // Handle basic auth in URL if credentials are provided, preserving port numbers\r\n            val urlWithAuth = if (args.username.isNotEmpty()) {\r\n                try {\r\n                    // Parse the URL to extract its components\r\n                    val url = java.net.URL(args.url)\r\n                    val protocol = url.protocol\r\n                    val host = url.host\r\n                    val port = if (url.port == -1) \"\" else \":${url.port}\"\r\n                    val path = if (url.path.isEmpty()) \"/\" else url.path\r\n                    val query = if (url.query == null) \"\" else \"?${url.query}\"\r\n                    val ref = if (url.ref == null) \"\" else \"#${url.ref}\"\r\n                    \r\n                    // Create credentials\r\n                    val credentials = \"${args.username}:${args.password}\"\r\n                    val base64Credentials = Base64.getEncoder().encodeToString(credentials.toByteArray())\r\n                    \r\n                    // Reconstruct URL with credentials while preserving port\r\n                    \"$protocol://$base64Credentials@$host$port$path$query$ref\"\r\n                } catch (e: Exception) {\r\n                    // Fallback to simple replacement if URL parsing fails\r\n                    android.util.Log.e(\"ConnectionViewer\", \"Error parsing URL: ${e.message}\")\r\n                    val credentials = \"${args.username}:${args.password}\"\r\n                    val base64Credentials = Base64.getEncoder().encodeToString(credentials.toByteArray())\r\n                    args.url.replace(\"://\", \"://$base64Credentials@\")\r\n                }\r\n            } else {\r\n                args.url\r\n            }\r\n\r\n            android.util.Log.d(\"ConnectionViewer\", \"Loading URL: $urlWithAuth\")\r\n            loadUrl(urlWithAuth)\r\n        }\r\n    }\r\n\r\n    private fun showError(message: String) {\r\n        binding.errorLayout.visibility = View.VISIBLE\r\n        binding.webView.visibility = View.GONE\r\n        binding.errorMessage.text = message\r\n        binding.retryButton.setOnClickListener {\r\n            binding.errorLayout.visibility = View.GONE\r\n            binding.webView.visibility = View.VISIBLE\r\n            binding.webView.reload()\r\n        }\r\n    }\r\n\r\n    override fun onPause() {\r\n        super.onPause()\r\n        // Save WebView state when fragment is paused (e.g., during orientation change)\r\n        val newState = Bundle()\r\n        binding.webView.saveState(newState)\r\n        webViewState = newState\r\n    }\r\n    \r\n    override fun onResume() {\r\n        super.onResume()\r\n        // Restore scroll position after resuming\r\n        if (lastScrollX != 0 || lastScrollY != 0) {\r\n            binding.webView.postDelayed({\r\n                binding.webView.scrollTo(lastScrollX, lastScrollY)\r\n            }, 300)\r\n        }\r\n    }\r\n    \r\n    override fun onDestroyView() {\r\n        super.onDestroyView()\r\n        // Don't nullify _binding if we're just changing orientation\r\n        if (!requireActivity().isChangingConfigurations) {\r\n            _binding = null\r\n        }\r\n    }\r\n    \r\n    override fun onDestroy() {\r\n        super.onDestroy()\r\n        // Clean up WebView resources only if the fragment is truly being destroyed\r\n        if (!requireActivity().isChangingConfigurations) {\r\n            binding.webView.destroy()\r\n            webViewState = null\r\n        }\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/antbear/pwneyes/ui/viewer/ConnectionViewerFragment.kt b/app/src/main/java/com/antbear/pwneyes/ui/viewer/ConnectionViewerFragment.kt
+--- a/app/src/main/java/com/antbear/pwneyes/ui/viewer/ConnectionViewerFragment.kt	(revision 24239367c21fa63b0c7e4ea80c644a222082f2e0)
++++ b/app/src/main/java/com/antbear/pwneyes/ui/viewer/ConnectionViewerFragment.kt	(date 1750346199930)
+@@ -247,158 +247,22 @@
+                 loadWithOverviewMode = true
+                 useWideViewPort = true
+                 
+-                // Take drastic measures - use extremely small scale to ensure all content fits
+-                setInitialScale(50) // 50% of original size to force everything into view
+-                
+-                // Enable zoom controls to allow user to adjust view as needed
++                // Enable JavaScript and DOM storage
++                javaScriptEnabled = true
++                domStorageEnabled = true
++
++                // Enable zooming capabilities
++                setSupportZoom(true)
+                 builtInZoomControls = true
+                 displayZoomControls = false
+-                setSupportZoom(true)
+-                
+-                // Enable caching for better performance (modern approach)
++
++                // Enable caching for better performance
+                 cacheMode = WebSettings.LOAD_DEFAULT
+-                
+-                // Additional settings for better web experience
+-                setGeolocationEnabled(false)
+-                
+-                // Allow cross-domain AJAX requests if needed for some APIs
+-                allowContentAccess = true
+-                allowFileAccess = true
+-                
+-                // Enable JavaScript dialogs
+-                javaScriptCanOpenWindowsAutomatically = true
+-                setSupportMultipleWindows(true)
+-                
+-                // Set default text encoding
+-                defaultTextEncodingName = "UTF-8"
+-                
++
+                 // Allow mixed content - needed for some older web interfaces
+                 mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+             }
+-            
+-            // Enable scroll bars and ensure scrolling works
+-            isVerticalScrollBarEnabled = true
+-            isHorizontalScrollBarEnabled = true
+-            scrollBarStyle = View.SCROLLBARS_INSIDE_OVERLAY
+-            overScrollMode = View.OVER_SCROLL_ALWAYS
+-            
+-            // Ensure layout is handled properly for scrolling
+-            layoutParams = ViewGroup.LayoutParams(
+-                ViewGroup.LayoutParams.MATCH_PARENT,
+-                ViewGroup.LayoutParams.MATCH_PARENT
+-            )
+-            
+-            // Use extreme scaling to ensure bottom controls are visible
+-            setInitialScale(50)
+-            
+-            // Add explicit bottom padding to push content up
+-            setPadding(0, 0, 0, 200) // Add 200px padding at bottom
+-            
+-            // Implement direct touch handling with custom scrolling
+-            setOnTouchListener(CustomWebViewTouchListener())
+-
+-            // Set WebChromeClient to handle JavaScript dialogs
+-            webChromeClient = object : WebChromeClient() {
+-                override fun onProgressChanged(view: WebView?, newProgress: Int) {
+-                    if (newProgress < 100) {
+-                        binding.progressBar.visibility = View.VISIBLE
+-                        binding.progressBar.progress = newProgress
+-                    } else {
+-                        binding.progressBar.visibility = View.GONE
+-                    }
+-                }
+-                
+-                override fun onJsAlert(view: WebView?, url: String?, message: String?, result: JsResult): Boolean {
+-                    try {
+-                        val context = view?.context ?: return false
+-                        val alertDialog = android.app.AlertDialog.Builder(context)
+-                            .setTitle("Alert")
+-                            .setMessage(message)
+-                            .setPositiveButton("OK") { _, _ -> 
+-                                result.confirm()
+-                            }
+-                            .setCancelable(true)
+-                            .setOnCancelListener {
+-                                result.cancel()
+-                            }
+-                            .create()
+-                        
+-                        alertDialog.show()
+-                    } catch (e: Exception) {
+-                        result.cancel()
+-                    }
+-                    return true
+-                }
+-                
+-                override fun onJsConfirm(view: WebView?, url: String?, message: String?, result: JsResult): Boolean {
+-                    try {
+-                        val context = view?.context ?: return false
+-                        
+-                        // Check if this is the shutdown confirmation
+-                        val isShutdown = message?.contains("shutdown", ignoreCase = true) ?: false
+-                        
+-                        val title = if (isShutdown) "Shutdown Confirmation" else "Confirmation"
+-                        val positiveButton = if (isShutdown) "Shutdown" else "OK"
+-                        
+-                        val confirmDialog = android.app.AlertDialog.Builder(context)
+-                            .setTitle(title)
+-                            .setMessage(message)
+-                            .setPositiveButton(positiveButton) { _, _ -> 
+-                                result.confirm()
+-                            }
+-                            .setNegativeButton("Cancel") { _, _ -> 
+-                                result.cancel()
+-                            }
+-                            .setCancelable(true)
+-                            .setOnCancelListener {
+-                                result.cancel()
+-                            }
+-                            .create()
+-                        
+-                        confirmDialog.show()
+-                    } catch (e: Exception) {
+-                        result.cancel()
+-                    }
+-                    return true
+-                }
+-                
+-                override fun onJsPrompt(view: WebView?, url: String?, message: String?, defaultValue: String?, result: JsPromptResult): Boolean {
+-                    try {
+-                        val context = view?.context ?: return false
+-                        val input = android.widget.EditText(context)
+-                        input.setText(defaultValue)
+-                        
+-                        val promptDialog = android.app.AlertDialog.Builder(context)
+-                            .setTitle("Prompt")
+-                            .setMessage(message)
+-                            .setView(input)
+-                            .setPositiveButton("OK") { _, _ -> 
+-                                result.confirm(input.text.toString())
+-                            }
+-                            .setNegativeButton("Cancel") { _, _ -> 
+-                                result.cancel()
+-                            }
+-                            .setCancelable(true)
+-                            .setOnCancelListener {
+-                                result.cancel()
+-                            }
+-                            .create()
+-                        
+-                        promptDialog.show()
+-                    } catch (e: Exception) {
+-                        result.cancel()
+-                    }
+-                    return true
+-                }
+-                
+-                override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {
+-                    consoleMessage?.let {
+-                        android.util.Log.d("WebConsole", "${it.message()} -- From line ${it.lineNumber()} of ${it.sourceId()}")
+-                    }
+-                    return true
+-                }
+-            }
+-            
++
+             webViewClient = object : WebViewClient() {
+                 override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+                     // Keep all navigation within the WebView
+@@ -413,251 +277,7 @@
+                 override fun onPageFinished(view: WebView?, url: String?) {
+                     super.onPageFinished(view, url)
+                     binding.progressBar.visibility = View.GONE
+-                    
+-                    // Save last URL for state restoration
+                     lastUrl = url
+-                    
+-                    // Force immediate extreme zoom out to show all content
+-                    view?.postDelayed({
+-                        // Use multiple zoom outs to force everything visible
+-                        for (i in 1..5) {
+-                            view.zoomOut()
+-                        }
+-                        
+-                        // Try to scroll to extreme bottom to ensure it's loaded
+-                        val heightGuess = 10000 // Much larger guess to ensure we reach bottom
+-                        view.scrollTo(0, heightGuess)
+-                        
+-                        // Wait longer before scrolling back to top
+-                        view.postDelayed({
+-                            // Scroll to show most content but ensure bottom is visible
+-                            view.scrollTo(0, 100)
+-                            
+-                            // Add a direct pixel offset to the rendering to show bottom of page
+-                            view.evaluateJavascript("""
+-                                (function() {
+-                                    // Direct offset of the entire content to show bottom
+-                                    document.body.style.transform = 'translateY(-150px)';
+-                                    document.body.style.marginBottom = '300px';
+-                                    document.documentElement.style.height = 'calc(100% - 200px)';
+-                                    return 'Applied extreme transform';
+-                                })();
+-                            """.trimIndent(), null)
+-                        }, 500)
+-                    }, 500)
+-                    
+-                    // Inject enhanced JavaScript to ensure content is scrollable, including nested areas
+-                    view?.evaluateJavascript("""
+-                        (function() {
+-                            // Store current scroll position for orientation changes
+-                            window.addEventListener('scroll', function() {
+-                                window.scrollXPos = window.scrollX;
+-                                window.scrollYPos = window.scrollY;
+-                            });
+-                            
+-                            // More aggressive scrolling function with touch handling
+-                            function makeScrollable(element) {
+-                                if (!element) return;
+-                                
+-                                // Force height to ensure scrollability
+-                                element.style.height = element.scrollHeight > element.clientHeight ? '100%' : 'auto';
+-                                element.style.maxHeight = 'none';
+-                                
+-                                // Force all overflow settings
+-                                element.style.overflow = 'auto';
+-                                element.style.overflowX = 'auto';
+-                                element.style.overflowY = 'auto';
+-                                element.style.webkitOverflowScrolling = 'touch';
+-                                
+-                                // Add specific CSS for touch devices
+-                                element.style.touchAction = 'pan-y';
+-                                
+-                                // Ensure the element is not preventing scroll
+-                                element.style.position = element.style.position === 'fixed' ? 'absolute' : element.style.position;
+-                                
+-                                // Add data attribute for debugging
+-                                element.setAttribute('data-made-scrollable', 'true');
+-                            }
+-                            
+-                            // Apply scrolling to document and body
+-                            document.documentElement.style.height = 'auto';
+-                            document.documentElement.style.overflow = 'auto';
+-                            document.body.style.height = 'auto';
+-                            document.body.style.overflow = 'auto';
+-                            document.body.style.webkitOverflowScrolling = 'touch';
+-                            
+-                            // Force all containers to be scrollable - target everything
+-                            var allElements = document.querySelectorAll('*');
+-                            for (var i = 0; i < allElements.length; i++) {
+-                                // Skip certain elements that shouldn't be scrollable
+-                                var tagName = allElements[i].tagName.toLowerCase();
+-                                if (tagName === 'script' || tagName === 'style' || tagName === 'meta' || tagName === 'link') {
+-                                    continue;
+-                                }
+-                                
+-                                // Check if this might be a content container
+-                                var style = window.getComputedStyle(allElements[i]);
+-                                if (style.display !== 'none' && style.visibility !== 'hidden' && 
+-                                    (style.overflow === 'hidden' || allElements[i].scrollHeight > allElements[i].clientHeight)) {
+-                                    makeScrollable(allElements[i]);
+-                                }
+-                            }
+-                            
+-                            // Specifically target elements that might be in the Plugin tab
+-                            var specialSelectors = [
+-                                '.plugin', '.plugin-content', '.tab-content', '.main-content', 
+-                                '[id*="plugin"]', '[id*="tab"]', '[class*="plugin"]', '[class*="tab"]',
+-                                'iframe', 'frame', '.scrollable', '[role="main"]'
+-                            ];
+-                            
+-                            specialSelectors.forEach(function(selector) {
+-                                try {
+-                                    var elements = document.querySelectorAll(selector);
+-                                    for (var i = 0; i < elements.length; i++) {
+-                                        makeScrollable(elements[i]);
+-                                        
+-                                        // Also make all children scrollable
+-                                        var children = elements[i].querySelectorAll('*');
+-                                        for (var j = 0; j < children.length; j++) {
+-                                            makeScrollable(children[j]);
+-                                        }
+-                                    }
+-                                } catch (e) {
+-                                    console.error('Error applying scrollable to ' + selector, e);
+-                                }
+-                            });
+-                            
+-                            // Add touch event listeners to handle custom scrolling on problematic elements
+-                            var touchStartY = 0;
+-                            var scrollingElement = null;
+-                            
+-                            document.addEventListener('touchstart', function(e) {
+-                                touchStartY = e.touches[0].clientY;
+-                                var target = e.target;
+-                                
+-                                // Find scrollable parent
+-                                while (target && !isScrollable(target)) {
+-                                    target = target.parentElement;
+-                                }
+-                                
+-                                scrollingElement = target;
+-                            }, { passive: false });
+-                            
+-                            document.addEventListener('touchmove', function(e) {
+-                                if (!scrollingElement) return;
+-                                
+-                                var touchY = e.touches[0].clientY;
+-                                var deltaY = touchStartY - touchY;
+-                                
+-                                scrollingElement.scrollTop += deltaY;
+-                                touchStartY = touchY;
+-                                
+-                                // Prevent default only if we're handling the scroll
+-                                if (Math.abs(deltaY) > 5) {
+-                                    e.preventDefault();
+-                                }
+-                            }, { passive: false });
+-                            
+-                            function isScrollable(element) {
+-                                if (!element) return false;
+-                                var style = window.getComputedStyle(element);
+-                                return style.overflowY === 'auto' || style.overflowY === 'scroll' || 
+-                                       element.scrollHeight > element.clientHeight;
+-                            }
+-                            
+-                            // Log information about content dimensions for debugging
+-                            console.log('Document height: ' + document.documentElement.scrollHeight);
+-                            console.log('Viewport height: ' + window.innerHeight);
+-                            
+-                            // Force a small delay then reflow to ensure scrollbars appear if needed
+-                            setTimeout(function() {
+-                                window.dispatchEvent(new Event('resize'));
+-                                
+-                                // Restore scroll position if it exists
+-                                if (typeof window.scrollXPos !== 'undefined' && typeof window.scrollYPos !== 'undefined') {
+-                                    window.scrollTo(window.scrollXPos, window.scrollYPos);
+-                                }
+-                                
+-                                // Extreme viewport manipulation to force all content to fit
+-                                var meta = document.querySelector('meta[name="viewport"]');
+-                                if (!meta) {
+-                                    meta = document.createElement('meta');
+-                                    meta.name = 'viewport';
+-                                    document.head.appendChild(meta);
+-                                }
+-                                meta.content = 'width=device-width, initial-scale=0.5, maximum-scale=3.0, user-scalable=yes';
+-                                
+-                                // Force all content to be visible by manipulating root styles
+-                                document.documentElement.style.height = 'auto';
+-                                document.documentElement.style.overflow = 'visible';
+-                                document.documentElement.style.position = 'relative';
+-                                document.documentElement.style.paddingBottom = '400px';
+-                                
+-                                // Make body smaller to fit within the viewport
+-                                document.body.style.transform = 'scale(0.9)';
+-                                document.body.style.transformOrigin = 'top center';
+-                                document.body.style.marginBottom = '300px';
+-                                
+-                                // Extreme method to find and move bottom controls
+-                                var possibleButtons = document.querySelectorAll('*');
+-                                var foundControls = false;
+-                                
+-                                // Check for shutdown/reboot text in any element
+-                                for (var i = 0; i < possibleButtons.length; i++) {
+-                                    var el = possibleButtons[i];
+-                                    var text = el.innerText || el.textContent;
+-                                    
+-                                    if (text && (text.indexOf('Shutdown') >= 0 || 
+-                                                text.indexOf('Reboot') >= 0 || 
+-                                                text.indexOf('MANU') >= 0)) {
+-                                        // Found control element - move it into view!
+-                                        console.log('FOUND CONTROL ELEMENT: ' + text);
+-                                        foundControls = true;
+-                                        
+-                                        // Force it to fixed position at bottom of screen
+-                                        el.style.position = 'fixed';
+-                                        el.style.bottom = '50px';
+-                                        el.style.left = '50%';
+-                                        el.style.transform = 'translateX(-50%)';
+-                                        el.style.zIndex = '9999';
+-                                        el.style.backgroundColor = 'rgba(255,0,0,0.3)';
+-                                        el.style.padding = '10px';
+-                                        el.style.border = '2px solid red';
+-                                    }
+-                                }
+-                                
+-                                // If we found controls, dramatically modify the page to show them
+-                                if (foundControls) {
+-                                    // Force entire body to be shorter
+-                                    document.body.style.height = '70vh';
+-                                    document.body.style.overflow = 'visible';
+-                                    document.documentElement.style.height = '70vh';
+-                                }
+-                                
+-                                // As a fallback, add a huge bottom margin anyway
+-                                document.body.style.paddingBottom = '250px';
+-                                document.body.style.marginBottom = '250px';
+-                                
+-                                // Force bottom margin for any bottom toolbars, navigation, etc.
+-                                var possibleBottomBars = document.querySelectorAll('.toolbar, .navbar, .navigation, nav, footer, .footer, .controls, .bottom-controls');
+-                                possibleBottomBars.forEach(function(bar) {
+-                                    var rect = bar.getBoundingClientRect();
+-                                    if (rect.bottom > window.innerHeight * 0.8) {
+-                                        bar.style.marginBottom = '80px';
+-                                        console.log('Adjusted bottom bar');
+-                                    }
+-                                });
+-                                
+-                                console.log('Enhanced scrolling applied to all elements');
+-                            }, 500);
+-                        })();
+-                    """.trimIndent(), null)
+-                    
+-                    // Save scroll position after page has fully loaded
+-                    view?.postDelayed({
+-                        lastScrollX = view.scrollX
+-                        lastScrollY = view.scrollY
+-                    }, 1000)
+                 }
+ 
+                 override fun onReceivedError(
+@@ -684,10 +304,8 @@
+                 }
+             }
+ 
+-            // Handle basic auth in URL if credentials are provided, preserving port numbers
+             val urlWithAuth = if (args.username.isNotEmpty()) {
+                 try {
+-                    // Parse the URL to extract its components
+                     val url = java.net.URL(args.url)
+                     val protocol = url.protocol
+                     val host = url.host
+@@ -695,15 +313,12 @@
+                     val path = if (url.path.isEmpty()) "/" else url.path
+                     val query = if (url.query == null) "" else "?${url.query}"
+                     val ref = if (url.ref == null) "" else "#${url.ref}"
+-                    
+-                    // Create credentials
++
+                     val credentials = "${args.username}:${args.password}"
+                     val base64Credentials = Base64.getEncoder().encodeToString(credentials.toByteArray())
+-                    
+-                    // Reconstruct URL with credentials while preserving port
++
+                     "$protocol://$base64Credentials@$host$port$path$query$ref"
+                 } catch (e: Exception) {
+-                    // Fallback to simple replacement if URL parsing fails
+                     android.util.Log.e("ConnectionViewer", "Error parsing URL: ${e.message}")
+                     val credentials = "${args.username}:${args.password}"
+                     val base64Credentials = Base64.getEncoder().encodeToString(credentials.toByteArray())
+Index: app/src/main/java/com/antbear/pwneyes/ui/settings/SettingsFragment.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.antbear.pwneyes.ui.settings\r\n\r\nimport android.app.AlertDialog\r\nimport android.content.Intent\r\nimport android.content.SharedPreferences\r\nimport android.net.Uri\r\nimport android.os.Bundle\r\nimport android.util.Log\r\nimport android.widget.Toast\r\nimport androidx.appcompat.app.AppCompatDelegate\r\nimport androidx.fragment.app.activityViewModels\r\nimport androidx.lifecycle.Observer\r\nimport androidx.preference.ListPreference\r\nimport androidx.preference.Preference\r\nimport androidx.preference.PreferenceFragmentCompat\r\nimport androidx.preference.PreferenceManager\r\nimport androidx.preference.PreferenceCategory\r\nimport androidx.preference.PreferenceScreen\r\nimport androidx.preference.SwitchPreference\r\nimport com.antbear.pwneyes.BuildConfig\r\nimport com.antbear.pwneyes.PwnEyesApplication\r\nimport com.antbear.pwneyes.R\r\nimport com.antbear.pwneyes.billing.BillingManager\r\nimport com.antbear.pwneyes.ui.home.SharedViewModel\r\n\r\nclass SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedPreferenceChangeListener {\r\n    private val TAG = \"SettingsFragment\"\r\n    private val sharedViewModel: SharedViewModel by activityViewModels()\r\n    private lateinit var sharedPreferences: SharedPreferences\r\n    private var billingManager: BillingManager? = null\r\n    private var isPremium = false\r\n\r\n    override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {\r\n        setPreferencesFromResource(R.xml.preferences, rootKey)\r\n        \r\n        // Initialize SharedPreferences\r\n        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext())\r\n        \r\n        // Initialize BillingManager\r\n        try {\r\n            billingManager = (requireActivity().application as PwnEyesApplication).billingManager\r\n            \r\n            // Observe premium status changes if billing manager is available\r\n            billingManager?.let { manager ->\r\n                // Premium status observer\r\n                manager.premiumStatus.observe(this, Observer { premium ->\r\n                    isPremium = premium\r\n                    updatePremiumPreferencesVisibility()\r\n                })\r\n                \r\n                // Connection state observer\r\n                manager.connectionState.observe(this, Observer { state ->\r\n                    when (state) {\r\n                        BillingManager.STATE_DISCONNECTED -> {\r\n                            Log.d(TAG, \"Billing service disconnected\")\r\n                            updateBillingState(false, \"Billing service disconnected\")\r\n                            updateBillingStatusUI(state, manager.lastErrorMessage.value)\r\n                        }\r\n                        BillingManager.STATE_CONNECTING -> {\r\n                            Log.d(TAG, \"Connecting to billing service...\")\r\n                            updateBillingState(false, \"Connecting to billing service...\")\r\n                            updateBillingStatusUI(state, null)\r\n                        }\r\n                        BillingManager.STATE_CONNECTED -> {\r\n                            Log.d(TAG, \"Billing service connected\")\r\n                            updateBillingState(true, null)\r\n                            updateBillingStatusUI(state, null)\r\n                        }\r\n                        BillingManager.STATE_ERROR -> {\r\n                            val errorMsg = manager.lastErrorMessage.value ?: \"Unknown error\"\r\n                            Log.e(TAG, \"Billing service error: $errorMsg\")\r\n                            updateBillingState(false, errorMsg)\r\n                            updateBillingStatusUI(state, errorMsg)\r\n                        }\r\n                    }\r\n                })\r\n            }\r\n        } catch (e: Exception) {\r\n            Log.e(TAG, \"Error accessing billing manager\", e)\r\n            isPremium = false\r\n            updateBillingState(false, \"Failed to initialize billing\")\r\n        }\r\n        \r\n        // Set up the erase all preference\r\n        findPreference<Preference>(\"erase_all\")?.setOnPreferenceClickListener {\r\n            showEraseAllConfirmationDialog()\r\n            true\r\n        }\r\n        \r\n        // Set up theme preference\r\n        val themePreference = findPreference<ListPreference>(\"theme_preference\")\r\n        themePreference?.summaryProvider = Preference.SummaryProvider<ListPreference> { preference ->\r\n            \"Selected: ${preference.entry}\"\r\n        }\r\n        \r\n        // Set up remove ads preference\r\n        findPreference<Preference>(\"remove_ads\")?.setOnPreferenceClickListener {\r\n            if (billingManager != null) {\r\n                billingManager?.launchPurchaseFlow(requireActivity())\r\n            } else {\r\n                Toast.makeText(requireContext(), getString(R.string.toast_billing_unavailable), Toast.LENGTH_SHORT).show()\r\n            }\r\n            true\r\n        }\r\n        \r\n        // Set up restore purchases preference\r\n        findPreference<Preference>(\"restore_purchases\")?.setOnPreferenceClickListener {\r\n            if (billingManager != null) {\r\n                billingManager?.restorePurchases()\r\n                Toast.makeText(requireContext(), getString(R.string.toast_restoring_purchases), Toast.LENGTH_SHORT).show()\r\n            } else {\r\n                Toast.makeText(requireContext(), getString(R.string.toast_billing_unavailable), Toast.LENGTH_SHORT).show()\r\n            }\r\n            true\r\n        }\r\n        \r\n        // Set up Buy Me Coffee preference\r\n        findPreference<Preference>(\"buy_me_coffee\")?.setOnPreferenceClickListener {\r\n            try {\r\n                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(\"https://buymeacoffee.com/ltldrk\"))\r\n                startActivity(intent)\r\n            } catch (e: Exception) {\r\n                Log.e(TAG, \"Error opening Buy Me Coffee link\", e)\r\n                Toast.makeText(requireContext(), getString(R.string.toast_browser_error), Toast.LENGTH_SHORT).show()\r\n            }\r\n            true\r\n        }\r\n        \r\n        // Set up Contact Us preference\r\n        findPreference<Preference>(\"contact_us\")?.setOnPreferenceClickListener {\r\n            try {\r\n                val emailAddress = \"PwnEyes@proton.me\"\r\n                \r\n                // Create a more general intent that more apps can handle\r\n                val intent = Intent(Intent.ACTION_SEND).apply {\r\n                    type = \"message/rfc822\" // Standard email MIME type\r\n                    putExtra(Intent.EXTRA_EMAIL, arrayOf(emailAddress))\r\n                    putExtra(Intent.EXTRA_SUBJECT, \"FROM PWNEYES ANDROID\")\r\n                    \r\n                    // Include app version in the email body\r\n                    val appVersion = \"App Version: ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})\"\r\n                    val deviceInfo = \"Device: ${android.os.Build.MANUFACTURER} ${android.os.Build.MODEL}, Android ${android.os.Build.VERSION.RELEASE}\"\r\n                    putExtra(Intent.EXTRA_TEXT, \"----------\\n\\n\\n----------\\n$appVersion\\n$deviceInfo\")\r\n                }\r\n                \r\n                // Create and show chooser dialog with all compatible apps\r\n                val chooser = Intent.createChooser(intent, \"Contact Support\")\r\n                startActivity(chooser)\r\n            } catch (e: Exception) {\r\n                Log.e(TAG, \"Error launching email intent\", e)\r\n                Toast.makeText(requireContext(), getString(R.string.toast_email_error), Toast.LENGTH_SHORT).show()\r\n            }\r\n            true\r\n        }\r\n        \r\n        // Initial update of premium preferences visibility\r\n        updatePremiumPreferencesVisibility()\r\n    }\r\n    \r\n    /**\r\n     * Updates the UI based on the billing connection state\r\n     */\r\n    private fun updateBillingState(isConnected: Boolean, errorMessage: String?) {\r\n        try {\r\n            val removeAdsPreference = findPreference<Preference>(\"remove_ads\")\r\n            val restorePurchasesPreference = findPreference<Preference>(\"restore_purchases\")\r\n            \r\n            // Enable/disable based on connection status\r\n            removeAdsPreference?.isEnabled = isConnected\r\n            restorePurchasesPreference?.isEnabled = isConnected\r\n            \r\n            // Update summary to show connection status\r\n            if (!isConnected) {\r\n                removeAdsPreference?.summary = errorMessage ?: \"Billing service not available\"\r\n                restorePurchasesPreference?.summary = errorMessage ?: \"Billing service not available\"\r\n            } else {\r\n                // Clear error message if connected\r\n                if (isPremium) {\r\n                    removeAdsPreference?.summary = getString(R.string.premium_status)\r\n                } else {\r\n                    removeAdsPreference?.summary = getString(R.string.pref_remove_ads_summary)\r\n                }\r\n                restorePurchasesPreference?.summary = getString(R.string.pref_restore_purchases_summary)\r\n            }\r\n            \r\n            Log.d(TAG, \"Updated billing state UI. isConnected: $isConnected, errorMessage: $errorMessage\")\r\n        } catch (e: Exception) {\r\n            Log.e(TAG, \"Error updating billing state UI\", e)\r\n        }\r\n    }\r\n    \r\n    private fun updatePremiumPreferencesVisibility() {\r\n        try {\r\n            val removeAdsPreference = findPreference<Preference>(\"remove_ads\")\r\n            val restorePurchasesPreference = findPreference<Preference>(\"restore_purchases\")\r\n            val premiumCategory = findPreference<PreferenceScreen>(\"premium_category\")\r\n            \r\n            // Hide \"Remove Ads\" option if user is already premium\r\n            removeAdsPreference?.isVisible = !isPremium && billingManager != null\r\n            \r\n            // Show \"Restore Purchases\" only if billing is available\r\n            restorePurchasesPreference?.isVisible = billingManager != null\r\n            \r\n            // Update summary if user is premium\r\n            if (isPremium) {\r\n                removeAdsPreference?.summary = getString(R.string.premium_status)\r\n            }\r\n            \r\n            Log.d(TAG, \"Updated premium preferences. isPremium: $isPremium, billingAvailable: ${billingManager != null}\")\r\n        } catch (e: Exception) {\r\n            Log.e(TAG, \"Error updating premium preferences visibility\", e)\r\n        }\r\n    }\r\n    \r\n    private fun showEraseAllConfirmationDialog() {\r\n        AlertDialog.Builder(requireContext())\r\n            .setTitle(getString(R.string.dialog_erase_all_title))\r\n            .setMessage(getString(R.string.dialog_erase_all_message))\r\n            .setPositiveButton(getString(R.string.dialog_erase_all_confirm)) { _, _ -> \r\n                sharedViewModel.deleteAllConnections()\r\n                Toast.makeText(requireContext(), getString(R.string.toast_connections_deleted), Toast.LENGTH_SHORT).show()\r\n            }\r\n            .setNegativeButton(getString(R.string.dialog_cancel), null)\r\n            .show()\r\n    }\r\n    \r\n    override fun onResume() {\r\n        super.onResume()\r\n        sharedPreferences.registerOnSharedPreferenceChangeListener(this)\r\n    }\r\n    \r\n    override fun onPause() {\r\n        super.onPause()\r\n        sharedPreferences.unregisterOnSharedPreferenceChangeListener(this)\r\n    }\r\n    \r\n    override fun onDestroy() {\r\n        try {\r\n            // Remove LiveData observers to prevent memory leaks\r\n            billingManager?.let { manager ->\r\n                manager.premiumStatus.removeObservers(this)\r\n                manager.connectionState.removeObservers(this)\r\n                manager.lastErrorMessage.removeObservers(this)\r\n            }\r\n        } catch (e: Exception) {\r\n            Log.e(TAG, \"Error removing observers in onDestroy\", e)\r\n        }\r\n        \r\n        super.onDestroy()\r\n    }\r\n    \r\n    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {\r\n        if (key == \"theme_preference\" && sharedPreferences != null) {\r\n            applyTheme(sharedPreferences)\r\n        }\r\n    }\r\n    \r\n    /**\r\n     * Updates the billing status UI based on connection state\r\n     * Note: Retry is now handled automatically in the background\r\n     */\r\n    private fun updateBillingStatusUI(state: Int, errorMessage: String?) {\r\n        try {\r\n            val retryBillingPreference = findPreference<Preference>(\"retry_billing\")\r\n            val billingStatusPreference = findPreference<Preference>(\"billing_status\")\r\n            \r\n            // Always hide the retry button as retries are now automatic\r\n            retryBillingPreference?.isVisible = false\r\n            \r\n            // Update status text with current state information\r\n            val statusText = when (state) {\r\n                BillingManager.STATE_CONNECTING -> getString(R.string.billing_connecting)\r\n                BillingManager.STATE_CONNECTED -> \"Connected to Google Play Billing\"\r\n                BillingManager.STATE_DISCONNECTED -> getString(R.string.billing_disconnected)\r\n                BillingManager.STATE_ERROR -> getString(R.string.billing_error, errorMessage ?: \"Unknown error\")\r\n                else -> \"Unknown billing state\"\r\n            }\r\n            \r\n            // Show status preference when needed\r\n            billingStatusPreference?.isVisible = true\r\n            billingStatusPreference?.title = getString(R.string.billing_connection_status, statusText)\r\n            \r\n            // For error states, also show detailed error message as summary\r\n            if (state == BillingManager.STATE_ERROR && !errorMessage.isNullOrEmpty()) {\r\n                billingStatusPreference?.summary = errorMessage\r\n            } else {\r\n                billingStatusPreference?.summary = null\r\n            }\r\n            \r\n            Log.d(TAG, \"Updated billing status UI. State: $state, Message: $errorMessage\")\r\n        } catch (e: Exception) {\r\n            Log.e(TAG, \"Error updating billing status UI\", e)\r\n        }\r\n    }\r\n    \r\n    private fun applyTheme(sharedPreferences: SharedPreferences) {\r\n        val themeValue = sharedPreferences.getString(\"theme_preference\", \"system\") ?: \"system\"\r\n        \r\n        val mode = when (themeValue) {\r\n            \"light\" -> AppCompatDelegate.MODE_NIGHT_NO\r\n            \"dark\" -> AppCompatDelegate.MODE_NIGHT_YES\r\n            else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM\r\n        }\r\n        \r\n        AppCompatDelegate.setDefaultNightMode(mode)\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/antbear/pwneyes/ui/settings/SettingsFragment.kt b/app/src/main/java/com/antbear/pwneyes/ui/settings/SettingsFragment.kt
+--- a/app/src/main/java/com/antbear/pwneyes/ui/settings/SettingsFragment.kt	(revision 24239367c21fa63b0c7e4ea80c644a222082f2e0)
++++ b/app/src/main/java/com/antbear/pwneyes/ui/settings/SettingsFragment.kt	(date 1750346228115)
+@@ -303,5 +303,8 @@
+         }
+         
+         AppCompatDelegate.setDefaultNightMode(mode)
++        
++        // Persist the selected theme across app restarts
++        sharedPreferences.edit().putInt("night_mode", mode).apply()
+     }
+ }
+Index: gradle.properties
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+># Project-wide Gradle settings.\r\n# IDE (e.g. Android Studio) users:\r\n# Gradle settings configured through the IDE *will override*\r\n# any settings specified in this file.\r\n# For more details on how to configure your build environment visit\r\n# http://www.gradle.org/docs/current/userguide/build_environment.html\r\n# Specifies the JVM arguments used for the daemon process.\r\n# The setting is particularly useful for tweaking memory settings.\r\norg.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8\r\n# Disable JDK check in Android Gradle Plugin\r\nandroid.suppressUnsupportedCompileSdk=34\r\nandroid.suppressUnsupportedOptionWarnings=android.suppressUnsupportedCompileSdk\r\n# When configured, Gradle will run in incubating parallel mode.\r\n# This option should only be used with decoupled projects. More details, visit\r\n# http://www.gradle.org/docs/current/userguide/multi_project_builds.html#sec:decoupled_projects\r\n# org.gradle.parallel=true\r\n# AndroidX package structure to make it clearer which packages are bundled with the\r\n# Android operating system, and which are packaged with your app's APK\r\n# https://developer.android.com/topic/libraries/support-library/androidx-rn\r\nandroid.useAndroidX=true\r\n# Kotlin code style for this project: \"official\" or \"obsolete\":\r\nkotlin.code.style=official\r\n# Enables namespacing of each library's R class so that its R class includes only the\r\n# resources declared in the library itself and none from the library's dependencies,\r\n# thereby reducing the size of the R class for that library\r\nandroid.nonTransitiveRClass=true\r\n\r\n# Disable baseline profiles completely\r\nandroid.enableR8.fullMode=false\r\nandroid.enableProfileInstaller=false\r\nandroid.enableGradleProfiler=false\r\nandroid.experimental.enableProfileData=false\r\nandroid.enableProfileableModuleAndroidText=false\r\nandroid.proguard.enableRulesExtraction=false\r\nandroid.enableBaselineProfile=false\r\n\r\n# Acknowledge experimental options\r\nandroid.experimental.enableNewResourceShrinker=true\r\nandroid.experimental.enableNewResourceShrinker.preciseShrinking=true\r\nandroid.experimental.proguardKeepRules=true\r\nandroid.experimentalProperties=true\r\n\r\n# Force Java 11 for all Kotlin compilation\r\nkotlin.jvm.target.validation.mode=warning\r\nkotlin.daemon.jvmargs=-Xmx2048m\r\nkapt.use.worker.api=true\r\nkapt.incremental.apt=true\r\nkapt.include.compile.classpath=false\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>ISO-8859-1
+===================================================================
+diff --git a/gradle.properties b/gradle.properties
+--- a/gradle.properties	(revision 24239367c21fa63b0c7e4ea80c644a222082f2e0)
++++ b/gradle.properties	(date 1750284008374)
+@@ -46,3 +46,5 @@
+ kapt.use.worker.api=true
+ kapt.incremental.apt=true
+ kapt.include.compile.classpath=false
++android.defaults.buildfeatures.buildconfig=true
++android.nonFinalResIds=false

@@ -161,6 +161,19 @@ android {
             arg("room.schemaLocation", layout.buildDirectory.dir("schemas").get().toString())
             arg("room.incremental", "true")
         }
+        // CRITICAL: Explicitly enable Kotlin 2.0+ support in KAPT
+        useBuildCache = true
+        includeCompileClasspath = false
+        keepJavacAnnotationProcessors = true
+        useLightAnalysis = true
+        verbose = true
+        // Enable language version 2.0+ support (otherwise KAPT falls back to 1.9)
+        kotlinOptions {
+            jvmTarget = JavaVersion.VERSION_11.toString()
+            languageVersion = "2.0"
+            apiVersion = "2.0"
+            freeCompilerArgs = listOf("-Xallow-unstable-dependencies", "-Xskip-prerelease-check")
+        }
     }
 }
 
@@ -220,13 +233,18 @@ dependencies {
     implementation("androidx.navigation:navigation-fragment-ktx:2.6.0")
     implementation("androidx.navigation:navigation-ui-ktx:2.6.0")
     
-    // Room database runtime only (we'll use in-memory fallback for database)
+    // Room database with updated compatibility for Kotlin 2.1
     implementation("androidx.room:room-runtime:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
-    // No annotation processor for Room - we'll use fallbacks instead
+    
+    // Special configuration for Room compiler with Kotlin 2.1
     kapt("androidx.room:room-compiler:2.6.1") {
-        exclude(module = "kotlinx-metadata-jvm", group = "org.jetbrains.kotlinx")
+        // DO NOT exclude kotlinx-metadata-jvm here - we need to provide our own version
     }
+    
+    // Provide explicit kotlinx-metadata-jvm dependency for annotation processors
+    // This is crucial for KAPT to work with Kotlin 2.1
+    kapt("org.jetbrains.kotlinx:kotlinx-metadata-jvm:0.7.0")
     
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")

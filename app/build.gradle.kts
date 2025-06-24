@@ -160,20 +160,11 @@ android {
             arg("kotlinx.metadata.jvm.version", "0.7.0")
             arg("room.schemaLocation", layout.buildDirectory.dir("schemas").get().toString())
             arg("room.incremental", "true")
+            // Critical: enable support for Kotlin 2.0+ in KAPT
+            arg("kapt.use.k2", "true")
         }
-        // CRITICAL: Explicitly enable Kotlin 2.0+ support in KAPT
+        // Use build cache for faster compilation
         useBuildCache = true
-        includeCompileClasspath = false
-        keepJavacAnnotationProcessors = true
-        useLightAnalysis = true
-        verbose = true
-        // Enable language version 2.0+ support (otherwise KAPT falls back to 1.9)
-        kotlinOptions {
-            jvmTarget = JavaVersion.VERSION_11.toString()
-            languageVersion = "2.0"
-            apiVersion = "2.0"
-            freeCompilerArgs = listOf("-Xallow-unstable-dependencies", "-Xskip-prerelease-check")
-        }
     }
 }
 

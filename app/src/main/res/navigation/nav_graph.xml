@@ -82,7 +82,13 @@
             android:defaultValue="" />
         <action
             android:id="@+id/actionConnectionViewerToTabDetail"
-            app:destination="@id/nav_tab_detail" />
+            app:destination="@id/nav_tab_detail"
+            app:enterAnim="@android:anim/slide_in_left"
+            app:exitAnim="@android:anim/slide_out_right"
+            app:popEnterAnim="@android:anim/slide_in_left"
+            app:popExitAnim="@android:anim/slide_out_right"
+            app:launchSingleTop="true"
+            app:popUpTo="@id/nav_connection_viewer" />
     </fragment>
     
     <!-- Tab Detail Fragment -->

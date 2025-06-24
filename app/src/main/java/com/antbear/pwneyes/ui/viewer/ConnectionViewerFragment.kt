@@ -179,15 +179,9 @@ class ConnectionViewerFragment : Fragment() {
                 password = args.password
             )
 
-            // Create an animation to slide right
-            val navOptions = androidx.navigation.NavOptions.Builder()
-                .setEnterAnim(android.R.anim.slide_in_left)
-                .setExitAnim(android.R.anim.slide_out_right)
-                .build()
-
-            // Navigate to the tab detail fragment with animation
-            findNavController().navigate(action, navOptions)
-            Log.i(TAG, "Navigation completed")
+            // Navigate to the tab detail fragment - animations are defined in the navigation graph
+            findNavController().navigate(action)
+            Log.i(TAG, "Navigation to $tabDisplayName completed")
 
         } catch (e: Exception) {
             // Log any exceptions

@@ -15,8 +15,8 @@ android {
         applicationId = "com.antbear.pwneyes"
         minSdk = 24
         targetSdk = 34
-        versionCode = 27
-        versionName = "10.20"
+        versionCode = 28
+        versionName = "10.24"
         
         // Explicitly disable baseline profiles to fix installation issues
         ndk {
@@ -178,11 +178,14 @@ android {
 // Add JVM arguments to fix Kotlin daemon issues
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
     compilerOptions {
-        // Use proper Kotlin compiler optimization options
-        freeCompilerArgs.addAll(listOf(
-            "-opt-in=kotlin.RequiresOptIn",
-            "-Xskip-prerelease-check"
-        ))
+    // Use proper Kotlin compiler optimization options
+    freeCompilerArgs.addAll(listOf(
+        "-opt-in=kotlin.RequiresOptIn",
+        "-Xskip-prerelease-check",
+        "-Xcontext-receivers",
+        "-Xexpect-actual-classes",
+        "-Xallow-unstable-dependencies" // For Kotlin 2.1 compatibility
+    ))
     }
 }
 
@@ -207,8 +210,8 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-savedstate:2.6.2")
     
     // Navigation components
-    implementation("androidx.navigation:navigation-fragment-ktx:2.5.3")
-    implementation("androidx.navigation:navigation-ui-ktx:2.5.3")
+    implementation("androidx.navigation:navigation-fragment-ktx:2.6.0")
+    implementation("androidx.navigation:navigation-ui-ktx:2.6.0")
     
     // Room database runtime only (we'll use in-memory fallback for database)
     implementation("androidx.room:room-runtime:2.6.1")

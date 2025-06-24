@@ -86,9 +86,21 @@ class ConnectionViewerFragment : Fragment() {
     }
     
     private fun setupControlButtons() {
-        // Set up direct Plugins navigation button
+        // Set up direct tab navigation buttons
         binding.pluginsTabButton.setOnClickListener {
-            navigateToPluginsTab()
+            navigateToTab("plugins", "Plugins")
+        }
+        
+        binding.inboxNewTabButton.setOnClickListener {
+            navigateToTab("inbox/new", "Inbox New")
+        }
+        
+        binding.inboxProfileTabButton.setOnClickListener {
+            navigateToTab("inbox/profile", "Profile")
+        }
+        
+        binding.inboxPeersTabButton.setOnClickListener {
+            navigateToTab("inbox/peers", "Peers")
         }
         
         // Set up click listeners for our overlay buttons
@@ -128,10 +140,10 @@ class ConnectionViewerFragment : Fragment() {
     }
     
     /**
-     * Direct method to navigate to the Plugins tab
+     * Direct method to navigate to any tab
      * This bypasses all the JavaScript detection complexity
      */
-    private fun navigateToPluginsTab() {
+    private fun navigateToTab(tabPath: String, tabDisplayName: String) {
         try {
             // Ensure URL has port 8080 if needed
             var url = args.url
@@ -144,24 +156,25 @@ class ConnectionViewerFragment : Fragment() {
                 Log.d(TAG, "Added port 8080 to URL: $url")
             }
 
-            // Ensure URL ends with "/plugins"
-            if (!url.endsWith("/plugins")) {
-                url = if (url.endsWith("/")) {
-                    url + "plugins"
-                } else {
-                    url + "/plugins"
-                }
-                Log.d(TAG, "Ensured URL ends with /plugins: $url")
+            // Ensure URL ends with the correct tab path
+            val cleanTabPath = if (tabPath.startsWith("/")) tabPath.substring(1) else tabPath
+            
+            url = if (url.endsWith("/")) {
+                url + cleanTabPath
+            } else {
+                url + "/" + cleanTabPath
             }
+            
+            Log.d(TAG, "Final URL: $url")
 
-            Log.i(TAG, "Navigating directly to Plugins tab")
+            Log.i(TAG, "Navigating directly to $tabDisplayName tab")
             Log.i(TAG, "URL: $url")
 
             // Create navigation action with explicit details
             val action = ConnectionViewerFragmentDirections.actionConnectionViewerToTabDetail(
                 url = url,
-                tabName = "Plugins",  // Make tab name very explicit
-                tabSelector = "plugins",
+                tabName = tabDisplayName,
+                tabSelector = cleanTabPath.replace("/", "_"),
                 username = args.username,
                 password = args.password
             )
@@ -178,7 +191,7 @@ class ConnectionViewerFragment : Fragment() {
 
         } catch (e: Exception) {
             // Log any exceptions
-            Log.e(TAG, "Error navigating to Plugins tab: ${e.message}")
+            Log.e(TAG, "Error navigating to $tabDisplayName tab: ${e.message}")
             Log.e(TAG, "Stack trace: ${e.stackTraceToString()}")
 
             // Show error toast

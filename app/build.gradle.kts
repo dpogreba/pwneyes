@@ -10,6 +10,8 @@ plugins {
 android {
     namespace = "com.antbear.pwneyes"
     compileSdk = 34
+    // Update buildToolsVersion to match Android Gradle Plugin 8.3.0
+    buildToolsVersion = "34.0.0"
 
     defaultConfig {
         applicationId = "com.antbear.pwneyes"
@@ -173,17 +175,6 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach 
     compilerOptions {
         jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
     }
-}
-
-// Suppress warnings for experimental options
-android {
-    // Update buildToolsVersion to match Android Gradle Plugin 8.3.0
-    buildToolsVersion = "34.0.0"
-    
-    // Explicitly disable experimental features that cause warnings
-    experimentalProperties["android.experimental.enableNewResourceShrinker.preciseShrinking"] = false
-    experimentalProperties["android.proguard.enableRulesExtraction"] = false
-    experimentalProperties["android.suppressUnsupportedOptionWarnings"] = true
 }
 
 // Add JVM arguments to fix Kotlin daemon issues

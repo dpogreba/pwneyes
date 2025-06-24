@@ -1,8 +1,8 @@
 # PwnEyes v10.25 - Build System Update
 
-## Technical Improvement: Android Gradle Plugin Upgrade
+## Technical Improvement: Android Gradle Plugin Upgrade and Kotlin 2.1 Compatibility Fixes
 
-This update brings PwnEyes up to date with the latest Android Gradle Plugin (AGP) version 8.3.0, providing several improvements to the build system.
+This update brings PwnEyes up to date with the latest Android Gradle Plugin (AGP) version 8.3.0, providing several improvements to the build system. It also fixes Kotlin 2.1 compatibility issues with annotation processing.
 
 ### Key Improvements
 
@@ -24,6 +24,13 @@ This update brings PwnEyes up to date with the latest Android Gradle Plugin (AGP
    - Enhanced compatibility with Kotlin 2.1
    - More reliable Kotlin DSL support in build scripts
    - Improved Kotlin compiler integration
+   - Fixed KAPT compatibility issues with Kotlin 2.1
+
+5. **Fixed Build Issues**
+   - Resolved Room compiler error with Kotlin 2.1 metadata
+   - Updated kotlinx-metadata-jvm to version 0.7.0
+   - Added proper KAPT configuration for Kotlin 2.1
+   - Adjusted experimental property settings to reduce warnings
 
 ### Developer Benefits
 

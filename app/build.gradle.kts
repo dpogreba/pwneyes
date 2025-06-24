@@ -154,6 +154,13 @@ android {
 
     kapt {
         correctErrorTypes = true
+        // Enable Kotlin 2.1 support in kapt (required for Room compiler)
+        arguments {
+            arg("kapt.kotlin.generated", layout.buildDirectory.dir("generated/kapt/src").get().toString())
+            arg("kotlinx.metadata.jvm.version", "0.7.0")
+            arg("room.schemaLocation", layout.buildDirectory.dir("schemas").get().toString())
+            arg("room.incremental", "true")
+        }
     }
 }
 
@@ -171,8 +178,8 @@ android {
     
     // Explicitly disable experimental features that cause warnings
     experimentalProperties["android.experimental.enableNewResourceShrinker.preciseShrinking"] = false
-    experimentalProperties["android.proguard.enableRulesExtraction"] = true
-    experimentalProperties["android.suppressUnsupportedOptionWarnings"] = false
+    experimentalProperties["android.proguard.enableRulesExtraction"] = false
+    experimentalProperties["android.suppressUnsupportedOptionWarnings"] = true
 }
 
 // Add JVM arguments to fix Kotlin daemon issues
@@ -242,8 +249,8 @@ dependencies {
     // JSON parsing
     implementation("com.google.code.gson:gson:2.10.1")
     
-    // Kotlin metadata for reflection
-    implementation("org.jetbrains.kotlinx:kotlinx-metadata-jvm:0.3.0")
+    // Kotlin metadata for reflection - use newer version compatible with Kotlin 2.1
+    implementation("org.jetbrains.kotlinx:kotlinx-metadata-jvm:0.7.0")
     
     implementation("androidx.preference:preference:1.2.0")
     // Google Play Billing Library for in-app purchases
@@ -266,8 +273,8 @@ dependencies {
     // Force compatible versions
     configurations.all {
         resolutionStrategy {
-            // Force older version of kotlinx-metadata-jvm
-            force("org.jetbrains.kotlinx:kotlinx-metadata-jvm:0.3.0")
+            // Force newer version of kotlinx-metadata-jvm to support Kotlin 2.1
+            force("org.jetbrains.kotlinx:kotlinx-metadata-jvm:0.7.0")
             // Force compatible kotlin reflection version
             force("org.jetbrains.kotlin:kotlin-reflect:2.1.0")
             force("org.jetbrains.kotlin:kotlin-stdlib:2.1.0")
@@ -283,7 +290,7 @@ dependencies {
             }
             if (requested.group == "org.jetbrains.kotlinx" && 
                 requested.name == "kotlinx-metadata-jvm") {
-                useVersion("0.3.0")
+                useVersion("0.7.0")
             }
         }
     }

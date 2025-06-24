@@ -52,7 +52,7 @@ class WebViewManager(private val context: Context) {
                 useWideViewPort = true
                 
                 // Initial scale settings for better content visibility
-                setInitialScale(40) // 40% of original size to show more content
+                setInitialScale(50) // 50% of original size
                 
                 // Enable caching for better performance
                 cacheMode = WebSettings.LOAD_DEFAULT
@@ -225,18 +225,18 @@ class WebViewManager(private val context: Context) {
                     meta.name = 'viewport';
                     document.head.appendChild(meta);
                 }
-                meta.content = 'width=device-width, initial-scale=0.4, maximum-scale=3.0, user-scalable=yes';
+                meta.content = 'width=device-width, initial-scale=0.5, maximum-scale=3.0, user-scalable=yes';
 
                 // Force all content to be visible by manipulating root styles
                 document.documentElement.style.height = 'auto';
                 document.documentElement.style.overflow = 'visible';
                 document.documentElement.style.position = 'relative';
-                document.documentElement.style.paddingBottom = '600px'; // Increased from 400px
+                document.documentElement.style.paddingBottom = '400px';
 
-                // Make body smaller to fit within the viewport but keep bottom content visible
-                document.body.style.transform = 'scale(0.85)'; // Decreased from 0.9
-                document.body.style.transformOrigin = 'center center'; // Changed from top center
-                document.body.style.marginBottom = '400px'; // Increased from 300px
+                // Make body smaller to fit within the viewport
+                document.body.style.transform = 'scale(0.9)';
+                document.body.style.transformOrigin = 'top center';
+                document.body.style.marginBottom = '300px';
                 
                 // Detect and highlight control elements
                 var controlKeywords = ['shutdown', 'reboot', 'restart', 'manu', 'power'];
@@ -273,25 +273,9 @@ class WebViewManager(private val context: Context) {
                     }
                 }
                 
-                // Add bottom margin and padding for visibility of navigation bars
-                document.body.style.paddingBottom = '180px'; // Increased from 80px
-                document.body.style.marginBottom = '180px'; // Increased from 80px
-                
-                // Try to find and ensure bottom navigation bar is visible
-                const possibleNavBars = document.querySelectorAll('nav, [class*="nav"], [class*="bottom"], [class*="footer"], [id*="nav"], [id*="bottom"], [id*="footer"]');
-                possibleNavBars.forEach(navbar => {
-                    if (navbar.getBoundingClientRect().bottom > window.innerHeight) {
-                        // This navbar is likely off-screen, fix its position
-                        console.log('Found potentially hidden navbar:', navbar);
-                        navbar.style.position = 'fixed';
-                        navbar.style.bottom = '0';
-                        navbar.style.left = '0';
-                        navbar.style.right = '0';
-                        navbar.style.zIndex = '1000';
-                        navbar.style.backgroundColor = navbar.style.backgroundColor || 'rgba(255,255,255,0.9)';
-                        navbar.setAttribute('data-pwneyes-fixed-navbar', 'true');
-                    }
-                });
+                // Add bottom margin and padding for visibility
+                document.body.style.paddingBottom = '80px';
+                document.body.style.marginBottom = '80px';
                 
                 return {
                     enhanced: true, 
@@ -332,9 +316,6 @@ class WebViewManager(private val context: Context) {
     private fun createCommandScript(command: String, additionalKeyword: String? = null): String {
         return """
             (function() {
-                // Ensure we can see the bottom of the page first
-                window.scrollTo(0, document.body.scrollHeight);
-                
                 // Find button based on text content
                 var buttons = Array.from(document.querySelectorAll('*')).filter(function(el) {
                     var text = el.textContent || el.innerText || '';

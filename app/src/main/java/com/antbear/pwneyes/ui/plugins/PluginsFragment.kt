@@ -1,12 +1,13 @@
 package com.antbear.pwneyes.ui.plugins
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Switch
+import android.webkit.*
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -15,6 +16,8 @@ import androidx.navigation.fragment.navArgs
 import com.antbear.pwneyes.R
 import com.antbear.pwneyes.databinding.FragmentPluginsBinding
 import com.antbear.pwneyes.ui.viewer.ViewerViewModel
+import com.antbear.pwneyes.ui.viewer.WebViewManager
+import java.util.Base64
 
 class PluginsFragment : Fragment() {
     private val TAG = "PluginsFragment"
@@ -32,8 +35,8 @@ class PluginsFragment : Fragment() {
     // Safe Args to get connection details
     private val args: PluginsFragmentArgs by navArgs()
     
-    // Plugin state tracking
-    private val pluginStates = mutableMapOf<String, Boolean>()
+    // WebView manager - manually instantiated
+    private lateinit var webViewManager: WebViewManager
     
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -66,12 +69,14 @@ class PluginsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Log.d(TAG, "🔵 onViewCreated called")
-        
+
         try {
+            // Initialize WebViewManager
+            webViewManager = WebViewManager(requireContext())
+            
             setupToolbar()
             setupTabs()
-            loadPluginStates()
-            setupPluginControls()
+            setupWebView()
             Log.d(TAG, "🔵 All UI setup methods completed successfully")
         } catch (e: Exception) {
             Log.e(TAG, "❌ Error during UI setup: ${e.message}")
@@ -142,72 +147,133 @@ class PluginsFragment : Fragment() {
         }
     }
     
-    private fun loadPluginStates() {
-        // For now, we'll use default states (all enabled)
-        // In a real implementation, these would be loaded from the device
-        pluginStates["aircrackonly"] = true
-        pluginStates["auto-tune"] = true
-        pluginStates["auto-update"] = true
-        pluginStates["banthex"] = true
-        pluginStates["bt-tether"] = true
-        pluginStates["discohash"] = true
+    private fun setupWebView() {
+        Log.d(TAG, "🔵 Setting up WebView")
         
-        // If we have saved states in ViewModel, use those instead
-        viewModel.getPluginStates()?.let { savedStates ->
-            pluginStates.putAll(savedStates)
+        binding.pluginsWebView.apply {
+            // Set an ID to help with state restoration
+            id = View.generateViewId()
+            
+            // Configure WebView using WebViewManager
+            webViewManager.configureWebView(this)
+            
+            // Set WebChromeClient for JavaScript dialogs and progress tracking
+            webChromeClient = object : WebChromeClient() {
+                override fun onProgressChanged(view: WebView?, newProgress: Int) {
+                    if (newProgress < 100) {
+                        binding.progressBar.visibility = View.VISIBLE
+                        binding.progressBar.progress = newProgress
+                    } else {
+                        binding.progressBar.visibility = View.GONE
+                    }
+                }
+                
+                override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {
+                    consoleMessage?.let {
+                        Log.d("WebConsole", "${it.message()} -- From line ${it.lineNumber()} of ${it.sourceId()}")
+                    }
+                    return true
+                }
+            }
+            
+            // Set WebViewClient for URL loading and error handling
+            webViewClient = object : WebViewClient() {
+                override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+                    super.onPageStarted(view, url, favicon)
+                    binding.progressBar.visibility = View.VISIBLE
+                    
+                    // Update URL indicator
+                    url?.let {
+                        binding.urlIndicator.text = it
+                    }
+                }
+
+                override fun onPageFinished(view: WebView?, url: String?) {
+                    super.onPageFinished(view, url)
+                    binding.progressBar.visibility = View.GONE
+                    
+                    // Apply WebView enhancements
+                    webViewManager.enhanceRendering(view ?: return)
+                }
+
+                override fun onReceivedError(
+                    view: WebView?,
+                    request: WebResourceRequest?,
+                    error: WebResourceError?
+                ) {
+                    super.onReceivedError(view, request, error)
+                    binding.progressBar.visibility = View.GONE
+                    
+                    // Show error toast
+                    val errorMessage = "Failed to load: ${error?.description}"
+                    Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                    Log.e(TAG, "❌ WebView error: $errorMessage")
+                }
+
+                override fun onReceivedHttpAuthRequest(
+                    view: WebView?,
+                    handler: HttpAuthHandler?,
+                    host: String?,
+                    realm: String?
+                ) {
+                    if (args.username.isNotEmpty()) {
+                        handler?.proceed(args.username, args.password)
+                    } else {
+                        super.onReceivedHttpAuthRequest(view, handler, host, realm)
+                    }
+                }
+            }
+
+            // Load the plugins URL
+            val pluginsUrl = getPluginsUrl()
+            Log.d(TAG, "🔵 Loading plugins URL: $pluginsUrl")
+            
+            // Handle basic auth in URL if credentials are provided
+            val urlWithAuth = if (args.username.isNotEmpty()) {
+                try {
+                    // Parse the URL to extract its components
+                    val url = java.net.URL(pluginsUrl)
+                    val protocol = url.protocol
+                    val host = url.host
+                    val port = if (url.port == -1) "" else ":${url.port}"
+                    val path = if (url.path.isEmpty()) "/" else url.path
+                    val query = if (url.query == null) "" else "?${url.query}"
+                    val ref = if (url.ref == null) "" else "#${url.ref}"
+                    
+                    // Create credentials
+                    val credentials = "${args.username}:${args.password}"
+                    val base64Credentials = Base64.getEncoder().encodeToString(credentials.toByteArray())
+                    
+                    // Reconstruct URL with credentials
+                    "$protocol://$base64Credentials@$host$port$path$query$ref"
+                } catch (e: Exception) {
+                    Log.e(TAG, "❌ Error parsing URL: ${e.message}")
+                    pluginsUrl
+                }
+            } else {
+                pluginsUrl
+            }
+            
+            loadUrl(urlWithAuth)
         }
     }
     
-    private fun setupPluginControls() {
-        // Set up switch states based on loaded data
-        binding.aircrackSwitch.isChecked = pluginStates["aircrackonly"] ?: true
-        binding.autotuneSwitch.isChecked = pluginStates["auto-tune"] ?: true
-        binding.autoupdateSwitch.isChecked = pluginStates["auto-update"] ?: true
-        binding.banthexSwitch.isChecked = pluginStates["banthex"] ?: true
-        binding.bttetherSwitch.isChecked = pluginStates["bt-tether"] ?: true
-        binding.discohashSwitch.isChecked = pluginStates["discohash"] ?: true
+    private fun getPluginsUrl(): String {
+        // Ensure the base URL has the correct format
+        var baseUrl = args.connectionBaseUrl
         
-        // Set up switch change listeners
-        setupSwitchListener(binding.aircrackSwitch, "aircrackonly")
-        setupSwitchListener(binding.autotuneSwitch, "auto-tune")
-        setupSwitchListener(binding.autoupdateSwitch, "auto-update")
-        setupSwitchListener(binding.banthexSwitch, "banthex")
-        setupSwitchListener(binding.bttetherSwitch, "bt-tether")
-        setupSwitchListener(binding.discohashSwitch, "discohash")
-        
-        // Set up upgrade button click listeners
-        binding.aircrackUpgrade.setOnClickListener { handleUpgradeClick("aircrackonly") }
-        binding.autotuneUpgrade.setOnClickListener { handleUpgradeClick("auto-tune") }
-        binding.autoupdateUpgrade.setOnClickListener { handleUpgradeClick("auto-update") }
-        binding.banthexUpgrade.setOnClickListener { handleUpgradeClick("banthex") }
-        binding.bttetherUpgrade.setOnClickListener { handleUpgradeClick("bt-tether") }
-        binding.discohashUpgrade.setOnClickListener { handleUpgradeClick("discohash") }
-    }
-    
-    private fun setupSwitchListener(switch: Switch, pluginName: String) {
-        switch.setOnCheckedChangeListener { _, isChecked ->
-            // Update the state in our map
-            pluginStates[pluginName] = isChecked
-            
-            // Update the ViewModel
-            viewModel.updatePluginState(pluginName, isChecked)
-            
-            // In a real implementation, this would send the command to the device
-            Toast.makeText(
-                requireContext(),
-                "$pluginName ${if (isChecked) "enabled" else "disabled"}",
-                Toast.LENGTH_SHORT
-            ).show()
+        // Make sure base URL doesn't end with a slash
+        if (baseUrl.endsWith("/")) {
+            baseUrl = baseUrl.substring(0, baseUrl.length - 1)
         }
-    }
-    
-    private fun handleUpgradeClick(pluginName: String) {
-        // In a real implementation, this would trigger an upgrade process
-        Toast.makeText(
-            requireContext(),
-            "Upgrading $pluginName...",
-            Toast.LENGTH_SHORT
-        ).show()
+        
+        // Make sure URL has port if needed
+        if (!baseUrl.contains(":8080") && !baseUrl.contains(":443") && !baseUrl.contains(":80")) {
+            baseUrl += ":8080"
+        }
+        
+        // Append /plugins to the base URL
+        return "$baseUrl/plugins"
     }
     
     override fun onStart() {
@@ -233,12 +299,30 @@ class PluginsFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         Log.d(TAG, "🔵 onDestroyView called")
+        
+        try {
+            // Clean up WebView resources
+            binding.pluginsWebView.stopLoading()
+            binding.pluginsWebView.clearCache(true)
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ Error cleaning up WebView: ${e.message}")
+        }
+        
         _binding = null
     }
     
     override fun onDestroy() {
         super.onDestroy()
         Log.d(TAG, "🔵 onDestroy called")
+        
+        try {
+            // Destroy WebView to prevent memory leaks
+            if (!requireActivity().isChangingConfigurations) {
+                binding.pluginsWebView.destroy()
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ Error destroying WebView: ${e.message}")
+        }
     }
     
     override fun onDetach() {

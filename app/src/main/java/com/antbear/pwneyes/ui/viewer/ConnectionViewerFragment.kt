@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.webkit.*
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -17,9 +18,6 @@ import com.antbear.pwneyes.databinding.FragmentConnectionViewerBinding
 import kotlinx.coroutines.launch
 import java.util.Base64
 
-// TODO: Uncomment when Hilt is properly configured
-// import dagger.hilt.android.AndroidEntryPoint
-// @AndroidEntryPoint
 class ConnectionViewerFragment : Fragment() {
     private val TAG = "ConnectionViewerFragment"
     
@@ -30,16 +28,12 @@ class ConnectionViewerFragment : Fragment() {
     // Web view manager - manually instantiated
     private lateinit var webViewManager: WebViewManager
     
-    // Variables to preserve WebView state across orientation changes
-    private var webViewState: Bundle? = null
-    private var lastUrl: String? = null
-    private var lastScrollX: Int = 0
-    private var lastScrollY: Int = 0
+    // Using ViewModel to preserve state across configuration changes
+    private val viewModel: ViewerViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Retain this fragment across configuration changes
-        retainInstance = true
+        // No longer using deprecated retainInstance
     }
 
     override fun onCreateView(
@@ -59,8 +53,8 @@ class ConnectionViewerFragment : Fragment() {
         setupControlButtons()
         observeWebViewLoadingState()
 
-        // Restore WebView state if it exists
-        webViewState?.let { state ->
+        // Restore WebView state from ViewModel if it exists
+        viewModel.webViewState?.let { state ->
             binding.webView.restoreState(state)
         }
 
@@ -396,16 +390,16 @@ class ConnectionViewerFragment : Fragment() {
                     super.onPageFinished(view, url)
                     binding.progressBar.visibility = View.GONE
                     
-                    // Save last URL for state restoration
-                    lastUrl = url
+                    // Save last URL in ViewModel for state restoration
+                    viewModel.lastUrl = url
                     
                     // Apply WebView enhancements
                     webViewManager.enhanceRendering(view ?: return)
                     
-                    // Save scroll position after page has fully loaded
+                    // Save scroll position in ViewModel after page has fully loaded
                     view.postDelayed({
-                        lastScrollX = view.scrollX
-                        lastScrollY = view.scrollY
+                        viewModel.lastScrollX = view.scrollX
+                        viewModel.lastScrollY = view.scrollY
                     }, 1000)
                 }
 
@@ -480,18 +474,18 @@ class ConnectionViewerFragment : Fragment() {
 
     override fun onPause() {
         super.onPause()
-        // Save WebView state when fragment is paused (e.g., during orientation change)
+        // Save WebView state to ViewModel when fragment is paused
         val newState = Bundle()
         binding.webView.saveState(newState)
-        webViewState = newState
+        viewModel.webViewState = newState
     }
     
     override fun onResume() {
         super.onResume()
-        // Restore scroll position after resuming
-        if (lastScrollX != 0 || lastScrollY != 0) {
+        // Restore scroll position from ViewModel after resuming
+        if (viewModel.lastScrollX != 0 || viewModel.lastScrollY != 0) {
             binding.webView.postDelayed({
-                binding.webView.scrollTo(lastScrollX, lastScrollY)
+                binding.webView.scrollTo(viewModel.lastScrollX, viewModel.lastScrollY)
             }, 300)
         }
     }
@@ -509,7 +503,7 @@ class ConnectionViewerFragment : Fragment() {
         // Clean up WebView resources only if the fragment is truly being destroyed
         if (!requireActivity().isChangingConfigurations) {
             binding.webView.destroy()
-            webViewState = null
+            // ViewModel will be automatically cleared when the fragment is destroyed
         }
     }
 }

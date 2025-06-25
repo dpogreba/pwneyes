@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.webkit.*
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.antbear.pwneyes.databinding.FragmentTabDetailBinding
@@ -19,16 +20,12 @@ class TabDetailFragment : Fragment() {
     private val binding get() = _binding!!
     private val args: TabDetailFragmentArgs by navArgs()
     
-    // Variables to preserve WebView state
-    private var webViewState: Bundle? = null
-    private var lastUrl: String? = null
-    private var lastScrollX: Int = 0
-    private var lastScrollY: Int = 0
+    // Using ViewModel to preserve state across configuration changes
+    private val viewModel: ViewerViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Retain this fragment across configuration changes
-        retainInstance = true
+        // No longer using deprecated retainInstance
     }
 
     override fun onCreateView(
@@ -56,8 +53,8 @@ class TabDetailFragment : Fragment() {
             setTextColor(android.graphics.Color.WHITE)
         }
         
-        // Restore WebView state if it exists
-        webViewState?.let { state ->
+        // Restore WebView state from ViewModel if it exists
+        viewModel.webViewState?.let { state ->
             binding.webView.restoreState(state)
         }
         
@@ -379,8 +376,8 @@ class TabDetailFragment : Fragment() {
                     super.onPageFinished(view, url)
                     binding.progressBar.visibility = View.GONE
                     
-                    // Save last URL for state restoration
-                    lastUrl = url
+                    // Save last URL in ViewModel for state restoration
+                    viewModel.lastUrl = url
                     
                     // Inject JavaScript to navigate to the specified tab
                     if (args.tabSelector.isNotEmpty()) {
@@ -575,21 +572,21 @@ class TabDetailFragment : Fragment() {
     
     override fun onPause() {
         super.onPause()
-        // Save WebView state when fragment is paused
+        // Save WebView state to ViewModel when fragment is paused
         val newState = Bundle()
         binding.webView.saveState(newState)
-        webViewState = newState
+        viewModel.webViewState = newState
         
-        // Save ScrollView position instead of WebView position
-        lastScrollY = binding.scrollView.scrollY
+        // Save ScrollView position to ViewModel
+        viewModel.lastScrollY = binding.scrollView.scrollY
     }
     
     override fun onResume() {
         super.onResume()
-        // Restore scroll position of the ScrollView after resuming
-        if (lastScrollY != 0) {
+        // Restore scroll position of the ScrollView from ViewModel after resuming
+        if (viewModel.lastScrollY != 0) {
             binding.scrollView.postDelayed({
-                binding.scrollView.scrollTo(0, lastScrollY)
+                binding.scrollView.scrollTo(0, viewModel.lastScrollY)
             }, 300)
         }
     }
@@ -627,7 +624,7 @@ class TabDetailFragment : Fragment() {
         // Clean up WebView resources only if the fragment is truly being destroyed
         if (!requireActivity().isChangingConfigurations) {
             binding.webView.destroy()
-            webViewState = null
+            // ViewModel will be automatically cleared when the fragment is destroyed
         }
     }
 }

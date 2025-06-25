@@ -17,8 +17,8 @@ android {
         applicationId = "com.antbear.pwneyes"
         minSdk = 24
         targetSdk = 34
-        versionCode = 29
-        versionName = "10.25"
+        versionCode = 30
+        versionName = "10.26"
         
         // Explicitly disable baseline profiles to fix installation issues
         ndk {
@@ -156,14 +156,10 @@ android {
 
     kapt {
         correctErrorTypes = true
-        // Enable Kotlin 2.1 support in kapt (required for Room compiler)
+        // Configure Room-specific arguments only
         arguments {
-            arg("kapt.kotlin.generated", layout.buildDirectory.dir("generated/kapt/src").get().toString())
-            arg("kotlinx.metadata.jvm.version", "0.7.0")
             arg("room.schemaLocation", layout.buildDirectory.dir("schemas").get().toString())
             arg("room.incremental", "true")
-            // Critical: enable support for Kotlin 2.0+ in KAPT
-            arg("kapt.use.k2", "true")
         }
         // Use build cache for faster compilation
         useBuildCache = true
@@ -180,13 +176,10 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach 
 // Add JVM arguments to fix Kotlin daemon issues
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
     compilerOptions {
-    // Use proper Kotlin compiler optimization options
+    // Use stable Kotlin compiler options only
     freeCompilerArgs.addAll(listOf(
         "-opt-in=kotlin.RequiresOptIn",
-        "-Xskip-prerelease-check",
-        "-Xcontext-receivers",
-        "-Xexpect-actual-classes",
-        "-Xallow-unstable-dependencies" // For Kotlin 2.1 compatibility
+        "-Xskip-prerelease-check"
     ))
     }
 }
@@ -194,7 +187,15 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach 
 // Configure Gradle daemon settings to avoid connection issues
 tasks.withType<JavaCompile>().configureEach {
     options.isFork = true
-    options.forkOptions.jvmArgs = listOf("-Xmx2g")
+    options.forkOptions.jvmArgs = listOf("-Xmx3g")
+}
+
+// Configure Kotlin daemon with high memory
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+    kotlinOptions {
+        // Increase memory for Kotlin daemon to prevent connection issues
+        freeCompilerArgs += listOf("-Xms1g", "-Xmx3g")
+    }
 }
 
 // No annotation processor configuration needed

@@ -152,6 +152,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupNavigation(savedInstanceState: Bundle?) {
+        Log.d(TAG, "🔍 setupNavigation called")
         try {
             // Set up Toolbar as the ActionBar
             setSupportActionBar(binding.toolbar)
@@ -181,6 +182,11 @@ class MainActivity : AppCompatActivity() {
 
             // Link the ActionBar with the NavController
             setupActionBarWithNavController(navController, appBarConfiguration)
+            
+            // Add debug logging for navigation issues
+            navController.addOnDestinationChangedListener { _, destination, _ ->
+                Log.d(TAG, "🔍 Navigation destination changed: ${destination.label} (id: ${destination.id})")
+            }
             
             // Setup navigation drawer
             toggle = navigationManager.setupDrawerToggle()

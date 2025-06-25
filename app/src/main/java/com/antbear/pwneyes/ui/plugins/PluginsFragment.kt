@@ -1,5 +1,6 @@
 package com.antbear.pwneyes.ui.plugins
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -18,6 +19,10 @@ import com.antbear.pwneyes.ui.viewer.ViewerViewModel
 class PluginsFragment : Fragment() {
     private val TAG = "PluginsFragment"
     
+    init {
+        Log.d(TAG, "🔵 PluginsFragment instance created")
+    }
+    
     private var _binding: FragmentPluginsBinding? = null
     private val binding get() = _binding!!
     
@@ -30,38 +35,76 @@ class PluginsFragment : Fragment() {
     // Plugin state tracking
     private val pluginStates = mutableMapOf<String, Boolean>()
     
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        Log.d(TAG, "🔵 onAttach called")
+    }
+    
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        Log.d(TAG, "🔵 onCreate called")
+        
+        try {
+            val args = args // This will throw if args don't exist
+            Log.d(TAG, "🔵 Args successfully retrieved: connectionName=${args.connectionName}")
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ Error retrieving args: ${e.message}")
+        }
+    }
+    
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        Log.d(TAG, "🔵 onCreateView called")
         _binding = FragmentPluginsBinding.inflate(inflater, container, false)
+        Log.d(TAG, "🔵 Binding inflated successfully")
         return binding.root
     }
     
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        Log.d(TAG, "🔵 onViewCreated called")
         
-        setupToolbar()
-        setupTabs()
-        loadPluginStates()
-        setupPluginControls()
+        try {
+            setupToolbar()
+            setupTabs()
+            loadPluginStates()
+            setupPluginControls()
+            Log.d(TAG, "🔵 All UI setup methods completed successfully")
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ Error during UI setup: ${e.message}")
+            Log.e(TAG, "❌ Stack trace: ${e.stackTraceToString()}")
+        }
     }
     
     private fun setupToolbar() {
-        // Set connection name in toolbar
-        val title = "${args.connectionName} - Plugins"
-        binding.connectionTitle.text = title
-        
-        // Set URL in indicator
-        binding.urlIndicator.text = "${args.connectionBaseUrl}/plugins"
-        
-        // Handle back button clicks
-        binding.backArrow.setOnClickListener {
-            findNavController().navigateUp()
-        }
-        binding.toolbar.setNavigationOnClickListener {
-            findNavController().navigateUp()
+        Log.d(TAG, "🔵 Setting up toolbar")
+        try {
+            // Set connection name in toolbar
+            val title = "${args.connectionName} - Plugins"
+            Log.d(TAG, "🔵 Setting toolbar title to: $title")
+            binding.connectionTitle.text = title
+            
+            // Set URL in indicator
+            val urlText = "${args.connectionBaseUrl}/plugins"
+            Log.d(TAG, "🔵 Setting URL indicator to: $urlText")
+            binding.urlIndicator.text = urlText
+            
+            // Handle back button clicks
+            binding.backArrow.setOnClickListener {
+                Log.d(TAG, "🔵 Back arrow clicked - navigating up")
+                findNavController().navigateUp()
+            }
+            binding.toolbar.setNavigationOnClickListener {
+                Log.d(TAG, "🔵 Toolbar navigation clicked - navigating up")
+                findNavController().navigateUp()
+            }
+            Log.d(TAG, "🔵 Toolbar setup completed successfully")
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ Error setting up toolbar: ${e.message}")
+            Log.e(TAG, "❌ Stack trace: ${e.stackTraceToString()}")
         }
     }
     
@@ -167,8 +210,39 @@ class PluginsFragment : Fragment() {
         ).show()
     }
     
+    override fun onStart() {
+        super.onStart()
+        Log.d(TAG, "🔵 onStart called")
+    }
+    
+    override fun onResume() {
+        super.onResume()
+        Log.d(TAG, "🔵 onResume called - fragment is now visible to user")
+    }
+    
+    override fun onPause() {
+        super.onPause()
+        Log.d(TAG, "🔵 onPause called")
+    }
+    
+    override fun onStop() {
+        super.onStop()
+        Log.d(TAG, "🔵 onStop called")
+    }
+    
     override fun onDestroyView() {
         super.onDestroyView()
+        Log.d(TAG, "🔵 onDestroyView called")
         _binding = null
+    }
+    
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d(TAG, "🔵 onDestroy called")
+    }
+    
+    override fun onDetach() {
+        super.onDetach()
+        Log.d(TAG, "🔵 onDetach called")
     }
 }

@@ -139,8 +139,10 @@ class ConnectionViewerFragment : Fragment() {
      * This bypasses all the JavaScript detection complexity
      */
     private fun navigateToTab(tabPath: String, tabDisplayName: String) {
+        Log.d(TAG, "🔍 navigateToTab called with tabPath='$tabPath', tabDisplayName='$tabDisplayName'")
         try {
             // Ensure URL has port 8080 if needed
+            Log.d(TAG, "🔍 Original URL from args: '${args.url}'")
             var url = args.url
             if (!url.contains(":8080") && !url.contains(":443") && !url.contains(":80")) {
                 url = if (url.endsWith("/")) {
@@ -153,6 +155,7 @@ class ConnectionViewerFragment : Fragment() {
 
             // Ensure URL ends with the correct tab path
             val cleanTabPath = if (tabPath.startsWith("/")) tabPath.substring(1) else tabPath
+            Log.d(TAG, "🔍 Clean tab path: '$cleanTabPath'")
             
             url = if (url.endsWith("/")) {
                 url + cleanTabPath
@@ -179,7 +182,10 @@ class ConnectionViewerFragment : Fragment() {
             
             // Special case for plugins tab - use native UI fragment
             if (cleanTabPath == "plugins") {
+                Log.d(TAG, "🔹 PLUGINS TAB DETECTED - Attempting to navigate to native UI")
                 try {
+                    Log.d(TAG, "🔹 Navigation attempt starting - target: R.id.nav_plugins")
+                    Log.d(TAG, "🔹 Arguments being passed - connectionName: ${args.name}, baseUrl: $baseUrl")
                     // Navigate to our new native Plugins fragment
                     findNavController().navigate(
                         R.id.nav_plugins,
@@ -197,15 +203,18 @@ class ConnectionViewerFragment : Fragment() {
                             launchSingleTop = true
                         }
                     )
-                    Log.i(TAG, "Navigated to native Plugins UI")
+                    Log.i(TAG, "✅ Successfully navigated to native Plugins UI")
                     return
                 } catch (e: Exception) {
-                    Log.e(TAG, "Error navigating to native Plugins UI, falling back to WebView", e)
+                    Log.e(TAG, "❌ Error navigating to native Plugins UI: ${e.javaClass.simpleName} - ${e.message}")
+                    Log.e(TAG, "❌ Stack trace: ${e.stackTraceToString()}")
+                    Log.e(TAG, "❌ Falling back to WebView display")
                     // Continue with WebView fallback
                 }
             }
             
             // For other tabs, use the regular TabDetailFragment with WebView
+            Log.d(TAG, "📱 Using TabDetailFragment (WebView) for this tab")
             val action = ConnectionViewerFragmentDirections.actionConnectionViewerToTabDetail(
                 url = url,
                 tabName = tabDisplayName,

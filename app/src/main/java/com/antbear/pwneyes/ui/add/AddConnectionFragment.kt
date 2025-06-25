@@ -97,6 +97,26 @@ class AddConnectionFragment : Fragment() {
             url.startsWith("http://") || url.startsWith("https://") -> url
             else -> "http://$url"
         }
+        
+        // Ensure URL has port 8080 if no port is specified
+        if (!url.contains(":8080") && !url.contains(":443") && !url.contains(":80")) {
+            // Parse the URL to find where to insert the port
+            val protocolEnd = url.indexOf("://")
+            if (protocolEnd != -1) {
+                // Find the first slash after the protocol
+                val pathStart = url.indexOf("/", protocolEnd + 3)
+                if (pathStart != -1) {
+                    // Insert port before the path
+                    url = url.substring(0, pathStart) + ":8080" + url.substring(pathStart)
+                } else {
+                    // No path, append port to the end
+                    url = "$url:8080"
+                }
+            } else {
+                // Shouldn't happen with our earlier cleanup, but just in case
+                url = "$url:8080"
+            }
+        }
 
         return Connection(
             id = if (isEditMode) connectionId else 0, // Use existing ID when editing

@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.antbear.pwneyes.R
 import com.antbear.pwneyes.databinding.FragmentConnectionViewerBinding
 import kotlinx.coroutines.launch
 import java.util.Base64
@@ -179,9 +180,46 @@ class ConnectionViewerFragment : Fragment() {
                 password = args.password
             )
 
-            // Navigate to the tab detail fragment - animations are defined in the navigation graph
-            findNavController().navigate(action)
-            Log.i(TAG, "Navigation to $tabDisplayName completed")
+            try {
+                // Force destroy WebView to prevent memory leaks
+                binding.webView.stopLoading()
+                binding.webView.clearCache(true)
+                
+                // Forcibly show a toast to confirm navigation is happening
+                context?.let {
+                    Toast.makeText(
+                        it,
+                        "Opening $tabDisplayName tab...",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+                
+                // Add small delay to ensure UI updates before navigation
+                view?.postDelayed({
+                    // Use safe navigation pattern with try/catch
+                    try {
+                        // Navigate to the tab detail fragment with explicit flags
+                        findNavController().navigate(
+                            action.actionId,
+                            action.arguments,
+                            androidx.navigation.navOptions {
+                                anim {
+                                    enter = android.R.anim.fade_in
+                                    exit = android.R.anim.fade_out
+                                }
+                                launchSingleTop = true
+                            }
+                        )
+                        Log.i(TAG, "Navigation to $tabDisplayName successfully triggered")
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Navigation failed in delayed execution: ${e.message}", e)
+                        showFallbackNavigation(url, tabDisplayName)
+                    }
+                }, 100)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error during navigation preparation: ${e.message}", e)
+                showFallbackNavigation(url, tabDisplayName)
+            }
 
         } catch (e: Exception) {
             // Log any exceptions
@@ -196,6 +234,40 @@ class ConnectionViewerFragment : Fragment() {
                     Toast.LENGTH_LONG
                 ).show()
             }
+        }
+    }
+    
+    /**
+     * Fallback navigation method if regular navigation fails
+     */
+    private fun showFallbackNavigation(url: String, tabDisplayName: String) {
+        Log.w(TAG, "Using fallback navigation for $tabDisplayName")
+        context?.let { ctx ->
+            // Show a dialog to inform the user
+            android.app.AlertDialog.Builder(ctx)
+                .setTitle("Navigation Issue")
+                .setMessage("There was an issue navigating to the $tabDisplayName tab. Would you like to try an alternative method?")
+                .setPositiveButton("Yes") { _, _ ->
+                    // Manually construct the bundle
+                    val bundle = Bundle().apply {
+                        putString("url", url)
+                        putString("tabName", tabDisplayName)
+                        putString("tabSelector", tabDisplayName.lowercase().replace(" ", "_"))
+                        putString("username", args.username)
+                        putString("password", args.password)
+                    }
+                    
+                    // Direct navigation to fragment
+                    try {
+                        findNavController().navigate(R.id.nav_tab_detail, bundle)
+                        Log.i(TAG, "Fallback navigation completed")
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Fallback navigation failed: ${e.message}", e)
+                        Toast.makeText(ctx, "Navigation failed: ${e.message}", Toast.LENGTH_LONG).show()
+                    }
+                }
+                .setNegativeButton("No", null)
+                .show()
         }
     }
 

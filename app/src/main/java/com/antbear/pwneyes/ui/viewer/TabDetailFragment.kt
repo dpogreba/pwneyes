@@ -2,6 +2,7 @@ package com.antbear.pwneyes.ui.viewer
 
 import android.graphics.Bitmap
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -37,6 +38,8 @@ class TabDetailFragment : Fragment() {
     ): View {
         _binding = FragmentTabDetailBinding.inflate(inflater, container, false)
         
+        Log.d("TabDetailFragment", "Creating TabDetailFragment view with args: ${args.tabName}, URL: ${args.url}")
+        
         // Set up toolbar with back navigation
         setupToolbar()
         
@@ -45,6 +48,13 @@ class TabDetailFragment : Fragment() {
         
         // Set up control buttons
         setupControlButtons()
+        
+        // Add a visual indicator that we're in TabDetailFragment for troubleshooting
+        binding.tabDetailIndicator.apply {
+            text = "${args.tabName} (${args.url})"
+            setBackgroundColor(android.graphics.Color.parseColor("#4CAF50")) // Green background
+            setTextColor(android.graphics.Color.WHITE)
+        }
         
         // Restore WebView state if it exists
         webViewState?.let { state ->

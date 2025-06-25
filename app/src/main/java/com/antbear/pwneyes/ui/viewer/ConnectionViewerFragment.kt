@@ -183,34 +183,9 @@ class ConnectionViewerFragment : Fragment() {
             
             // Special case for plugins tab - use native UI fragment in separate activity
             if (cleanTabPath == "plugins") {
-                Log.d(TAG, "🔹 PLUGINS TAB DETECTED - Launching ContentContainerActivity")
-                try {
-                    // Create arguments bundle for the fragment
-                    val fragmentArgs = Bundle().apply {
-                        putString("connectionName", args.name)
-                        putString("connectionBaseUrl", baseUrl)
-                        putString("username", args.username)
-                        putString("password", args.password)
-                    }
-                    
-                    // Create an intent to start the ContentContainerActivity
-                    val intent = ContentContainerActivity.createIntent(
-                        requireContext(),
-                        R.id.nav_plugins,
-                        fragmentArgs
-                    )
-                    
-                    // Start the activity
-                    Log.d(TAG, "🔹 Starting ContentContainerActivity with Plugins fragment")
-                    startActivity(intent)
-                    Log.i(TAG, "✅ Successfully launched ContentContainerActivity for Plugins")
-                    return
-                } catch (e: Exception) {
-                    Log.e(TAG, "❌ Error launching ContentContainerActivity: ${e.javaClass.simpleName} - ${e.message}")
-                    Log.e(TAG, "❌ Stack trace: ${e.stackTraceToString()}")
-                    Log.e(TAG, "❌ Falling back to WebView display")
-                    // Continue with WebView fallback
-                }
+                Log.d(TAG, "🔹 PLUGINS TAB DETECTED (from button click) - Launching ContentContainerActivity")
+                handlePluginsNavigation()
+                return
             }
             
             // For other tabs, use the regular TabDetailFragment with WebView
@@ -441,7 +416,15 @@ class ConnectionViewerFragment : Fragment() {
             
             webViewClient = object : WebViewClient() {
                 override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
-                    // Keep all navigation within the WebView
+                    // Check if the URL is for the plugins tab
+                    val url = request?.url?.toString() ?: ""
+                    if (url.contains("/plugins")) {
+                        Log.d(TAG, "🔍 URL Navigation detected to plugins: $url")
+                        handlePluginsNavigation()
+                        return true // We handled the URL change
+                    }
+                    
+                    // For all other URLs, keep navigation within WebView
                     return false
                 }
 
@@ -456,6 +439,15 @@ class ConnectionViewerFragment : Fragment() {
                     
                     // Save last URL in ViewModel for state restoration
                     viewModel.lastUrl = url
+                    
+                    // Check if this is a plugins page that we should handle natively
+                    url?.let {
+                        if (it.contains("/plugins")) {
+                            Log.d(TAG, "🔍 Page finished loading with plugins URL: $it")
+                            handlePluginsNavigation()
+                            return
+                        }
+                    }
                     
                     // Apply WebView enhancements
                     webViewManager.enhanceRendering(view ?: return)
@@ -568,6 +560,63 @@ class ConnectionViewerFragment : Fragment() {
         if (!requireActivity().isChangingConfigurations) {
             binding.webView.destroy()
             // ViewModel will be automatically cleared when the fragment is destroyed
+        }
+    }
+    
+    /**
+     * Handle navigation to the Plugins screen in ContentContainerActivity
+     * This is called from multiple places:
+     * 1. When the user clicks the Plugins tab button
+     * 2. When URL navigation to /plugins is detected
+     * 3. When a page with /plugins in the URL finishes loading
+     */
+    private fun handlePluginsNavigation() {
+        Log.d(TAG, "🔹 handlePluginsNavigation - Launching ContentContainerActivity")
+        try {
+            // Extract the base URL (without the path part)
+            val baseUrl = try {
+                val parsedUrl = java.net.URL(args.url)
+                val protocol = parsedUrl.protocol
+                val host = parsedUrl.host
+                val port = if (parsedUrl.port == -1) "" else ":${parsedUrl.port}"
+                "$protocol://$host$port"
+            } catch (e: Exception) {
+                // Fallback to original URL if parsing fails
+                args.url
+            }
+            
+            // Create arguments bundle for the fragment
+            val fragmentArgs = Bundle().apply {
+                putString("connectionName", args.name)
+                putString("connectionBaseUrl", baseUrl)
+                putString("username", args.username)
+                putString("password", args.password)
+            }
+            
+            // Create an intent to start the ContentContainerActivity
+            val intent = ContentContainerActivity.createIntent(
+                requireContext(),
+                R.id.nav_plugins,
+                fragmentArgs
+            )
+            
+            // Start the activity
+            Log.d(TAG, "🔹 Starting ContentContainerActivity with Plugins fragment")
+            startActivity(intent)
+            Log.i(TAG, "✅ Successfully launched ContentContainerActivity for Plugins")
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ Error launching ContentContainerActivity: ${e.javaClass.simpleName} - ${e.message}")
+            Log.e(TAG, "❌ Stack trace: ${e.stackTraceToString()}")
+            Log.e(TAG, "❌ Falling back to WebView display")
+            
+            // If we hit an exception, don't attempt to navigate away from the current page
+            context?.let {
+                Toast.makeText(
+                    it,
+                    "Error launching Plugins screen: ${e.message}",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
         }
     }
 }

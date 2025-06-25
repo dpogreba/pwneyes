@@ -46,12 +46,7 @@ class TabDetailFragment : Fragment() {
         // Set up control buttons
         setupControlButtons()
         
-        // Add a visual indicator that we're in TabDetailFragment for troubleshooting
-        binding.tabDetailIndicator.apply {
-            text = "${args.tabName} (${args.url})"
-            setBackgroundColor(android.graphics.Color.parseColor("#4CAF50")) // Green background
-            setTextColor(android.graphics.Color.WHITE)
-        }
+        // The tab indicator is now set up in setupToolbar() method
         
         // Restore WebView state from ViewModel if it exists
         viewModel.webViewState?.let { state ->
@@ -62,9 +57,16 @@ class TabDetailFragment : Fragment() {
     }
     
     private fun setupToolbar() {
+        // Set up the toolbar with connection name
+        val title = if (args.connectionName.isNotEmpty()) {
+            "${args.connectionName} - ${args.tabName}"
+        } else {
+            args.tabName
+        }
+        
         binding.toolbar.apply {
             // Clear the title since we're using a custom title layout
-            title = ""
+            this.title = ""
             setNavigationOnClickListener {
                 findNavController().navigateUp()
             }
@@ -74,21 +76,31 @@ class TabDetailFragment : Fragment() {
         binding.backArrow.setOnClickListener {
             findNavController().navigateUp()
         }
-
-        // Format the URL properly for the indicator
+        
+        // Set the connection name next to back button
+        val titleTextView = binding.toolbar.findViewById<android.widget.TextView>(android.R.id.title)
+        titleTextView?.text = title
+        
+        // Format the URL properly for the indicator showing IP_ADDRESS:PORT/path
         val formattedUrl = try {
             val url = java.net.URL(args.url)
             val host = url.host
             val port = if (url.port == -1) "" else ":${url.port}"
-            val path = if (url.path.isEmpty() || url.path == "/") "/plugins" else url.path
+            val path = if (url.path.isEmpty() || url.path == "/") "/${args.tabName.lowercase()}" else url.path
             
             "$host$port$path"
         } catch (e: Exception) {
-            "${args.url}/plugins"
+            "${args.connectionBaseUrl}/${args.tabName.lowercase()}"
         }
         
-        // Set the URL in the indicator
-        binding.tabDetailIndicator.text = formattedUrl
+        // Set the URL in the indicator with enhanced visibility
+        binding.tabDetailIndicator.apply {
+            text = formattedUrl
+            setTextColor(android.graphics.Color.WHITE)
+            setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 16f)
+            setPadding(16, 12, 16, 12)
+            setBackgroundColor(android.graphics.Color.parseColor("#4CAF50")) // Green background
+        }
     }
     
     private fun setupControlButtons() {

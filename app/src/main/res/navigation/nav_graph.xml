@@ -106,6 +106,12 @@
             android:name="tabSelector"
             app:argType="string" />
         <argument
+            android:name="connectionName"
+            app:argType="string" />
+        <argument
+            android:name="connectionBaseUrl"
+            app:argType="string" />
+        <argument
             android:name="username"
             app:argType="string"
             android:defaultValue="" />

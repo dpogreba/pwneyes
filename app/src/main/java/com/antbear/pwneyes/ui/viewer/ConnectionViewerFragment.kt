@@ -165,11 +165,25 @@ class ConnectionViewerFragment : Fragment() {
             Log.i(TAG, "Navigating directly to $tabDisplayName tab")
             Log.i(TAG, "URL: $url")
 
+            // Extract the base URL (without the path part)
+            val baseUrl = try {
+                val parsedUrl = java.net.URL(args.url)
+                val protocol = parsedUrl.protocol
+                val host = parsedUrl.host
+                val port = if (parsedUrl.port == -1) "" else ":${parsedUrl.port}"
+                "$protocol://$host$port"
+            } catch (e: Exception) {
+                // Fallback to original URL if parsing fails
+                args.url
+            }
+            
             // Create navigation action with explicit details
             val action = ConnectionViewerFragmentDirections.actionConnectionViewerToTabDetail(
                 url = url,
                 tabName = tabDisplayName,
                 tabSelector = cleanTabPath.replace("/", "_"),
+                connectionName = args.name,
+                connectionBaseUrl = baseUrl,
                 username = args.username,
                 password = args.password
             )
@@ -243,10 +257,23 @@ class ConnectionViewerFragment : Fragment() {
                 .setMessage("There was an issue navigating to the $tabDisplayName tab. Would you like to try an alternative method?")
                 .setPositiveButton("Yes") { _, _ ->
                     // Manually construct the bundle
+                    // Extract the base URL for fallback navigation too
+                    val baseUrl = try {
+                        val parsedUrl = java.net.URL(args.url)
+                        val protocol = parsedUrl.protocol
+                        val host = parsedUrl.host
+                        val port = if (parsedUrl.port == -1) "" else ":${parsedUrl.port}"
+                        "$protocol://$host$port"
+                    } catch (e: Exception) {
+                        args.url
+                    }
+                    
                     val bundle = Bundle().apply {
                         putString("url", url)
                         putString("tabName", tabDisplayName)
                         putString("tabSelector", tabDisplayName.lowercase().replace(" ", "_"))
+                        putString("connectionName", args.name)
+                        putString("connectionBaseUrl", baseUrl)
                         putString("username", args.username)
                         putString("password", args.password)
                     }

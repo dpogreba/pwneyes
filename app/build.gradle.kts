@@ -260,6 +260,8 @@ dependencies {
     implementation("com.google.android.gms:play-services-ads:22.6.0")
     // WorkManager for background tasks
     implementation("androidx.work:work-runtime-ktx:2.7.1")
+    // GridLayout support for native UI layouts
+    implementation("androidx.gridlayout:gridlayout:1.0.0")
     
     // Testing
     testImplementation("junit:junit:4.13.2")

@@ -15,6 +15,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.antbear.pwneyes.R
 import com.antbear.pwneyes.databinding.FragmentConnectionViewerBinding
+import com.antbear.pwneyes.ui.content.ContentContainerActivity
 import kotlinx.coroutines.launch
 import java.util.Base64
 
@@ -180,33 +181,32 @@ class ConnectionViewerFragment : Fragment() {
                 args.url
             }
             
-            // Special case for plugins tab - use native UI fragment
+            // Special case for plugins tab - use native UI fragment in separate activity
             if (cleanTabPath == "plugins") {
-                Log.d(TAG, "🔹 PLUGINS TAB DETECTED - Attempting to navigate to native UI")
+                Log.d(TAG, "🔹 PLUGINS TAB DETECTED - Launching ContentContainerActivity")
                 try {
-                    Log.d(TAG, "🔹 Navigation attempt starting - target: R.id.nav_plugins")
-                    Log.d(TAG, "🔹 Arguments being passed - connectionName: ${args.name}, baseUrl: $baseUrl")
-                    // Navigate to our new native Plugins fragment
-                    findNavController().navigate(
+                    // Create arguments bundle for the fragment
+                    val fragmentArgs = Bundle().apply {
+                        putString("connectionName", args.name)
+                        putString("connectionBaseUrl", baseUrl)
+                        putString("username", args.username)
+                        putString("password", args.password)
+                    }
+                    
+                    // Create an intent to start the ContentContainerActivity
+                    val intent = ContentContainerActivity.createIntent(
+                        requireContext(),
                         R.id.nav_plugins,
-                        Bundle().apply {
-                            putString("connectionName", args.name)
-                            putString("connectionBaseUrl", baseUrl)
-                            putString("username", args.username)
-                            putString("password", args.password)
-                        },
-                        androidx.navigation.navOptions {
-                            anim {
-                                enter = android.R.anim.fade_in
-                                exit = android.R.anim.fade_out
-                            }
-                            launchSingleTop = true
-                        }
+                        fragmentArgs
                     )
-                    Log.i(TAG, "✅ Successfully navigated to native Plugins UI")
+                    
+                    // Start the activity
+                    Log.d(TAG, "🔹 Starting ContentContainerActivity with Plugins fragment")
+                    startActivity(intent)
+                    Log.i(TAG, "✅ Successfully launched ContentContainerActivity for Plugins")
                     return
                 } catch (e: Exception) {
-                    Log.e(TAG, "❌ Error navigating to native Plugins UI: ${e.javaClass.simpleName} - ${e.message}")
+                    Log.e(TAG, "❌ Error launching ContentContainerActivity: ${e.javaClass.simpleName} - ${e.message}")
                     Log.e(TAG, "❌ Stack trace: ${e.stackTraceToString()}")
                     Log.e(TAG, "❌ Falling back to WebView display")
                     // Continue with WebView fallback

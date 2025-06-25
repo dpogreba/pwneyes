@@ -46,6 +46,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        
+        <!-- Content Container Activity for full-screen fragment experiences -->
+        <activity
+            android:name=".ui.content.ContentContainerActivity"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+            android:theme="@style/Theme.PwnEyes.NoActionBar"
+            android:exported="false" />
     </application>
 
 </manifest>

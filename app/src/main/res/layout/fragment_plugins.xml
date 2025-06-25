@@ -1,0 +1,400 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white">
+
+    <!-- Toolbar with back button and title -->
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:elevation="4dp"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:navigationIcon="@android:drawable/ic_menu_revert"
+        app:title="">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <ImageView
+                android:id="@+id/backArrow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@android:drawable/ic_menu_revert"
+                android:contentDescription="Back"/>
+
+            <TextView
+                android:id="@+id/connectionTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="Connection - Plugins"
+                android:textAppearance="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
+                android:textColor="@android:color/white" />
+        </LinearLayout>
+    </androidx.appcompat.widget.Toolbar>
+
+    <!-- URL indicator bar -->
+    <TextView
+        android:id="@+id/urlIndicator"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#4CAF50"
+        android:padding="8dp"
+        android:textColor="@android:color/white"
+        android:text="192.168.1.1:8080/plugins"
+        android:textSize="14sp"
+        app:layout_constraintTop_toBottomOf="@id/toolbar" />
+
+    <!-- Tab bar -->
+    <HorizontalScrollView
+        android:id="@+id/tabScrollView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#F0F0F0"
+        android:scrollbars="none"
+        app:layout_constraintTop_toBottomOf="@id/urlIndicator">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/homeTab"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:drawableStart="@android:drawable/ic_menu_compass"
+                android:text="Home" />
+
+            <Button
+                android:id="@+id/inboxTab"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:drawableStart="@android:drawable/ic_menu_agenda"
+                android:text="Inbox" />
+
+            <Button
+                android:id="@+id/newTab"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:drawableStart="@android:drawable/ic_menu_edit"
+                android:text="New" />
+
+            <Button
+                android:id="@+id/profileTab"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:drawableStart="@android:drawable/ic_menu_info_details"
+                android:text="Profile" />
+
+            <Button
+                android:id="@+id/peersTab"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:drawableStart="@android:drawable/ic_menu_my_calendar"
+                android:text="Peers" />
+
+            <Button
+                android:id="@+id/pluginsTab"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:drawableStart="@android:drawable/ic_menu_manage"
+                android:text="Plugins"
+                android:background="#E0E0E0" />
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <!-- Content area with GridLayout for plugins -->
+    <androidx.gridlayout.widget.GridLayout
+        android:id="@+id/pluginsGrid"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:padding="8dp"
+        app:columnCount="2"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tabScrollView"
+        app:rowCount="3">
+
+        <!-- Plugin Card 1: aircrackonly -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/aircrackPlugin"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="2dp"
+            app:layout_columnWeight="1"
+            app:layout_rowWeight="1">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="aircrackonly"
+                    android:textAlignment="center"
+                    android:textColor="#2196F3"
+                    android:textSize="18sp" />
+
+                <Switch
+                    android:id="@+id/aircrackSwitch"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:checked="true"
+                    android:text="Enabled" />
+
+                <Button
+                    android:id="@+id/aircrackUpgrade"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="Upgrade" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Plugin Card 2: auto-tune -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/autotunePlugin"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="2dp"
+            app:layout_columnWeight="1"
+            app:layout_rowWeight="1">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="auto-tune"
+                    android:textAlignment="center"
+                    android:textColor="#2196F3"
+                    android:textSize="18sp" />
+
+                <Switch
+                    android:id="@+id/autotuneSwitch"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:checked="true"
+                    android:text="Enabled" />
+
+                <Button
+                    android:id="@+id/autotuneUpgrade"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="Upgrade" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Plugin Card 3: auto-update -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/autoupdatePlugin"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="2dp"
+            app:layout_columnWeight="1"
+            app:layout_rowWeight="1">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="auto-update"
+                    android:textAlignment="center"
+                    android:textColor="#2196F3"
+                    android:textSize="18sp" />
+
+                <Switch
+                    android:id="@+id/autoupdateSwitch"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:checked="true"
+                    android:text="Enabled" />
+
+                <Button
+                    android:id="@+id/autoupdateUpgrade"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="Upgrade" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Plugin Card 4: banthex -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/banthexPlugin"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="2dp"
+            app:layout_columnWeight="1"
+            app:layout_rowWeight="1">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="banthex"
+                    android:textAlignment="center"
+                    android:textColor="#2196F3"
+                    android:textSize="18sp" />
+
+                <Switch
+                    android:id="@+id/banthexSwitch"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:checked="true"
+                    android:text="Enabled" />
+
+                <Button
+                    android:id="@+id/banthexUpgrade"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="Upgrade" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Plugin Card 5: bt-tether -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/bttetherPlugin"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="2dp"
+            app:layout_columnWeight="1"
+            app:layout_rowWeight="1">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="bt-tether"
+                    android:textAlignment="center"
+                    android:textColor="#2196F3"
+                    android:textSize="18sp" />
+
+                <Switch
+                    android:id="@+id/bttetherSwitch"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:checked="true"
+                    android:text="Enabled" />
+
+                <Button
+                    android:id="@+id/bttetherUpgrade"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="Upgrade" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Plugin Card 6: discohash -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/discohashPlugin"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="2dp"
+            app:layout_columnWeight="1"
+            app:layout_rowWeight="1">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="discohash"
+                    android:textAlignment="center"
+                    android:textColor="#2196F3"
+                    android:textSize="18sp" />
+
+                <Switch
+                    android:id="@+id/discohashSwitch"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:checked="true"
+                    android:text="Enabled" />
+
+                <Button
+                    android:id="@+id/discohashUpgrade"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="Upgrade" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+    </androidx.gridlayout.widget.GridLayout>
+
+    <!-- Loading progress indicator -->
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/tabScrollView" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

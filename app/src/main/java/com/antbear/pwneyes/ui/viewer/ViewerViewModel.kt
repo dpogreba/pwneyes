@@ -16,6 +16,7 @@ class ViewerViewModel(private val savedStateHandle: SavedStateHandle) : ViewMode
         private const val KEY_SCROLL_X = "scroll_x"
         private const val KEY_SCROLL_Y = "scroll_y"
         private const val KEY_WEB_VIEW_SCALE = "web_view_scale"
+        private const val KEY_PLUGIN_STATES = "plugin_states"
     }
 
     // WebView state bundle
@@ -51,4 +52,32 @@ class ViewerViewModel(private val savedStateHandle: SavedStateHandle) : ViewMode
         set(value) {
             savedStateHandle[KEY_WEB_VIEW_SCALE] = value
         }
+    
+    /**
+     * Get the stored plugin states
+     * @return Map of plugin names to their enabled/disabled state
+     */
+    @Suppress("UNCHECKED_CAST")
+    fun getPluginStates(): Map<String, Boolean>? {
+        return savedStateHandle.get<Map<String, Boolean>>(KEY_PLUGIN_STATES)
+    }
+    
+    /**
+     * Update a single plugin's state
+     * @param pluginName Name of the plugin
+     * @param enabled Whether the plugin is enabled
+     */
+    fun updatePluginState(pluginName: String, enabled: Boolean) {
+        val currentStates = getPluginStates()?.toMutableMap() ?: mutableMapOf()
+        currentStates[pluginName] = enabled
+        savedStateHandle[KEY_PLUGIN_STATES] = currentStates
+    }
+    
+    /**
+     * Update all plugin states at once
+     * @param states Map of plugin names to their enabled/disabled state
+     */
+    fun updatePluginStates(states: Map<String, Boolean>) {
+        savedStateHandle[KEY_PLUGIN_STATES] = states
+    }
 }

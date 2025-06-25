@@ -177,7 +177,35 @@ class ConnectionViewerFragment : Fragment() {
                 args.url
             }
             
-            // Create navigation action with explicit details
+            // Special case for plugins tab - use native UI fragment
+            if (cleanTabPath == "plugins") {
+                try {
+                    // Navigate to our new native Plugins fragment
+                    findNavController().navigate(
+                        R.id.nav_plugins,
+                        Bundle().apply {
+                            putString("connectionName", args.name)
+                            putString("connectionBaseUrl", baseUrl)
+                            putString("username", args.username)
+                            putString("password", args.password)
+                        },
+                        androidx.navigation.navOptions {
+                            anim {
+                                enter = android.R.anim.fade_in
+                                exit = android.R.anim.fade_out
+                            }
+                            launchSingleTop = true
+                        }
+                    )
+                    Log.i(TAG, "Navigated to native Plugins UI")
+                    return
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error navigating to native Plugins UI, falling back to WebView", e)
+                    // Continue with WebView fallback
+                }
+            }
+            
+            // For other tabs, use the regular TabDetailFragment with WebView
             val action = ConnectionViewerFragmentDirections.actionConnectionViewerToTabDetail(
                 url = url,
                 tabName = tabDisplayName,

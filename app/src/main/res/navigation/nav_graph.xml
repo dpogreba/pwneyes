@@ -120,4 +120,33 @@
             app:argType="string"
             android:defaultValue="" />
     </fragment>
+    
+    <!-- Plugins Fragment (Native UI) -->
+    <fragment
+        android:id="@+id/nav_plugins"
+        android:name="com.antbear.pwneyes.ui.plugins.PluginsFragment"
+        android:label="Plugins">
+        <argument
+            android:name="connectionName"
+            app:argType="string" />
+        <argument
+            android:name="connectionBaseUrl"
+            app:argType="string" />
+        <argument
+            android:name="username"
+            app:argType="string"
+            android:defaultValue="" />
+        <argument
+            android:name="password"
+            app:argType="string"
+            android:defaultValue="" />
+        <!-- Navigation action to go to Tab Detail from Plugins -->
+        <action
+            android:id="@+id/actionPluginsToTabDetail"
+            app:destination="@id/nav_tab_detail"
+            app:enterAnim="@android:anim/fade_in"
+            app:exitAnim="@android:anim/fade_out"
+            app:popEnterAnim="@android:anim/fade_in"
+            app:popExitAnim="@android:anim/fade_out" />
+    </fragment>
 </navigation>

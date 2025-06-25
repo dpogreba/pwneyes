@@ -3,6 +3,8 @@ package com.antbear.pwneyes.ui.plugins
 import android.content.Context
 import android.graphics.Bitmap
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -76,10 +78,56 @@ class PluginsFragment : Fragment() {
             
             setupToolbar()
             setupTabs()
+            setupNativeUI()
             setupWebView()
             Log.d(TAG, "🔵 All UI setup methods completed successfully")
         } catch (e: Exception) {
             Log.e(TAG, "❌ Error during UI setup: ${e.message}")
+            Log.e(TAG, "❌ Stack trace: ${e.stackTraceToString()}")
+        }
+    }
+    
+    private fun setupNativeUI() {
+        Log.d(TAG, "🔵 Setting up native UI elements")
+        
+        try {
+            // Update header text with connection name
+            binding.pluginsHeaderText.text = "Available Plugins for ${args.connectionName}"
+            
+            // Setup refresh button
+            binding.refreshPluginsButton.setOnClickListener {
+                Log.d(TAG, "🔵 Refresh button clicked")
+                binding.pluginsStatusText.text = "Refreshing plugins..."
+                binding.pluginsWebView.reload()
+                
+                // Show status message briefly
+                Handler(Looper.getMainLooper()).postDelayed({
+                    binding.pluginsStatusText.text = "Plugins refreshed"
+                }, 2000)
+            }
+            
+            // Setup manage button
+            binding.managePluginsButton.setOnClickListener {
+                Log.d(TAG, "🔵 Manage button clicked")
+                binding.pluginsStatusText.text = "Managing plugins..."
+                
+                // In a real implementation, this would open a dialog or another screen
+                // For now, we'll just show a toast
+                Toast.makeText(
+                    requireContext(),
+                    "Plugin management interface would open here",
+                    Toast.LENGTH_SHORT
+                ).show()
+                
+                // Reset status message after a delay
+                Handler(Looper.getMainLooper()).postDelayed({
+                    binding.pluginsStatusText.text = "Active plugins are displayed below"
+                }, 2000)
+            }
+            
+            Log.d(TAG, "🔵 Native UI setup completed successfully")
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ Error setting up native UI: ${e.message}")
             Log.e(TAG, "❌ Stack trace: ${e.stackTraceToString()}")
         }
     }

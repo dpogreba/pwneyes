@@ -121,6 +121,69 @@
         </LinearLayout>
     </HorizontalScrollView>
 
+    <!-- Native UI container -->
+    <LinearLayout
+        android:id="@+id/nativeUIContainer"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:background="#F8F8F8"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tabScrollView">
+
+        <!-- Native UI header -->
+        <TextView
+            android:id="@+id/pluginsHeaderText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Available Plugins"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="#333333" />
+
+        <!-- Native UI status indicator -->
+        <TextView
+            android:id="@+id/pluginsStatusText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Active plugins are displayed below"
+            android:textSize="14sp"
+            android:textColor="#666666" />
+
+        <!-- Native UI controls -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="12dp">
+
+            <Button
+                android:id="@+id/refreshPluginsButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Refresh"
+                android:layout_marginEnd="8dp" />
+
+            <Button
+                android:id="@+id/managePluginsButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Manage" />
+        </LinearLayout>
+
+        <!-- Divider -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#E0E0E0"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp" />
+
+    </LinearLayout>
+
     <!-- WebView container for plugins content -->
     <WebView
         android:id="@+id/pluginsWebView"
@@ -129,7 +192,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tabScrollView" />
+        app:layout_constraintTop_toBottomOf="@id/nativeUIContainer" />
 
     <!-- Loading progress indicator -->
     <ProgressBar

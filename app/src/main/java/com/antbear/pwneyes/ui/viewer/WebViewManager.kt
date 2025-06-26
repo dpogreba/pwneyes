@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.antbear.pwneyes.ui.viewer
 
 import android.content.Context
@@ -65,14 +67,12 @@ class WebViewManager(private val context: Context) {
                 allowFileAccess = true
                 
                 // Security settings for file access
-                // Use consistent approach for all Android versions with proper suppression
-                @Suppress("DEPRECATION")
+                // Using deprecated properties but they're suppressed at file level
                 this.allowUniversalAccessFromFileURLs = false
-                @Suppress("DEPRECATION")
                 this.allowFileAccessFromFileURLs = false
                 
-                // Note: There's no direct non-deprecated replacement for these in Android 11+
-                // We could use WebViewAssetLoader for more complex local file access scenarios
+                // Note: While these properties are deprecated, there's no direct replacement
+                // For advanced file access scenarios, consider using androidx.webkit.WebViewAssetLoader
                 
                 // Enable JavaScript dialogs
                 javaScriptCanOpenWindowsAutomatically = true

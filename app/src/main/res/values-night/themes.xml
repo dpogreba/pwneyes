@@ -2,19 +2,21 @@
     <!-- Base application theme -->
     <style name="Theme.PwnEyes" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
         <!-- Primary brand color -->
-        <item name="colorPrimary">@color/purple_200</item>
-        <item name="colorPrimaryVariant">@color/purple_700</item>
+        <item name="colorPrimary">@color/blue_200</item>
+        <item name="colorPrimaryVariant">@color/blue_700</item>
         <item name="colorOnPrimary">@color/black</item>
         <!-- Secondary brand color -->
-        <item name="colorSecondary">@color/teal_200</item>
-        <item name="colorSecondaryVariant">@color/teal_200</item>
+        <item name="colorSecondary">@color/green_200</item>
+        <item name="colorSecondaryVariant">@color/green_200</item>
         <item name="colorOnSecondary">@color/black</item>
+        <!-- Accent color -->
+        <item name="colorAccent">@color/amber_accent</item>
         <!-- Background color -->
         <item name="android:windowBackground">@color/black</item>
         <!-- Status bar color -->
         <item name="android:statusBarColor" tools:targetApi="21">?attr/colorPrimaryVariant</item>
         <!-- Navigation bar color -->
-        <item name="android:navigationBarColor">@color/teal_200</item>
+        <item name="android:navigationBarColor">@color/blue_700</item>
     </style>
 
     <!-- No Action Bar Theme -->

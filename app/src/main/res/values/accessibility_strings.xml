@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Accessibility Preferences -->
+    <string name="pref_category_accessibility">Accessibility</string>
+    
+    <!-- Font Size -->
+    <string name="pref_font_size_title">Font Size</string>
+    <string name="pref_font_size_summary">Adjust text size throughout the app</string>
+    <string-array name="font_size_options">
+        <item>Small</item>
+        <item>Normal (Default)</item>
+        <item>Large</item>
+        <item>Extra Large</item>
+    </string-array>
+    <string-array name="font_size_values">
+        <item>small</item>
+        <item>normal</item>
+        <item>large</item>
+        <item>extra_large</item>
+    </string-array>
+    
+    <!-- High Contrast Mode -->
+    <string name="pref_high_contrast_title">High Contrast Mode</string>
+    <string name="pref_high_contrast_summary">Enhance text visibility with improved contrast</string>
+    
+    <!-- Text-to-Speech -->
+    <string name="pref_tts_title">Text-to-Speech Feedback</string>
+    <string name="pref_tts_summary">Enable spoken feedback for important actions</string>
+    
+    <!-- Touch & UI Elements -->
+    <string name="pref_touch_target_title">Larger Touch Targets</string>
+    <string name="pref_touch_target_summary">Make buttons and interactive elements easier to tap</string>
+    
+    <!-- Content Descriptions -->
+    <string name="pref_content_description_title">Enhanced Screen Reader Support</string>
+    <string name="pref_content_description_summary">Improve compatibility with screen readers</string>
+    
+    <!-- Reduce Animations -->
+    <string name="pref_reduce_animations_title">Reduce Animations</string>
+    <string name="pref_reduce_animations_summary">Simplify visual transitions and animations</string>
+</resources>

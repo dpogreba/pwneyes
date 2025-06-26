@@ -15,6 +15,55 @@
             android:entryValues="@array/theme_values"
             app:iconSpaceReserved="false" />
     </PreferenceCategory>
+    
+    <PreferenceCategory
+        android:title="@string/pref_category_accessibility"
+        app:iconSpaceReserved="false">
+        
+        <ListPreference
+            android:key="font_size_preference"
+            android:title="@string/pref_font_size_title"
+            android:summary="@string/pref_font_size_summary"
+            android:defaultValue="normal"
+            android:entries="@array/font_size_options"
+            android:entryValues="@array/font_size_values"
+            app:iconSpaceReserved="false" />
+            
+        <SwitchPreference
+            android:key="high_contrast_mode"
+            android:title="@string/pref_high_contrast_title"
+            android:summary="@string/pref_high_contrast_summary"
+            android:defaultValue="false"
+            app:iconSpaceReserved="false" />
+            
+        <SwitchPreference
+            android:key="text_to_speech"
+            android:title="@string/pref_tts_title"
+            android:summary="@string/pref_tts_summary"
+            android:defaultValue="false"
+            app:iconSpaceReserved="false" />
+            
+        <SwitchPreference
+            android:key="larger_touch_targets"
+            android:title="@string/pref_touch_target_title"
+            android:summary="@string/pref_touch_target_summary"
+            android:defaultValue="false"
+            app:iconSpaceReserved="false" />
+            
+        <SwitchPreference
+            android:key="screen_reader_support"
+            android:title="@string/pref_content_description_title"
+            android:summary="@string/pref_content_description_summary"
+            android:defaultValue="false"
+            app:iconSpaceReserved="false" />
+            
+        <SwitchPreference
+            android:key="reduce_animations"
+            android:title="@string/pref_reduce_animations_title"
+            android:summary="@string/pref_reduce_animations_summary"
+            android:defaultValue="false"
+            app:iconSpaceReserved="false" />
+    </PreferenceCategory>
 
     <PreferenceCategory
         android:title="@string/pref_category_data"

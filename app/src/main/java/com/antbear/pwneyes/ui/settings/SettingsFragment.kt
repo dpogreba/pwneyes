@@ -22,6 +22,7 @@ import com.antbear.pwneyes.PwnEyesApplication
 import com.antbear.pwneyes.R
 import com.antbear.pwneyes.billing.BillingManager
 import com.antbear.pwneyes.ui.home.SharedViewModel
+import com.antbear.pwneyes.util.AccessibilityUtils
 
 class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedPreferenceChangeListener {
     private val TAG = "SettingsFragment"
@@ -29,12 +30,16 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
     private lateinit var sharedPreferences: SharedPreferences
     private var billingManager: BillingManager? = null
     private var isPremium = false
+    private lateinit var accessibilityUtils: AccessibilityUtils
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.preferences, rootKey)
         
         // Initialize SharedPreferences
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext())
+        
+        // Initialize AccessibilityUtils
+        accessibilityUtils = AccessibilityUtils(requireContext())
         
         // Initialize BillingManager
         try {
@@ -242,16 +247,43 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
                 manager.connectionState.removeObservers(this)
                 manager.lastErrorMessage.removeObservers(this)
             }
+            
+            // Shut down text-to-speech resources
+            accessibilityUtils.shutdown()
         } catch (e: Exception) {
-            Log.e(TAG, "Error removing observers in onDestroy", e)
+            Log.e(TAG, "Error cleaning up resources in onDestroy", e)
         }
         
         super.onDestroy()
     }
     
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        if (key == "theme_preference" && sharedPreferences != null) {
-            applyTheme(sharedPreferences)
+        if (sharedPreferences == null) return
+        
+        when (key) {
+            "theme_preference" -> {
+                applyTheme(sharedPreferences)
+            }
+            "font_size_preference" -> {
+                // When font size changes, we need to recreate the activity for it to take effect globally
+                Toast.makeText(requireContext(), "Font size will apply after restart", Toast.LENGTH_SHORT).show()
+            }
+            "high_contrast_mode" -> {
+                // Recreate to apply high contrast mode
+                activity?.recreate()
+            }
+            "text_to_speech" -> {
+                if (sharedPreferences.getBoolean(key, false)) {
+                    // Initialize TTS when enabled
+                    Toast.makeText(requireContext(), "Text-to-speech enabled", Toast.LENGTH_SHORT).show()
+                    // Speak a confirmation
+                    accessibilityUtils.speak("Text to speech is now enabled")
+                }
+            }
+            "larger_touch_targets", "screen_reader_support", "reduce_animations" -> {
+                // For these settings, we need to recreate the activity to apply changes
+                Toast.makeText(requireContext(), "Changes will apply after restart", Toast.LENGTH_SHORT).show()
+            }
         }
     }
     

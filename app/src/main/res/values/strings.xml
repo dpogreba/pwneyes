@@ -29,6 +29,26 @@
     <string name="empty_connections_message">You haven\'t added any connections. Add your first connection to get started.</string>
     <string name="empty_connections_action">Add Connection</string>
     
+    <!-- Dialogs -->
+    <string name="dialog_erase_all_title">Erase All Data?</string>
+    <string name="dialog_erase_all_message">This will delete all your connections and cannot be undone. Are you sure?</string>
+    <string name="dialog_erase_all_confirm">Erase All</string>
+    <string name="dialog_cancel">Cancel</string>
+    
+    <!-- Toasts -->
+    <string name="toast_connections_deleted">All connections have been deleted</string>
+    <string name="toast_billing_unavailable">Billing service is not available</string>
+    <string name="toast_restoring_purchases">Restoring your purchases…</string>
+    <string name="toast_browser_error">Could not open browser</string>
+    <string name="toast_email_error">Could not open email app</string>
+    
+    <!-- Billing -->
+    <string name="premium_status">You\'re a Premium user!</string>
+    <string name="billing_connecting">Connecting to billing service…</string>
+    <string name="billing_disconnected">Billing service disconnected</string>
+    <string name="billing_error">Billing error: %1$s</string>
+    <string name="billing_connection_status">Billing status: %1$s</string>
+    
     <!-- Preferences - Appearance -->
     <string name="pref_category_appearance">Appearance</string>
     <string name="pref_theme_title">Theme</string>
@@ -54,4 +74,7 @@
     <string name="pref_buy_coffee_summary">Support the developer with a small donation</string>
     <string name="pref_contact_us_title">Contact Us</string>
     <string name="pref_contact_us_summary">Send feedback or report issues</string>
+    
+    <!-- Content Screens -->
+    <string name="plugins_title">Plugins</string>
 </resources>

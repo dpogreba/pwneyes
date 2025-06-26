@@ -190,11 +190,15 @@ tasks.withType<JavaCompile>().configureEach {
     options.forkOptions.jvmArgs = listOf("-Xmx3g")
 }
 
-// Configure Kotlin daemon with high memory
+// Configure Kotlin daemon
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-    kotlinOptions {
-        // Increase memory for Kotlin daemon to prevent connection issues
-        freeCompilerArgs += listOf("-Xms1g", "-Xmx3g")
+    compilerOptions {
+        // Use modern compiler options without the deprecated memory flags
+        // Modern Kotlin compiler manages memory automatically
+        freeCompilerArgs.addAll(listOf(
+            "-opt-in=kotlin.RequiresOptIn",
+            "-Xskip-prerelease-check"
+        ))
     }
 }
 

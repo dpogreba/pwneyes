@@ -180,7 +180,7 @@ class PluginsFragment : Fragment() {
             // we'll fall back to the WebView approach for other tabs
             val action = PluginsFragmentDirections.actionPluginsToTabDetail(
                 url = "${args.connectionBaseUrl}/$tabPath",
-                tabName = tabPath.split("/").last().capitalize(),
+                tabName = tabPath.split("/").last().replaceFirstChar { it.uppercase() },
                 tabSelector = tabPath.replace("/", "_"),
                 connectionName = args.connectionName,
                 connectionBaseUrl = args.connectionBaseUrl,

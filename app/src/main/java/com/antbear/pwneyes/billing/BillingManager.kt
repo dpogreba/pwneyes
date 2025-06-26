@@ -65,20 +65,9 @@ class BillingManager(private val context: Context) {
     private fun setupBillingClient() {
         Log.d(TAG, "Setting up billing client")
         try {
-            // Make sure the purchasesUpdatedListener is defined before using it
-            if (purchasesUpdatedListener == null) {
-                Log.e(TAG, "PurchasesUpdatedListener is null, creating default implementation")
-            }
-            
-            // Ensure the purchasesUpdatedListener is properly initialized
-            val listener = purchasesUpdatedListener ?: PurchasesUpdatedListener { billingResult, purchases ->
-                Log.d(TAG, "Default purchase update listener called: ${billingResult.responseCode}")
-                if (billingResult.responseCode == BillingResponseCode.OK && purchases != null) {
-                    for (purchase in purchases) {
-                        handlePurchase(purchase)
-                    }
-                }
-            }
+            // Use the defined purchasesUpdatedListener directly
+            // The listener is guaranteed to be initialized as a property
+            val listener = purchasesUpdatedListener
             
             billingClient = BillingClient.newBuilder(context)
                 .setListener(listener)
@@ -186,6 +175,7 @@ class BillingManager(private val context: Context) {
                                 "Item unavailable. Product may not be configured properly."
                             BillingResponseCode.SERVICE_DISCONNECTED -> 
                                 "Service disconnected. Please check your internet connection."
+                            @Suppress("DEPRECATION")
                             BillingResponseCode.SERVICE_TIMEOUT -> 
                                 "Service timeout. Please try again later."
                             BillingResponseCode.SERVICE_UNAVAILABLE -> 

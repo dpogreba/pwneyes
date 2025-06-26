@@ -225,6 +225,7 @@ class NetworkUtils(private val context: Context) {
                 // Fallback for older Android versions
                 @Suppress("DEPRECATION")
                 val networkInfo = connectivityManager?.activeNetworkInfo
+                @Suppress("DEPRECATION")
                 networkInfo?.isConnected ?: false
             }
         } catch (e: Exception) {
@@ -391,15 +392,17 @@ class NetworkUtils(private val context: Context) {
                 }
             } else {
                 // Fallback for older Android versions
+                // Using deprecated APIs for backward compatibility on older Android versions
                 @Suppress("DEPRECATION")
                 val networkInfo = connectivityManager?.activeNetworkInfo
 
+                @Suppress("DEPRECATION")
                 return when (networkInfo?.type) {
-                    ConnectivityManager.TYPE_WIFI -> "WiFi"
-                    ConnectivityManager.TYPE_MOBILE -> "Mobile Data"
-                    ConnectivityManager.TYPE_ETHERNET -> "Ethernet"
-                    ConnectivityManager.TYPE_BLUETOOTH -> "Bluetooth"
-                    ConnectivityManager.TYPE_VPN -> "VPN"
+                    @Suppress("DEPRECATION") ConnectivityManager.TYPE_WIFI -> "WiFi"
+                    @Suppress("DEPRECATION") ConnectivityManager.TYPE_MOBILE -> "Mobile Data"
+                    @Suppress("DEPRECATION") ConnectivityManager.TYPE_ETHERNET -> "Ethernet"
+                    @Suppress("DEPRECATION") ConnectivityManager.TYPE_BLUETOOTH -> "Bluetooth"
+                    @Suppress("DEPRECATION") ConnectivityManager.TYPE_VPN -> "VPN"
                     else -> "Unknown"
                 }
             }

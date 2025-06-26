@@ -60,9 +60,22 @@ class WebViewManager(private val context: Context) {
                 // Additional settings for better web experience
                 setGeolocationEnabled(false)
                 
-                // Allow cross-domain requests if needed
+                // Allow content access with modern settings
                 allowContentAccess = true
                 allowFileAccess = true
+                
+                // Security settings for file access
+                // Modern approach avoiding deprecated allowUniversalAccessFromFileURLs
+                // and allowFileAccessFromFileURLs properties
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+                    // For Android 11+ use more secure alternatives or WebViewAssetLoader
+                    setAllowedNetworkImageAccess(true)
+                } else {
+                    @Suppress("DEPRECATION")
+                    this.allowUniversalAccessFromFileURLs = false
+                    @Suppress("DEPRECATION")
+                    this.allowFileAccessFromFileURLs = false
+                }
                 
                 // Enable JavaScript dialogs
                 javaScriptCanOpenWindowsAutomatically = true

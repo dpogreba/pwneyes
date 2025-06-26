@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- App General -->
     <string name="app_name">PwnEyes</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
@@ -11,11 +12,46 @@
     <string name="network_error">Network Error</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
+    
+    <!-- Default Values -->
     <string name="default_username">Default Username</string>
     <string name="default_password">Default Password</string>
     <string name="default_connection_name">Default Connection</string>
     <string name="default_connection_url">Default URL</string>
+    
+    <!-- Navigation Drawer -->
     <string name="see_whats_new">🎉 See What\'s New!</string>
     <string name="rate_app">Rate PwnEyes</string>
     <string name="share_app">Share PwnEyes</string>
+    
+    <!-- Empty Connections Screen -->
+    <string name="empty_connections_title">No Connections Yet</string>
+    <string name="empty_connections_message">You haven\'t added any connections. Add your first connection to get started.</string>
+    <string name="empty_connections_action">Add Connection</string>
+    
+    <!-- Preferences - Appearance -->
+    <string name="pref_category_appearance">Appearance</string>
+    <string name="pref_theme_title">Theme</string>
+    <string name="pref_theme_summary">Choose your preferred app theme</string>
+    
+    <!-- Preferences - Data -->
+    <string name="pref_category_data">Data</string>
+    <string name="pref_erase_all_title">Erase All Data</string>
+    <string name="pref_erase_all_summary">Permanently delete all connections and settings</string>
+    
+    <!-- Preferences - Premium -->
+    <string name="pref_category_premium">Premium Features</string>
+    <string name="remove_ads">Remove Ads</string>
+    <string name="pref_remove_ads_summary">Upgrade to ad-free version</string>
+    <string name="restore_purchases">Restore Purchases</string>
+    <string name="pref_restore_purchases_summary">Restore your previous purchases</string>
+    <string name="billing_retry">Retry Connection</string>
+    <string name="billing_test_mode">Reconnect to billing service</string>
+    
+    <!-- Preferences - Support -->
+    <string name="pref_category_support">Support</string>
+    <string name="pref_buy_coffee_title">Buy Me a Coffee</string>
+    <string name="pref_buy_coffee_summary">Support the developer with a small donation</string>
+    <string name="pref_contact_us_title">Contact Us</string>
+    <string name="pref_contact_us_summary">Send feedback or report issues</string>
 </resources>

@@ -18,6 +18,7 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import com.antbear.pwneyes.billing.BillingManager
 import com.antbear.pwneyes.databinding.ActivityMainBinding
 import com.antbear.pwneyes.navigation.NavigationManager
+import com.antbear.pwneyes.util.BluetoothUtils
 import com.antbear.pwneyes.util.NetworkUtils
 import com.antbear.pwneyes.util.VersionManager
 import com.google.android.material.navigation.NavigationView

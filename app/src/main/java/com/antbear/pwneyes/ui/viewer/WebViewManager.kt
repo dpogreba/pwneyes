@@ -65,17 +65,14 @@ class WebViewManager(private val context: Context) {
                 allowFileAccess = true
                 
                 // Security settings for file access
-                // Modern approach avoiding deprecated allowUniversalAccessFromFileURLs
-                // and allowFileAccessFromFileURLs properties
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
-                    // For Android 11+ use more secure alternatives or WebViewAssetLoader
-                    setAllowedNetworkImageAccess(true)
-                } else {
-                    @Suppress("DEPRECATION")
-                    this.allowUniversalAccessFromFileURLs = false
-                    @Suppress("DEPRECATION")
-                    this.allowFileAccessFromFileURLs = false
-                }
+                // Use consistent approach for all Android versions with proper suppression
+                @Suppress("DEPRECATION")
+                this.allowUniversalAccessFromFileURLs = false
+                @Suppress("DEPRECATION")
+                this.allowFileAccessFromFileURLs = false
+                
+                // Note: There's no direct non-deprecated replacement for these in Android 11+
+                // We could use WebViewAssetLoader for more complex local file access scenarios
                 
                 // Enable JavaScript dialogs
                 javaScriptCanOpenWindowsAutomatically = true

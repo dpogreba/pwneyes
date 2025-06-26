@@ -1,14 +1,24 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item
-        android:id="@+id/homeFragment"
-        android:icon="@drawable/ic_menu_home"
-        android:title="Home" />
-    <item
-        android:id="@+id/addConnectionFragment"
-        android:icon="@drawable/ic_menu_add_connection"
-        android:title="Add Connection" />
-    <item
-        android:id="@+id/nav_settings"
-        android:icon="@drawable/ic_menu_settings"
-        android:title="Settings" />
+    <group android:id="@+id/group_main">
+        <item
+            android:id="@+id/homeFragment"
+            android:icon="@drawable/ic_menu_home"
+            android:title="Home" />
+        <item
+            android:id="@+id/addConnectionFragment"
+            android:icon="@drawable/ic_menu_add_connection"
+            android:title="Add Connection" />
+        <item
+            android:id="@+id/nav_settings"
+            android:icon="@drawable/ic_menu_settings"
+            android:title="Settings" />
+    </group>
+    
+    <!-- Bottom section for temporary menu items -->
+    <group android:id="@+id/group_bottom">
+        <item
+            android:id="@+id/nav_whats_new"
+            android:title="@string/see_whats_new"
+            android:visible="false" />
+    </group>
 </menu>

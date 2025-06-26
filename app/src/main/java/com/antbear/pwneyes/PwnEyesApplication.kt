@@ -14,6 +14,8 @@ import com.antbear.pwneyes.health.ConnectionHealthService
 import com.antbear.pwneyes.util.AdsManagerBase
 import com.antbear.pwneyes.util.CrashReporter
 import com.antbear.pwneyes.util.NetworkUtils
+import com.antbear.pwneyes.util.ReleaseNotesManager
+import com.antbear.pwneyes.util.VersionManager
 import java.io.File
 
 // TODO: Uncomment this when Hilt is properly configured
@@ -94,6 +96,29 @@ class PwnEyesApplication : Application() {
             NetworkUtils(this)
         } catch (e: Exception) {
             Log.e(TAG, "Error initializing NetworkUtils", e)
+            null
+        }
+    }
+    
+    // Version management for tracking app updates
+    val versionManager by lazy {
+        try {
+            Log.d(TAG, "Initializing VersionManager")
+            VersionManager(this)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error initializing VersionManager", e)
+            null
+        }
+    }
+    
+    // Release notes management for displaying what's new information
+    val releaseNotesManager by lazy {
+        try {
+            Log.d(TAG, "Initializing ReleaseNotesManager")
+            val vManager = versionManager ?: throw IllegalStateException("VersionManager not initialized")
+            ReleaseNotesManager(this, vManager)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error initializing ReleaseNotesManager", e)
             null
         }
     }
@@ -217,6 +242,23 @@ class PwnEyesApplication : Application() {
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error starting connection health monitoring", e)
+        }
+        
+        // Initialize the version manager to track app updates
+        try {
+            Log.d(TAG, "Checking app version")
+            if (versionManager != null) {
+                // If this is the first run after an update, record the new version code
+                if (versionManager!!.isAppUpdated()) {
+                    Log.d(TAG, "App was updated from version ${versionManager!!.getPreviousVersionCode()} to ${versionManager!!.getCurrentVersionCode()}")
+                }
+                // Always update the previous version code to the current one
+                versionManager!!.updatePreviousVersionCode()
+            } else {
+                Log.w(TAG, "VersionManager is null, cannot check for app updates")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error checking app version", e)
         }
     }
     

@@ -10,6 +10,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.NavController
 import androidx.navigation.ui.AppBarConfiguration
+import com.antbear.pwneyes.PwnEyesApplication
 import com.antbear.pwneyes.R
 
 /**
@@ -78,6 +79,10 @@ class NavigationManager(
                 }
                 R.id.nav_settings -> {
                     navigateToDestination(R.id.nav_settings)
+                    true
+                }
+                R.id.nav_whats_new -> {
+                    showWhatsNewDialog()
                     true
                 }
                 else -> false
@@ -151,6 +156,41 @@ class NavigationManager(
         } catch (e: Exception) {
             Log.e(TAG, "Error navigating back", e)
             false
+        }
+    }
+    
+    /**
+     * Shows the "What's New" dialog and hides the menu item afterward
+     */
+    private fun showWhatsNewDialog() {
+        try {
+            // Get the application instance
+            val application = activity.application as PwnEyesApplication
+            
+            // Show the release notes dialog
+            val releaseNotesManager = application.releaseNotesManager
+            val shown = releaseNotesManager?.showWhatsNewDialog() ?: false
+            
+            if (shown) {
+                Log.d(TAG, "What's New dialog shown successfully")
+                
+                // Update menu to hide the What's New item
+                activity.invalidateOptionsMenu()
+            } else {
+                Log.w(TAG, "Failed to show What's New dialog")
+                Toast.makeText(
+                    activity,
+                    "Could not display release notes at this time",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error showing What's New dialog", e)
+            Toast.makeText(
+                activity,
+                "Error displaying release notes: ${e.message}",
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
 }

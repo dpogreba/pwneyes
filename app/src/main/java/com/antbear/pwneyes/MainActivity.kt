@@ -19,6 +19,8 @@ import com.antbear.pwneyes.billing.BillingManager
 import com.antbear.pwneyes.databinding.ActivityMainBinding
 import com.antbear.pwneyes.navigation.NavigationManager
 import com.antbear.pwneyes.util.NetworkUtils
+import com.antbear.pwneyes.util.VersionManager
+import com.google.android.material.navigation.NavigationView
 import kotlinx.coroutines.launch
 
 // TODO: Uncomment when Hilt is properly configured
@@ -38,6 +40,9 @@ class MainActivity : AppCompatActivity() {
     private var billingManager: BillingManager? = null
     private var networkUtils: NetworkUtils? = null
     
+    // Version management
+    private var versionManager: VersionManager? = null
+    
     // Track premium status
     private var isPremium = false
 
@@ -46,8 +51,10 @@ class MainActivity : AppCompatActivity() {
 
         try {
             // Get dependencies from application instance
-            billingManager = (application as PwnEyesApplication).billingManager
-            networkUtils = (application as PwnEyesApplication).networkUtils
+            val app = application as PwnEyesApplication
+            billingManager = app.billingManager
+            networkUtils = app.networkUtils
+            versionManager = app.versionManager
             
             // Setup billing and observe premium status changes
             setupBilling()
@@ -200,6 +207,9 @@ class MainActivity : AppCompatActivity() {
             if (savedInstanceState == null) {
                 navController.navigate(R.id.homeFragment)
             }
+            
+            // Set up the "See What's New" menu item visibility
+            updateWhatsNewMenuItemVisibility()
         } catch (e: Exception) {
             Log.e(TAG, "Error setting up navigation", e)
             Toast.makeText(this, "Error initializing navigation", Toast.LENGTH_SHORT).show()
@@ -233,6 +243,42 @@ class MainActivity : AppCompatActivity() {
             Log.e(TAG, "Error navigating up", e)
             super.onSupportNavigateUp()
         }
+    }
+    
+    /**
+     * Updates the visibility of the "See What's New" menu item based on app update status
+     */
+    private fun updateWhatsNewMenuItemVisibility() {
+        try {
+            Log.d(TAG, "Updating 'What's New' menu item visibility")
+            
+            // Get the navigation view
+            val navigationView = binding.navView
+            
+            // Get the menu
+            val menu = navigationView.menu
+            
+            // Find the "What's New" menu item
+            val whatsNewItem = menu.findItem(R.id.nav_whats_new)
+            
+            // Check if the app was updated and the what's new dialog hasn't been seen yet
+            val shouldShow = versionManager?.shouldShowWhatsNewButton() ?: false
+            
+            // Update visibility
+            whatsNewItem?.isVisible = shouldShow
+            
+            Log.d(TAG, "What's New menu item visibility set to: $shouldShow")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error updating What's New menu item visibility", e)
+        }
+    }
+    
+    /**
+     * Called when invalidateOptionsMenu() is called
+     */
+    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
+        updateWhatsNewMenuItemVisibility()
+        return super.onPrepareOptionsMenu(menu)
     }
     
     override fun onDestroy() {

@@ -1,78 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">PwnEyes</string>
-    <string name="plugins_title">Plugins</string>
+    <string name="title_activity_main">MainActivity</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="nav_header_title">PwnEyes App</string>
-    <string name="nav_header_subtitle">support@pwneyes.com</string>
+    <string name="nav_header_title">PwnEyes</string>
+    <string name="nav_header_subtitle">Secure &amp; Private Browsing</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
-    <string name="menu_home">Home</string>
-    <string name="menu_gallery">Add Connection</string>
-    <string name="menu_slideshow">Settings</string>
-
-    <!-- Added missing resource -->
-    <string name="settings_screen">Settings</string>
-
-    <!-- Other strings -->
-    <string name="friendly_name_hint">Enter a friendly name</string>
-    <string name="friendly_name_input_desc">A descriptive name</string>
-    <string name="host_hint">Enter the host address</string>
-    <string name="host_input_desc">Enter IP</string>
-    <string name="save_connection">Save Connection</string>
-    <string name="save_connection_desc">Save</string>
-    <string name="connection_name">Connection Name</string>
-    <string name="connection_name_desc">Enter the name</string>
-    <string name="connection_url">Connection URL</string>
-    <string name="connection_url_desc">Enter the URL</string>
-    <string name="hamburger_menu">Menu</string>
-
-    <!-- In-app purchase -->
-    <string name="remove_ads">Remove Ads</string>
-    <string name="premium_status">Premium Status</string>
-    <string name="restore_purchases">Restore Purchases</string>
-    <string name="billing_connecting">Connecting to billing service…</string>
-    <string name="billing_disconnected">Billing service disconnected</string>
-    <string name="billing_error">Billing error: %1$s</string>
-    <string name="billing_not_ready">Billing service not ready. Please try again later.</string>
-    <string name="billing_retry">Retry Billing Connection</string>
-    <string name="billing_connection_status">Billing connection status: %1$s</string>
-    <string name="billing_test_mode">Test Mode: App not published to Play Store</string>
-    
-    <!-- Preference Categories -->
-    <string name="pref_category_appearance">Appearance</string>
-    <string name="pref_category_data">Data Management</string>
-    <string name="pref_category_premium">Premium Features</string>
-    <string name="pref_category_support">Support</string>
-    
-    <!-- Preferences -->
-    <string name="pref_theme_title">Theme</string>
-    <string name="pref_theme_summary">Choose the app theme</string>
-    <string name="pref_erase_all_title">Erase All Connections</string>
-    <string name="pref_erase_all_summary">Delete all saved connections</string>
-    <string name="pref_remove_ads_summary">Purchase premium to remove advertisements</string>
-    <string name="pref_restore_purchases_summary">Restore previously purchased premium features</string>
-    <string name="pref_buy_coffee_title">Buy our dogs a treat</string>
-    <string name="pref_buy_coffee_summary">Support the development with a treat for our furbabies!</string>
-    <string name="pref_contact_us_title">Contact Us</string>
-    <string name="pref_contact_us_summary">Get in touch with the development team</string>
-    
-    <!-- Dialogs -->
-    <string name="dialog_erase_all_title">Erase All Connections</string>
-    <string name="dialog_erase_all_message">Are you sure you want to erase all connections? This action cannot be undone.</string>
-    <string name="dialog_erase_all_confirm">Erase All</string>
-    <string name="dialog_cancel">Cancel</string>
-    
-    <!-- Toasts -->
-    <string name="toast_connections_deleted">All connections deleted</string>
-    <string name="toast_restoring_purchases">Restoring purchases…</string>
-    <string name="toast_billing_unavailable">Billing service is not available</string>
-    <string name="toast_browser_error">Could not open browser</string>
-    <string name="toast_email_error">Could not open email app</string>
-    <string name="toast_no_email_app">No email app available</string>
-    
-    <!-- Empty States -->
-    <string name="empty_connections_title">No Connections</string>
-    <string name="empty_connections_message">You haven\'t added any pwnagotchi connections yet.</string>
-    <string name="empty_connections_action">Add Your First Connection</string>
+    <string name="network_error">Network Error</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="default_username">Default Username</string>
+    <string name="default_password">Default Password</string>
+    <string name="default_connection_name">Default Connection</string>
+    <string name="default_connection_url">Default URL</string>
+    <string name="see_whats_new">🎉 See What\'s New!</string>
+    <string name="rate_app">Rate PwnEyes</string>
+    <string name="share_app">Share PwnEyes</string>
 </resources>

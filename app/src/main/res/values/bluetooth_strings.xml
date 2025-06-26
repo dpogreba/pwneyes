@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Bluetooth Tethering -->
+    <string name="bluetooth_tethering_dialog_title">Bluetooth Tethering Required</string>
+    <string name="bluetooth_tethering_dialog_message">Bluetooth tethering must be enabled to connect to devices. Would you like to open system settings to enable it now?</string>
+    <string name="bluetooth_tethering_dialog_positive">Open Settings</string>
+    <string name="bluetooth_tethering_dialog_negative">Cancel</string>
+    <string name="bluetooth_tethering_dialog_do_not_show">Don\'t show this message again</string>
+    
+    <!-- Preferences -->
+    <string name="pref_category_connection">Connection Settings</string>
+    <string name="pref_bluetooth_check_title">Bluetooth Tethering Check</string>
+    <string name="pref_bluetooth_check_summary">Show notification when Bluetooth tethering is disabled</string>
+</resources>

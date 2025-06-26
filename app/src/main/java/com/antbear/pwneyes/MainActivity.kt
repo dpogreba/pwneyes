@@ -39,6 +39,7 @@ class MainActivity : AppCompatActivity() {
     // Dependencies - now manually obtained from Application class
     private var billingManager: BillingManager? = null
     private var networkUtils: NetworkUtils? = null
+    private var bluetoothUtils: BluetoothUtils? = null
     
     // Version management
     private var versionManager: VersionManager? = null
@@ -56,6 +57,9 @@ class MainActivity : AppCompatActivity() {
             networkUtils = app.networkUtils
             versionManager = app.versionManager
             
+            // Initialize BluetoothUtils
+            bluetoothUtils = BluetoothUtils(this)
+            
             // Setup billing and observe premium status changes
             setupBilling()
             
@@ -68,6 +72,9 @@ class MainActivity : AppCompatActivity() {
             
             // Check network connectivity
             checkNetworkConnectivity()
+            
+            // Check Bluetooth tethering status
+            checkBluetoothTethering()
             
         } catch (e: Exception) {
             Log.e(TAG, "Error in onCreate", e)
@@ -302,6 +309,18 @@ class MainActivity : AppCompatActivity() {
      * Called when the app is resumed.
      * Good opportunity to check network status again.
      */
+    /**
+     * Check if Bluetooth tethering is enabled and show a warning dialog if it's not
+     */
+    private fun checkBluetoothTethering() {
+        try {
+            // Show dialog if needed (only if the setting is enabled and tethering is disabled)
+            bluetoothUtils?.showBluetoothTetheringDialogIfNeeded()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error checking Bluetooth tethering", e)
+        }
+    }
+    
     override fun onResume() {
         super.onResume()
         

@@ -66,6 +66,18 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+        android:title="@string/pref_category_connection"
+        app:iconSpaceReserved="false">
+        
+        <SwitchPreference
+            android:key="show_bluetooth_tethering_check"
+            android:title="@string/pref_bluetooth_check_title"
+            android:summary="@string/pref_bluetooth_check_summary"
+            android:defaultValue="true"
+            app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
         android:title="@string/pref_category_data"
         app:iconSpaceReserved="false">
 

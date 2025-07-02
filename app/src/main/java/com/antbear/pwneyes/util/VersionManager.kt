@@ -59,7 +59,7 @@ class VersionManager(private val context: Context) {
                 @Suppress("DEPRECATION")
                 context.packageManager.getPackageInfo(context.packageName, 0)
             }
-            packageInfo.versionName
+            packageInfo.versionName ?: "Unknown"
         } catch (e: Exception) {
             Log.e(TAG, "Error getting current version name", e)
             "Unknown"

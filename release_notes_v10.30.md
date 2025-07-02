@@ -1,29 +1,41 @@
 # PwnEyes v10.30 Release Notes
 
-## Full-Screen Native UI Implementation
+## Android 15 Compatibility Update
 
-### Complete UI Architecture Redesign
-- Replaced in-fragment navigation with a dedicated activity-based approach
-- Each tab (Plugins, Peers, etc.) now launches as a full-screen experience
-- Implemented ContentContainerActivity to host single fragment experiences
-- This matches the intended application structure in the design document
+This release brings PwnEyes into compliance with Google Play Store requirements by targeting Android 15 (API Level 35) and updating critical dependencies.
 
-### Technical Improvements
-- Created dedicated ContentContainerActivity class for hosting fragments
-- Added proper activity lifecycle management for fragment hosting
-- Fixed navigation issues with native UI fragments
-- Implemented complete separation between tabs as requested
+### Major Updates
 
-### Debugging Enhancements
-- Added comprehensive logging throughout the navigation flow
-- Added visual indicators for tab transitions
-- Improved error handling with detailed stack traces
-- Fixed GridLayout dependency issues in the Plugins UI
+#### Android 15 (API Level 35) Support
+- **Target SDK**: Updated from API Level 34 to API Level 35 (Android 15)
+- **Compile SDK**: Updated to API Level 35 for latest Android features and security improvements
+- **Build Tools**: Updated to version 35.0.0 for optimal compatibility
 
-### Other Improvements
-- Updated AndroidManifest to include the new activity
-- Added proper toolbar handling in the content container
-- Improved back navigation behavior
-- Maintained WebView fallback for tabs not yet implemented natively
+#### Google Play Billing Library v7.0.0
+- **Billing Library**: Upgraded from v6.0.1 to v7.0.0
+- **Compliance**: Meets Google Play Store requirements for billing library versions
+- **Future-Ready**: Prepared for enhanced billing features and security improvements
 
-This update represents a significant architectural shift that provides a more robust separation between different parts of the application. Each tab now functions as an independent screen rather than being constrained within the existing UI, exactly matching the intended design.
+### Version Information
+- **Version Code**: 34 (incremented from 33)
+- **Version Name**: 10.30 (updated from 10.29)
+
+### Technical Details
+
+#### Compatibility
+- Maintains backward compatibility with Android 7.0 (API Level 24) and above
+- All existing features continue to work as expected
+- No user-facing changes in this release
+
+#### Development Notes
+- This is primarily a compliance and infrastructure update
+- Billing functionality may require testing and potential code updates due to major version upgrade
+- Recommended for all users to ensure continued Google Play Store compatibility
+
+### Google Play Store Compliance
+This update ensures PwnEyes meets Google's latest requirements for:
+- Target SDK level compliance
+- Modern billing library usage
+- Android 15 security and privacy enhancements
+
+Users should update to this version to ensure continued access to app updates through the Google Play Store.

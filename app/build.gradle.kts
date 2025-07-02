@@ -9,16 +9,16 @@ plugins {
 
 android {
     namespace = "com.antbear.pwneyes"
-    compileSdk = 34
-    // Update buildToolsVersion to match Android Gradle Plugin 8.3.0
-    buildToolsVersion = "34.0.0"
+    compileSdk = 35
+    // Update buildToolsVersion to match Android 15 (API Level 35)
+    buildToolsVersion = "35.0.0"
 
     defaultConfig {
         applicationId = "com.antbear.pwneyes"
         minSdk = 24
-        targetSdk = 34
-        versionCode = 33
-        versionName = "10.29"
+        targetSdk = 35
+        versionCode = 34
+        versionName = "10.30"
         
         // Explicitly disable baseline profiles to fix installation issues
         ndk {
@@ -258,8 +258,8 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-metadata-jvm:0.7.0")
     
     implementation("androidx.preference:preference:1.2.0")
-    // Google Play Billing Library for in-app purchases
-    implementation("com.android.billingclient:billing-ktx:6.0.1")
+    // Google Play Billing Library for in-app purchases - Updated to v7.0.0
+    implementation("com.android.billingclient:billing-ktx:7.0.0")
     // Google Ads - now used conditionally based on premium status
     implementation("com.google.android.gms:play-services-ads:22.6.0")
     // WorkManager for background tasks

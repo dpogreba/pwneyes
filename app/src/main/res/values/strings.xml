@@ -70,8 +70,8 @@
     
     <!-- Preferences - Support -->
     <string name="pref_category_support">Support</string>
-    <string name="pref_buy_coffee_title">Buy Me a Coffee</string>
-    <string name="pref_buy_coffee_summary">Support the developer with a small donation</string>
+    <string name="pref_buy_coffee_title">Buy our dogs a treat!</string>
+    <string name="pref_buy_coffee_summary">Support the development with happy pups</string>
     <string name="pref_contact_us_title">Contact Us</string>
     <string name="pref_contact_us_summary">Send feedback or report issues</string>
     

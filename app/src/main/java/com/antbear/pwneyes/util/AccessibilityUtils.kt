@@ -30,20 +30,7 @@ class AccessibilityUtils(private val context: Context) {
     private var textToSpeech: TextToSpeech? = null
     private var ttsInitialized = false
     
-    companion object {
-        // Font scale factors
-        private const val FONT_SCALE_SMALL = 0.85f
-        private const val FONT_SCALE_NORMAL = 1.0f
-        private const val FONT_SCALE_LARGE = 1.25f
-        private const val FONT_SCALE_EXTRA_LARGE = 1.5f
-        
-        // Touch target scaling
-        private const val TOUCH_TARGET_NORMAL = 1.0f
-        private const val TOUCH_TARGET_LARGE = 1.25f
-        
-        // Minimum touch target size in dp (as per WCAG guidelines)
-        private const val MIN_TOUCH_TARGET_SIZE_DP = 48
-    }
+    // Constants are now centralized in Constants.kt
     
     init {
         // Initialize TTS if enabled
@@ -96,12 +83,12 @@ class AccessibilityUtils(private val context: Context) {
      * Check if font size adjustment is enabled and get the selected size
      */
     fun getFontSizeScale(): Float {
-        val fontSizePref = preferences.getString("font_size_preference", "normal") ?: "normal"
+        val fontSizePref = preferences.getString(Constants.PreferenceKeys.FONT_SIZE_PREFERENCE, Constants.FontSizeValues.FONT_SIZE_NORMAL) ?: Constants.FontSizeValues.FONT_SIZE_NORMAL
         return when (fontSizePref) {
-            "small" -> FONT_SCALE_SMALL
-            "large" -> FONT_SCALE_LARGE
-            "extra_large" -> FONT_SCALE_EXTRA_LARGE
-            else -> FONT_SCALE_NORMAL
+            Constants.FontSizeValues.FONT_SIZE_SMALL -> Constants.Accessibility.FONT_SCALE_SMALL
+            Constants.FontSizeValues.FONT_SIZE_LARGE -> Constants.Accessibility.FONT_SCALE_LARGE
+            Constants.FontSizeValues.FONT_SIZE_EXTRA_LARGE -> Constants.Accessibility.FONT_SCALE_EXTRA_LARGE
+            else -> Constants.Accessibility.FONT_SCALE_NORMAL
         }
     }
     
@@ -216,7 +203,7 @@ class AccessibilityUtils(private val context: Context) {
                 // Convert min touch target size to pixels
                 val minSizePx = TypedValue.applyDimension(
                     TypedValue.COMPLEX_UNIT_DIP, 
-                    MIN_TOUCH_TARGET_SIZE_DP.toFloat(),
+                    Constants.Accessibility.MIN_TOUCH_TARGET_SIZE_DP.toFloat(),
                     context.resources.displayMetrics
                 ).toInt()
                 
@@ -234,14 +221,14 @@ class AccessibilityUtils(private val context: Context) {
                 val totalHorizontalPadding = view.paddingLeft + view.paddingRight
                 val totalVerticalPadding = view.paddingTop + view.paddingBottom
                 
-                if (totalHorizontalPadding < 16) {
-                    view.setPadding(view.paddingLeft + 4, view.paddingTop, 
-                                    view.paddingRight + 4, view.paddingBottom)
+                if (totalHorizontalPadding < Constants.Accessibility.MIN_PADDING_DP) {
+                    view.setPadding(view.paddingLeft + Constants.Accessibility.ADDITIONAL_PADDING_DP, view.paddingTop, 
+                                    view.paddingRight + Constants.Accessibility.ADDITIONAL_PADDING_DP, view.paddingBottom)
                 }
                 
-                if (totalVerticalPadding < 16) {
-                    view.setPadding(view.paddingLeft, view.paddingTop + 4, 
-                                    view.paddingRight, view.paddingBottom + 4)
+                if (totalVerticalPadding < Constants.Accessibility.MIN_PADDING_DP) {
+                    view.setPadding(view.paddingLeft, view.paddingTop + Constants.Accessibility.ADDITIONAL_PADDING_DP, 
+                                    view.paddingRight, view.paddingBottom + Constants.Accessibility.ADDITIONAL_PADDING_DP)
                 }
             }
             

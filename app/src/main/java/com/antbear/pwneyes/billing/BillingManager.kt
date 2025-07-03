@@ -10,6 +10,7 @@ import com.android.billingclient.api.*
 import com.android.billingclient.api.BillingClient.BillingResponseCode
 import com.android.billingclient.api.BillingClient.ProductType
 import com.android.billingclient.api.Purchase.PurchaseState
+import com.antbear.pwneyes.util.Constants
 import kotlinx.coroutines.*
 
 /**
@@ -19,13 +20,13 @@ import kotlinx.coroutines.*
 class BillingManager(private val context: Context) {
     companion object {
         private const val TAG = "BillingManager"
-        const val REMOVE_ADS_PRODUCT_ID = "remove_ads"
+        const val REMOVE_ADS_PRODUCT_ID = Constants.Billing.REMOVE_ADS_PRODUCT_ID
         
         // Billing connection states
-        const val STATE_DISCONNECTED = 0
-        const val STATE_CONNECTING = 1
-        const val STATE_CONNECTED = 2
-        const val STATE_ERROR = 3
+        const val STATE_DISCONNECTED = Constants.Billing.STATE_DISCONNECTED
+        const val STATE_CONNECTING = Constants.Billing.STATE_CONNECTING
+        const val STATE_CONNECTED = Constants.Billing.STATE_CONNECTED
+        const val STATE_ERROR = Constants.Billing.STATE_ERROR
     }
 
     private val _premiumStatus = MutableLiveData<Boolean>()
@@ -40,7 +41,7 @@ class BillingManager(private val context: Context) {
     val lastErrorMessage: LiveData<String> = _lastErrorMessage
     
     private var connectionAttempts = 0
-    private var maxRetryAttempts = 5  // Increased from 3 to 5
+    private var maxRetryAttempts = Constants.Billing.MAX_RETRY_ATTEMPTS
     private var connectingTimeoutJob: Job? = null
     private var periodicReconnectionJob: Job? = null
     private var billingClient: BillingClient? = null
@@ -139,7 +140,7 @@ class BillingManager(private val context: Context) {
         // Start a new periodic job that attempts reconnection every 2 minutes
         periodicReconnectionJob = coroutineScope.launch {
             while (isActive) {
-                delay(120000) // 2 minutes between reconnection attempts
+                delay(Constants.Billing.PERIODIC_RECONNECTION_INTERVAL_MS)
                 
                 // Only attempt reconnection if we're not already connected or connecting
                 if (_connectionState.value != STATE_CONNECTED && 
@@ -163,9 +164,9 @@ class BillingManager(private val context: Context) {
         
         // Create a new timeout job - will change to error state if connection takes too long
         connectingTimeoutJob = coroutineScope.launch {
-            delay(15000) // 15 second timeout for connection
+            delay(Constants.Billing.CONNECTION_TIMEOUT_MS)
             if (_connectionState.value == STATE_CONNECTING) {
-                Log.e(TAG, "Billing connection timeout after 15 seconds")
+                Log.e(TAG, "Billing connection timeout after ${Constants.Billing.CONNECTION_TIMEOUT_MS/1000} seconds")
                 _connectionState.value = STATE_ERROR
                 _lastErrorMessage.value = "Connection timeout. App may not be published on Google Play yet."
             }
@@ -224,7 +225,7 @@ class BillingManager(private val context: Context) {
                         if (connectionAttempts < maxRetryAttempts) {
                             coroutineScope.launch {
                                 // Exponential backoff: wait longer between consecutive retries
-                                val delayTime = 3000L * (1 shl (connectionAttempts - 1))
+                                val delayTime = Constants.Billing.RETRY_DELAY_BASE_MS * (1 shl (connectionAttempts - 1))
                                 Log.d(TAG, "Retrying connection attempt $connectionAttempts of $maxRetryAttempts in ${delayTime/1000} seconds")
                                 delay(delayTime) // Wait with exponential backoff
                                 connectToPlayBilling()
@@ -243,7 +244,7 @@ class BillingManager(private val context: Context) {
                     
                     // Try to reconnect, but not immediately (could cause an infinite loop)
                     coroutineScope.launch {
-                        delay(5000) // Wait 5 seconds before trying to reconnect
+                        delay(Constants.Billing.RECONNECT_DELAY_MS)
                         Log.d(TAG, "Attempting to reconnect after disconnect")
                         connectionAttempts = 0 // Reset connection attempts on disconnect
                         connectToPlayBilling()

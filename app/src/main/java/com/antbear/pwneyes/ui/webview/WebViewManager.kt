@@ -52,7 +52,6 @@ class WebViewManager(
                 mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
                 allowContentAccess = true
                 allowFileAccess = true
-                databaseEnabled = true
                 setGeolocationEnabled(false)
                 cacheMode = WebSettings.LOAD_NO_CACHE
                 
@@ -60,13 +59,17 @@ class WebViewManager(
                 javaScriptCanOpenWindowsAutomatically = true
                 setSupportMultipleWindows(true)
                 
-                // Enable more HTML5 features
-                databaseEnabled = true
+                // Modern storage approach - DOM storage replaces deprecated database storage
                 domStorageEnabled = true
                 
-                // Allow cross-domain AJAX requests - needed for some pwnagotchi APIs
-                allowUniversalAccessFromFileURLs = true
-                allowFileAccessFromFileURLs = true
+                // Modern security approach for Android 15 - restrict cross-origin access
+                // Only enable if specifically needed for pwnagotchi functionality
+                if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN) {
+                    @Suppress("DEPRECATION")
+                    allowUniversalAccessFromFileURLs = true
+                    @Suppress("DEPRECATION") 
+                    allowFileAccessFromFileURLs = true
+                }
                 
                 // Set default text encoding
                 defaultTextEncodingName = "UTF-8"

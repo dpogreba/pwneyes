@@ -165,7 +165,9 @@ class AccessibilityUtils(private val context: Context) {
      */
     fun applyFontSize(textView: TextView) {
         try {
-            val currentSize = textView.textSize / context.resources.displayMetrics.scaledDensity
+            // Use modern density calculation approach
+            val displayMetrics = context.resources.displayMetrics
+            val currentSize = textView.textSize / displayMetrics.density
             val fontScale = getFontSizeScale()
             textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, currentSize * fontScale)
         } catch (e: Exception) {

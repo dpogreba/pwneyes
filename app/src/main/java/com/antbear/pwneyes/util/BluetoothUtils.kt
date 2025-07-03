@@ -7,7 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.net.ConnectivityManager
-import android.net.NetworkInfo
+import android.net.NetworkCapabilities
 import android.os.Build
 import android.provider.Settings
 import android.util.Log
@@ -111,7 +111,14 @@ class BluetoothUtils(private val context: Context) {
      */
     private fun getBluetoothTetheringState(): Boolean {
         try {
-            val bluetoothAdapter = BluetoothAdapter.getDefaultAdapter() ?: return false
+            // Use modern BluetoothManager approach instead of deprecated getDefaultAdapter()
+            val bluetoothManager = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                context.getSystemService(BluetoothManager::class.java)
+            } else {
+                context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+            }
+            
+            val bluetoothAdapter = bluetoothManager?.adapter ?: return false
             
             // Try to invoke the getTetheringState method using reflection
             val method: Method = bluetoothAdapter.javaClass.getDeclaredMethod("isTetheringOn")

@@ -71,7 +71,11 @@ class BillingManager(private val context: Context) {
             
             billingClient = BillingClient.newBuilder(context)
                 .setListener(listener)
-                .enablePendingPurchases()
+                .enablePendingPurchases(
+                    PendingPurchasesParams.newBuilder()
+                        .enableOneTimeProducts()
+                        .build()
+                )
                 .build()
 
             connectToPlayBilling()

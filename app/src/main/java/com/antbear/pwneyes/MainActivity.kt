@@ -9,6 +9,9 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
@@ -52,6 +55,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         try {
+            // Enable edge-to-edge display for Android 15 compatibility
+            WindowCompat.setDecorFitsSystemWindows(window, false)
+            
             // Get dependencies from application instance
             val app = application as PwnEyesApplication
             billingManager = app.billingManager
@@ -68,6 +74,9 @@ class MainActivity : AppCompatActivity() {
             binding = ActivityMainBinding.inflate(layoutInflater)
             setContentView(binding.root)
 
+            // Setup window insets handling to fix status bar overlap
+            setupWindowInsets()
+
             // Set up UI components
             setupNavigation(savedInstanceState)
             
@@ -80,6 +89,55 @@ class MainActivity : AppCompatActivity() {
         } catch (e: Exception) {
             Log.e(TAG, "Error in onCreate", e)
             Toast.makeText(this, "Error initializing application", Toast.LENGTH_SHORT).show()
+        }
+    }
+    
+    /**
+     * Setup window insets handling to prevent status bar overlap
+     * This fixes the issue where "Home" text appears under the status bar
+     */
+    private fun setupWindowInsets() {
+        try {
+            Log.d(TAG, "Setting up window insets for status bar handling")
+            
+            // Apply window insets to the main content area
+            ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, windowInsets ->
+                val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+                
+                Log.d(TAG, "Window insets - top: ${insets.top}, bottom: ${insets.bottom}, left: ${insets.left}, right: ${insets.right}")
+                
+                // Apply top padding to account for status bar
+                // The AppBarLayout will handle the status bar area
+                view.setPadding(
+                    insets.left,
+                    0, // Don't add top padding to root - let AppBarLayout handle it
+                    insets.right,
+                    0  // Don't add bottom padding to root - let individual components handle it
+                )
+                
+                // Apply insets to the AppBarLayout to push it below the status bar
+                binding.appBarMain.setPadding(
+                    0,
+                    insets.top, // This pushes the toolbar below the status bar
+                    0,
+                    0
+                )
+                
+                // Apply bottom insets to the ad container to account for navigation bar
+                binding.adContainer.setPadding(
+                    binding.adContainer.paddingLeft,
+                    binding.adContainer.paddingTop,
+                    binding.adContainer.paddingRight,
+                    binding.adContainer.paddingBottom + insets.bottom
+                )
+                
+                // Return the insets to allow other views to handle them
+                windowInsets
+            }
+            
+            Log.d(TAG, "Window insets setup completed")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error setting up window insets", e)
         }
     }
     

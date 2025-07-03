@@ -46,6 +46,25 @@ class BillingManager(private val context: Context) {
     private var billingClient: BillingClient? = null
     private val coroutineScope = CoroutineScope(Dispatchers.Main + Job())
 
+    // Initialize purchasesUpdatedListener BEFORE it's used in setupBillingClient
+    private val purchasesUpdatedListener = PurchasesUpdatedListener { billingResult, purchases ->
+        if (billingResult.responseCode == BillingResponseCode.OK && purchases != null) {
+            Log.d(TAG, "Purchase updated: ${purchases.size} purchases")
+            for (purchase in purchases) {
+                handlePurchase(purchase)
+            }
+        } else if (billingResult.responseCode == BillingResponseCode.USER_CANCELED) {
+            Log.d(TAG, "Purchase canceled by user")
+        } else {
+            Log.e(TAG, "Purchase failed: ${billingResult.responseCode}")
+            Toast.makeText(
+                context,
+                "Purchase failed. Please try again later.",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+
     init {
         Log.d(TAG, "BillingManager initialization started")
         _premiumStatus.value = false
@@ -65,12 +84,8 @@ class BillingManager(private val context: Context) {
     private fun setupBillingClient() {
         Log.d(TAG, "Setting up billing client")
         try {
-            // Use the defined purchasesUpdatedListener directly
-            // The listener is guaranteed to be initialized as a property
-            val listener = purchasesUpdatedListener
-            
             billingClient = BillingClient.newBuilder(context)
-                .setListener(listener)
+                .setListener(purchasesUpdatedListener)
                 .enablePendingPurchases(
                     PendingPurchasesParams.newBuilder()
                         .enableOneTimeProducts()
@@ -239,24 +254,6 @@ class BillingManager(private val context: Context) {
             Log.e(TAG, "Error connecting to Play Billing", e)
             _connectionState.value = STATE_ERROR
             _lastErrorMessage.value = "Connection error: ${e.message}"
-        }
-    }
-
-    private val purchasesUpdatedListener = PurchasesUpdatedListener { billingResult, purchases ->
-        if (billingResult.responseCode == BillingResponseCode.OK && purchases != null) {
-            Log.d(TAG, "Purchase updated: ${purchases.size} purchases")
-            for (purchase in purchases) {
-                handlePurchase(purchase)
-            }
-        } else if (billingResult.responseCode == BillingResponseCode.USER_CANCELED) {
-            Log.d(TAG, "Purchase canceled by user")
-        } else {
-            Log.e(TAG, "Purchase failed: ${billingResult.responseCode}")
-            Toast.makeText(
-                context,
-                "Purchase failed. Please try again later.",
-                Toast.LENGTH_SHORT
-            ).show()
         }
     }
 

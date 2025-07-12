@@ -21,7 +21,6 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import com.antbear.pwneyes.billing.BillingManager
 import com.antbear.pwneyes.databinding.ActivityMainBinding
 import com.antbear.pwneyes.navigation.NavigationManager
-import com.antbear.pwneyes.util.BluetoothUtils
 import com.antbear.pwneyes.util.NetworkUtils
 import com.antbear.pwneyes.util.VersionManager
 import com.google.android.material.navigation.NavigationView
@@ -43,7 +42,6 @@ class MainActivity : AppCompatActivity() {
     // Dependencies - now manually obtained from Application class
     private var billingManager: BillingManager? = null
     private var networkUtils: NetworkUtils? = null
-    private var bluetoothUtils: BluetoothUtils? = null
     
     // Version management
     private var versionManager: VersionManager? = null
@@ -64,12 +62,6 @@ class MainActivity : AppCompatActivity() {
             networkUtils = app.networkUtils
             versionManager = app.versionManager
             
-            // Initialize BluetoothUtils
-            bluetoothUtils = BluetoothUtils(this)
-            
-            // Setup billing and observe premium status changes
-            setupBilling()
-            
             // Inflate layout using ViewBinding
             binding = ActivityMainBinding.inflate(layoutInflater)
             setContentView(binding.root)
@@ -82,9 +74,6 @@ class MainActivity : AppCompatActivity() {
             
             // Check network connectivity
             checkNetworkConnectivity()
-            
-            // Check Bluetooth tethering status
-            checkBluetoothTethering()
             
         } catch (e: Exception) {
             Log.e(TAG, "Error in onCreate", e)
@@ -112,7 +101,7 @@ class MainActivity : AppCompatActivity() {
                     insets.left,
                     0, // Don't add top padding to root - let AppBarLayout handle it
                     insets.right,
-                    0  // Don't add bottom padding to root - let individual components handle it
+                    0  // Don't add bottom padding to root - let AppBarLayout handle it
                 )
                 
                 // Apply insets to the AppBarLayout to push it below the status bar
@@ -368,17 +357,6 @@ class MainActivity : AppCompatActivity() {
      * Called when the app is resumed.
      * Good opportunity to check network status again.
      */
-    /**
-     * Check if Bluetooth tethering is enabled and show a warning dialog if it's not
-     */
-    private fun checkBluetoothTethering() {
-        try {
-            // Show dialog if needed (only if the setting is enabled and tethering is disabled)
-            bluetoothUtils?.showBluetoothTetheringDialogIfNeeded()
-        } catch (e: Exception) {
-            Log.e(TAG, "Error checking Bluetooth tethering", e)
-        }
-    }
     
     override fun onResume() {
         super.onResume()

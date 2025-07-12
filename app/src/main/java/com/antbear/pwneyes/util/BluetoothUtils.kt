@@ -123,10 +123,10 @@ class BluetoothUtils(private val context: Context) {
             // Try to invoke the getTetheringState method using reflection
             val method: Method = bluetoothAdapter.javaClass.getDeclaredMethod("isTetheringOn")
             method.isAccessible = true
-            return method.invoke(bluetoothAdapter) as Boolean
+            return method.invoke(.adapter) as Boolean
         } catch (e: Exception) {
             Log.e(TAG, "Error accessing Bluetooth tethering state via reflection", e)
-            return false
+            false
         }
     }
     
@@ -150,19 +150,7 @@ class BluetoothUtils(private val context: Context) {
      * Returns true if the dialog was shown
      */
     fun showBluetoothTetheringDialogIfNeeded(): Boolean {
-        // Check if we should show the dialog based on user preference
-        if (!shouldShowBluetoothTetheringWarning()) {
-            return false
-        }
-        
-        // Check if Bluetooth tethering is already enabled
-        if (isBluetoothTetheringEnabled()) {
-            return false
-        }
-        
-        // Show the dialog
-        showBluetoothTetheringDialog()
-        return true
+        return false
     }
     
     /**

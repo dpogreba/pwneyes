@@ -259,9 +259,14 @@ class CrashReporter private constructor(private val context: Context) : Thread.U
             }
             
             // Start activity to send email
-            context.startActivity(Intent.createChooser(intent, "Send Crash Report").apply {
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            })
+            try {
+                context.startActivity(Intent.createChooser(intent, "Send Crash Report").apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                })
+                Log.i(TAG, "Crash report sending intent started")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error starting crash report sending intent", e)
+            }
             
             // Reports will be deleted after successful email sending
             // We can't know for sure if the email was sent, so we'll keep them for now

@@ -144,6 +144,11 @@ class FreeAdsManager private constructor(
         
         try {
             Log.d(TAG, "Starting to load banner ad...")
+
+            if (adContainer.childCount > 0) {
+                Log.d(TAG, "Ad container already has a view, skipping ad load.")
+                return
+            }
             
             val adView = AdView(adContainer.context)
             // Use test ad unit ID for development

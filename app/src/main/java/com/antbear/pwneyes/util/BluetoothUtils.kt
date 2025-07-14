@@ -123,7 +123,7 @@ class BluetoothUtils(private val context: Context) {
             // Try to invoke the getTetheringState method using reflection
             val method: Method = bluetoothAdapter.javaClass.getDeclaredMethod("isTetheringOn")
             method.isAccessible = true
-            return method.invoke(.adapter) as Boolean
+            return method.invoke(bluetoothAdapter) as Boolean
         } catch (e: Exception) {
             Log.e(TAG, "Error accessing Bluetooth tethering state via reflection", e)
             false

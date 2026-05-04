@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:api.github.com)",
+      "Bash(git --version)",
+      "Bash(where gradle *)",
+      "Read(//c/Users/derek/AppData/Local/Android/Sdk/**)",
+      "Read(//c/Program Files/Android/Android Studio/jbr/bin/**)",
+      "Read(//c/Users/derek/AppData/Local/**)",
+      "Read(//c/Users/derek/AppData/Local/Programs//**)",
+      "Bash(ssh -T git@github.com)",
+      "Bash(git config *)",
+      "Bash(ssh-keyscan github.com)",
+      "Bash(git credential-manager *)",
+      "Bash(git init *)",
+      "Bash(git remote *)",
+      "Bash(git fetch *)",
+      "Bash(git add *)"
+    ]
+  }
+}

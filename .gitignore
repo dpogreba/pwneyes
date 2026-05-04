@@ -1,0 +1,19 @@
+*.iml
+.gradle
+/local.properties
+/.idea
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+# Android build outputs
+app/build/
+
+# Kotlin
+*.class
+
+# Gradle wrapper jar (downloaded at build time)
+gradle/wrapper/gradle-wrapper.jar

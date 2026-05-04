@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="nav_header_height">180dp</dimen>
+    <dimen name="nav_drawer_width">280dp</dimen>
+    <dimen name="fab_margin">16dp</dimen>
+    <dimen name="card_margin">8dp</dimen>
+    <dimen name="card_padding">16dp</dimen>
+    <dimen name="card_corner_radius">12dp</dimen>
+    <dimen name="card_elevation">2dp</dimen>
+    <dimen name="status_dot_size">10dp</dimen>
+    <dimen name="device_icon_size">40dp</dimen>
+    <dimen name="empty_state_icon_size">96dp</dimen>
+    <dimen name="empty_state_padding">32dp</dimen>
+    <dimen name="coffee_button_margin">16dp</dimen>
+</resources>

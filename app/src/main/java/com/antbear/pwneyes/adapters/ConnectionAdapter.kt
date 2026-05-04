@@ -1,0 +1,74 @@
+package com.antbear.pwneyes.adapters
+
+import android.graphics.Color
+import android.view.LayoutInflater
+import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.RecyclerView
+import com.antbear.pwneyes.R
+import com.antbear.pwneyes.data.BluetoothConnection
+import com.antbear.pwneyes.databinding.ItemConnectionBinding
+import java.text.SimpleDateFormat
+import java.util.*
+
+class ConnectionAdapter(
+    private val onDeleteClick: (BluetoothConnection) -> Unit
+) : ListAdapter<BluetoothConnection, ConnectionAdapter.ViewHolder>(DIFF_CALLBACK) {
+
+    inner class ViewHolder(private val binding: ItemConnectionBinding) :
+        RecyclerView.ViewHolder(binding.root) {
+
+        fun bind(connection: BluetoothConnection) {
+            binding.tvDeviceName.text = connection.name
+            binding.tvMacAddress.text = connection.macAddress
+
+            // Status label
+            binding.tvStatus.text = when {
+                connection.isConnected -> itemView.context.getString(R.string.status_connected)
+                connection.lastConnectedMs > 0 -> {
+                    val fmt = SimpleDateFormat("MMM d, h:mm a", Locale.getDefault())
+                    itemView.context.getString(
+                        R.string.last_connected_format,
+                        fmt.format(Date(connection.lastConnectedMs))
+                    )
+                }
+                else -> itemView.context.getString(R.string.never_connected)
+            }
+
+            // Status dot colour
+            val dotColor = when {
+                connection.isConnected ->
+                    itemView.context.getColor(R.color.status_connected)
+                connection.lastConnectedMs > 0 ->
+                    itemView.context.getColor(R.color.status_disconnected)
+                else ->
+                    itemView.context.getColor(R.color.status_unknown)
+            }
+            binding.statusDot.background.mutate().setTint(dotColor)
+
+            binding.btnDelete.setOnClickListener { onDeleteClick(connection) }
+        }
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val binding = ItemConnectionBinding.inflate(
+            LayoutInflater.from(parent.context), parent, false
+        )
+        return ViewHolder(binding)
+    }
+
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        holder.bind(getItem(position))
+    }
+
+    companion object {
+        private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<BluetoothConnection>() {
+            override fun areItemsTheSame(old: BluetoothConnection, new: BluetoothConnection) =
+                old.id == new.id
+
+            override fun areContentsTheSame(old: BluetoothConnection, new: BluetoothConnection) =
+                old == new
+        }
+    }
+}

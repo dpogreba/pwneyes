@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory android:title="@string/pref_category_general">
+
+        <ListPreference
+            android:key="pref_theme"
+            android:title="@string/pref_theme_title"
+            android:summary="@string/pref_theme_summary"
+            android:entries="@array/theme_entries"
+            android:entryValues="@array/theme_values"
+            android:defaultValue="system"
+            app:iconSpaceReserved="false" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/pref_category_connection">
+
+        <SwitchPreferenceCompat
+            android:key="pref_bluetooth_check"
+            android:title="@string/pref_bluetooth_check_title"
+            android:summary="@string/pref_bluetooth_check_summary"
+            android:defaultValue="true"
+            app:iconSpaceReserved="false" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/pref_category_data">
+
+        <Preference
+            android:key="pref_erase_data"
+            android:title="@string/pref_erase_data_title"
+            android:summary="@string/pref_erase_data_summary"
+            app:iconSpaceReserved="false" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/pref_category_support">
+
+        <Preference
+            android:key="pref_buy_coffee"
+            android:title="@string/pref_buy_coffee_title"
+            android:summary="@string/pref_buy_coffee_summary"
+            app:iconSpaceReserved="false" />
+
+        <Preference
+            android:key="pref_version"
+            android:title="@string/pref_version_title"
+            android:selectable="false"
+            app:iconSpaceReserved="false" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

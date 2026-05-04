@@ -1,0 +1,79 @@
+<resources>
+    <string name="app_name">PwnEyes</string>
+
+    <!-- Navigation drawer -->
+    <string name="nav_home">Home</string>
+    <string name="nav_edit_connections">Edit Connections</string>
+    <string name="nav_settings">Settings</string>
+    <string name="nav_open_drawer">Open navigation drawer</string>
+    <string name="nav_close_drawer">Close navigation drawer</string>
+    <string name="nav_header_subtitle">Bluetooth Device Manager</string>
+    <string name="btn_buy_coffee">☕  Buy Me a Coffee</string>
+
+    <!-- Home screen -->
+    <string name="fab_add_connection">Add Connection</string>
+    <string name="no_connections_title">No Connections Yet</string>
+    <string name="no_connections_message">Tap the + button to add your first Bluetooth connection</string>
+
+    <!-- Add / Edit connection dialog -->
+    <string name="dialog_add_connection_title">Add Connection</string>
+    <string name="dialog_edit_connection_title">Edit Connection</string>
+    <string name="hint_connection_name">Connection Name</string>
+    <string name="hint_mac_address">MAC Address (XX:XX:XX:XX:XX:XX)</string>
+    <string name="hint_device_url">Device URL (optional)</string>
+    <string name="btn_scan_devices">Scan for Devices</string>
+    <string name="btn_save">Save</string>
+    <string name="btn_cancel">Cancel</string>
+
+    <!-- Bluetooth scanning -->
+    <string name="scanning_title">Scanning for Devices…</string>
+    <string name="scanning_empty">No Bluetooth devices found nearby.</string>
+    <string name="bt_not_supported">Bluetooth is not supported on this device.</string>
+    <string name="bt_not_enabled">Bluetooth is disabled. Please enable it to scan.</string>
+    <string name="bt_permission_denied">Bluetooth permission denied. Grant permission in Settings.</string>
+    <string name="bt_tethering_dialog_title">Bluetooth Tethering Required</string>
+    <string name="bt_tethering_dialog_message">Bluetooth tethering must be enabled to connect to this device. Would you like to open system settings?</string>
+    <string name="bt_tethering_open_settings">Open Settings</string>
+
+    <!-- Connection item -->
+    <string name="status_connected">Connected</string>
+    <string name="status_disconnected">Disconnected</string>
+    <string name="status_pairing">Pairing…</string>
+    <string name="action_connect">Connect</string>
+    <string name="action_disconnect">Disconnect</string>
+    <string name="action_delete">Delete</string>
+    <string name="rssi_format">%1$d dBm</string>
+    <string name="last_connected_format">Last seen: %1$s</string>
+    <string name="never_connected">Never connected</string>
+
+    <!-- Edit Connections screen -->
+    <string name="title_edit_connections">Edit Connections</string>
+    <string name="delete_connection_confirm_title">Delete Connection?</string>
+    <string name="delete_connection_confirm_message">"%1$s" will be permanently removed.</string>
+    <string name="delete_all_confirm_title">Delete All Connections?</string>
+    <string name="delete_all_confirm_message">All saved connections will be permanently removed. This cannot be undone.</string>
+    <string name="connection_deleted">Connection deleted</string>
+    <string name="undo">Undo</string>
+
+    <!-- Settings screen -->
+    <string name="title_settings">Settings</string>
+    <string name="pref_category_general">General</string>
+    <string name="pref_theme_title">App Theme</string>
+    <string name="pref_theme_summary">Choose light, dark, or follow system</string>
+    <string name="pref_category_connection">Connection Settings</string>
+    <string name="pref_bluetooth_check_title">Bluetooth Tethering Check</string>
+    <string name="pref_bluetooth_check_summary">Show notification when Bluetooth tethering is disabled</string>
+    <string name="pref_category_support">Support</string>
+    <string name="pref_buy_coffee_title">Buy Us a Coffee</string>
+    <string name="pref_buy_coffee_summary">Support PwnEyes development</string>
+    <string name="pref_version_title">Version</string>
+    <string name="pref_category_data">Data</string>
+    <string name="pref_erase_data_title">Erase All Data</string>
+    <string name="pref_erase_data_summary">Remove all saved connections and reset settings</string>
+
+    <!-- Accessibility -->
+    <string name="cd_bluetooth_icon">Bluetooth device icon</string>
+    <string name="cd_status_indicator">Connection status indicator</string>
+    <string name="cd_delete_connection">Delete this connection</string>
+    <string name="cd_connect_device">Connect to device</string>
+</resources>

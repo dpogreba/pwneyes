@@ -8,7 +8,7 @@
     <string name="nav_open_drawer">Open navigation drawer</string>
     <string name="nav_close_drawer">Close navigation drawer</string>
     <string name="nav_header_subtitle">Bluetooth Device Manager</string>
-    <string name="btn_buy_coffee">☕  Buy Me a Coffee</string>
+    <string name="btn_buy_coffee">🦴  Buy me a treat 4 our dogs</string>
 
     <!-- Home screen -->
     <string name="fab_add_connection">Add Connection</string>
@@ -78,6 +78,7 @@
     <!-- Accessibility -->
     <string name="cd_bluetooth_icon">Bluetooth device icon</string>
     <string name="cd_status_indicator">Connection status indicator</string>
+    <string name="cd_edit_connection">Edit this connection</string>
     <string name="cd_delete_connection">Delete this connection</string>
     <string name="cd_connect_device">Connect to device</string>
 </resources>

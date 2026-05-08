@@ -12,6 +12,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class ConnectionAdapter(
+    private val onEditClick: (BluetoothConnection) -> Unit,
     private val onDeleteClick: (BluetoothConnection) -> Unit
 ) : ListAdapter<BluetoothConnection, ConnectionAdapter.ViewHolder>(DIFF_CALLBACK) {
 
@@ -47,6 +48,7 @@ class ConnectionAdapter(
             }
             binding.statusDot.background.mutate().setTint(dotColor)
 
+            binding.btnEdit.setOnClickListener   { onEditClick(connection) }
             binding.btnDelete.setOnClickListener { onDeleteClick(connection) }
         }
     }

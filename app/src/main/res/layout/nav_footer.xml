@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:paddingBottom="16dp">
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginBottom="12dp"
+        android:background="@color/nav_footer_divider" />
+
+    <!--
+        Official Buy Me a Coffee button image loaded at runtime via Coil.
+        Dimensions match the badge spec: 217 × 60 px (HTML source).
+        Falls back to the local coffee drawable if the device is offline.
+    -->
+    <ImageView
+        android:id="@+id/img_buy_coffee"
+        android:layout_width="217dp"
+        android:layout_height="60dp"
+        android:layout_gravity="center_horizontal"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/btn_buy_coffee"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_coffee" />
+
+</LinearLayout>

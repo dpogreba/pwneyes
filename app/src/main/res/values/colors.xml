@@ -14,6 +14,7 @@
     <!-- Connection status indicators -->
     <color name="status_connected">#34A853</color>
     <color name="status_disconnected">#EA4335</color>
+    <color name="status_checking">#FBBC04</color>
     <color name="status_pairing">#FBBC04</color>
     <color name="status_unknown">#9E9E9E</color>
 

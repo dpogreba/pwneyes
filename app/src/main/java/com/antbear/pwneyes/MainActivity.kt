@@ -8,7 +8,6 @@ import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.Fragment
-import coil.load
 import com.antbear.pwneyes.databinding.ActivityMainBinding
 import com.antbear.pwneyes.fragments.EditConnectionsFragment
 import com.antbear.pwneyes.fragments.HomeFragment
@@ -65,15 +64,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     private fun setupBuyCoffeeButton() {
-        // binding.navFooter is NavFooterBinding — exposed because the <include> in
-        // activity_main.xml carries android:id="@+id/nav_footer"
-        binding.navFooter.imgBuyCoffee.load(
-            "https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png"
-        ) {
-            placeholder(R.drawable.ic_coffee)
-            error(R.drawable.ic_coffee)
-        }
-        binding.navFooter.imgBuyCoffee.setOnClickListener {
+        binding.navFooter.btnBuyCoffee.setOnClickListener {
             startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://www.buymeacoffee.com/ltldrk")))
             binding.drawerLayout.closeDrawer(GravityCompat.START)
         }

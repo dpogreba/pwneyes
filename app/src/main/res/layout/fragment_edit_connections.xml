@@ -1,26 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Home fragment: BT connection list + FAB.
-     RecyclerView scrolls naturally when items overflow the screen;
-     when the list is empty the empty-state view is shown instead. -->
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- Empty state — shown when connection list is empty -->
+    <!-- Empty state -->
     <LinearLayout
         android:id="@+id/empty_state"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
         android:orientation="vertical"
-        android:padding="@dimen/empty_state_padding"
+        android:padding="32dp"
         android:visibility="visible">
 
         <ImageView
-            android:layout_width="@dimen/empty_state_icon_size"
-            android:layout_height="@dimen/empty_state_icon_size"
+            android:layout_width="96dp"
+            android:layout_height="96dp"
             android:alpha="0.4"
             android:contentDescription="@string/cd_bluetooth_icon"
             android:src="@drawable/ic_bluetooth"
@@ -34,41 +31,29 @@
             android:textSize="18sp"
             android:textStyle="bold" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:gravity="center"
-            android:text="@string/no_connections_message"
-            android:textColor="?attr/colorOnSurface"
-            android:alpha="0.6"
-            android:textSize="14sp" />
-
     </LinearLayout>
 
-    <!-- Connections list — shown when at least one connection exists.
-         Infinite scroll is provided automatically by RecyclerView
-         when content height exceeds the screen; no extra code needed. -->
+    <!-- Editable connection list -->
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_connections"
+        android:id="@+id/recycler_edit_connections"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipToPadding="false"
-        android:paddingBottom="80dp"
+        android:paddingBottom="16dp"
         android:scrollbars="vertical"
         android:visibility="gone"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
-    <!-- Circular floating action button to add a new BT connection -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab_add"
+    <!-- Delete-all FAB -->
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/fab_delete_all"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
-        android:contentDescription="@string/fab_add_connection"
-        android:src="@drawable/ic_add"
-        app:fabSize="normal"
-        style="@style/Widget.PwnEyes.FAB" />
+        android:text="Delete All"
+        android:visibility="gone"
+        app:icon="@drawable/ic_delete"
+        app:iconTint="@color/white" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

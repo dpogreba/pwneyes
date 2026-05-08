@@ -3,71 +3,77 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/drawerLayout"
+    android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    android:fitsSystemWindows="true"
+    tools:openDrawer="start">
 
-    <!-- Main Content -->
+    <!-- ============================================================
+         Main content area
+         ============================================================ -->
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <com.google.android.material.appbar.AppBarLayout
-            android:id="@+id/app_bar_main"
+            android:id="@+id/app_bar_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            android:fitsSystemWindows="false">
+            android:fitsSystemWindows="true"
+            android:theme="@style/Theme.PwnEyes.AppBarOverlay">
 
             <androidx.appcompat.widget.Toolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                android:background="?attr/colorPrimary"
-                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-                app:layout_scrollFlags="scroll|enterAlways">
-                <!-- No custom ImageButton; the default hamburger will appear -->
-            </androidx.appcompat.widget.Toolbar>
+                app:popupTheme="@style/Theme.PwnEyes.PopupOverlay" />
+
         </com.google.android.material.appbar.AppBarLayout>
 
-        <LinearLayout
+        <!-- Fragment container — scrolls independently of the drawer -->
+        <FrameLayout
+            android:id="@+id/nav_host_fragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
-            <!-- Nav Host Fragment -->
-            <fragment
-                android:id="@+id/nav_host_fragment_content_main"
-                android:name="androidx.navigation.fragment.NavHostFragment"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                app:defaultNavHost="true"
-                app:navGraph="@navigation/nav_graph" />
 
-            <!-- Ad Container -->
-            <FrameLayout
-                android:id="@+id/adContainer"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:minHeight="70dp"
-                android:padding="8dp"
-                android:layout_marginBottom="8dp"
-                android:background="#E0F0F0"
-                android:layout_gravity="bottom"
-                android:elevation="4dp" />
-
-        </LinearLayout>
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
-    <!-- Navigation View -->
-    <com.google.android.material.navigation.NavigationView
-        android:id="@+id/nav_view"
-        android:layout_width="wrap_content"
+    <!-- ============================================================
+         Navigation drawer panel
+         Using a LinearLayout so we can pin "Buy me a coffee" at
+         the very bottom regardless of how many nav items exist.
+         ============================================================ -->
+    <LinearLayout
+        android:layout_width="@dimen/nav_drawer_width"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        app:menu="@menu/drawer_menu" />
+        android:orientation="vertical"
+        android:fitsSystemWindows="true"
+        android:background="?attr/colorSurface">
+
+        <!-- Branded header -->
+        <include layout="@layout/nav_header" />
+
+        <!-- Navigation menu items (fills all available space) -->
+        <com.google.android.material.navigation.NavigationView
+            android:id="@+id/nav_view"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            app:menu="@menu/nav_menu" />
+
+        <!-- Pinned footer with "Buy me a coffee" button.
+             android:id is required for ViewBinding to expose child views
+             as binding.navFooter.imgBuyCoffee in MainActivity. -->
+        <include
+            android:id="@+id/nav_footer"
+            layout="@layout/nav_footer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
 
 </androidx.drawerlayout.widget.DrawerLayout>

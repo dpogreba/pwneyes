@@ -1,0 +1,73 @@
+name: Build APK
+
+on:
+  push:
+    branches: [ main, master, feature/** ]
+    tags:     [ 'v*.*' ]           # e.g. v1.1 — triggers GitHub Release creation
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+# Allow the workflow to create GitHub Releases when a tag is pushed.
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      # gradle-wrapper.jar is gitignored (binary); regenerate it here so
+      # ./gradlew works correctly for the rest of the build steps.
+      - name: Generate Gradle wrapper JAR
+        run: gradle wrapper --gradle-version 8.7 --distribution-type bin
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      - name: Build debug APK
+        run: ./gradlew assembleDebug --stacktrace
+
+      - name: Upload debug APK (artifact)
+        uses: actions/upload-artifact@v4
+        with:
+          name: pwneyes-debug-${{ github.run_number }}
+          path: app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 30
+
+      - name: Build release APK (unsigned)
+        run: ./gradlew assembleRelease --stacktrace
+
+      - name: Upload release APK (artifact)
+        uses: actions/upload-artifact@v4
+        with:
+          name: pwneyes-release-unsigned-${{ github.run_number }}
+          path: app/build/outputs/apk/release/app-release-unsigned.apk
+          retention-days: 30
+
+      # -----------------------------------------------------------------------
+      # Create a GitHub Release when a version tag (e.g. v1.1) is pushed.
+      # The in-app UpdateChecker queries the latest release to notify users.
+      # To publish a release: git tag v1.1 && git push origin v1.1
+      # -----------------------------------------------------------------------
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            app/build/outputs/apk/debug/app-debug.apk
+            app/build/outputs/apk/release/app-release-unsigned.apk

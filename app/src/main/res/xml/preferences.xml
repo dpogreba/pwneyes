@@ -2,128 +2,54 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <PreferenceCategory
-        android:title="@string/pref_category_appearance"
-        app:iconSpaceReserved="false">
+    <PreferenceCategory android:title="@string/pref_category_general">
 
         <ListPreference
-            android:key="theme_preference"
+            android:key="pref_theme"
             android:title="@string/pref_theme_title"
             android:summary="@string/pref_theme_summary"
-            android:defaultValue="system"
-            android:entries="@array/theme_options"
+            android:entries="@array/theme_entries"
             android:entryValues="@array/theme_values"
+            android:defaultValue="system"
             app:iconSpaceReserved="false" />
-    </PreferenceCategory>
-    
-    <PreferenceCategory
-        android:title="@string/pref_category_accessibility"
-        app:iconSpaceReserved="false">
-        
-        <ListPreference
-            android:key="font_size_preference"
-            android:title="@string/pref_font_size_title"
-            android:summary="@string/pref_font_size_summary"
-            android:defaultValue="normal"
-            android:entries="@array/font_size_options"
-            android:entryValues="@array/font_size_values"
-            app:iconSpaceReserved="false" />
-            
-        <SwitchPreference
-            android:key="high_contrast_mode"
-            android:title="@string/pref_high_contrast_title"
-            android:summary="@string/pref_high_contrast_summary"
-            android:defaultValue="false"
-            app:iconSpaceReserved="false" />
-            
-        <SwitchPreference
-            android:key="text_to_speech"
-            android:title="@string/pref_tts_title"
-            android:summary="@string/pref_tts_summary"
-            android:defaultValue="false"
-            app:iconSpaceReserved="false" />
-            
-        <SwitchPreference
-            android:key="larger_touch_targets"
-            android:title="@string/pref_touch_target_title"
-            android:summary="@string/pref_touch_target_summary"
-            android:defaultValue="false"
-            app:iconSpaceReserved="false" />
-            
-        <SwitchPreference
-            android:key="screen_reader_support"
-            android:title="@string/pref_content_description_title"
-            android:summary="@string/pref_content_description_summary"
-            android:defaultValue="false"
-            app:iconSpaceReserved="false" />
-            
-        <SwitchPreference
-            android:key="reduce_animations"
-            android:title="@string/pref_reduce_animations_title"
-            android:summary="@string/pref_reduce_animations_summary"
-            android:defaultValue="false"
-            app:iconSpaceReserved="false" />
+
     </PreferenceCategory>
 
-    <PreferenceCategory
-        android:title="@string/pref_category_data"
-        app:iconSpaceReserved="false">
+    <PreferenceCategory android:title="@string/pref_category_connection">
 
-        <Preference
-            android:key="erase_all"
-            android:title="@string/pref_erase_all_title"
-            android:summary="@string/pref_erase_all_summary"
+        <SwitchPreferenceCompat
+            android:key="pref_bluetooth_check"
+            android:title="@string/pref_bluetooth_check_title"
+            android:summary="@string/pref_bluetooth_check_summary"
+            android:defaultValue="true"
             app:iconSpaceReserved="false" />
+
     </PreferenceCategory>
 
-    <PreferenceCategory
-        android:title="@string/pref_category_premium"
-        app:iconSpaceReserved="false">
+    <PreferenceCategory android:title="@string/pref_category_data">
 
         <Preference
-            android:key="remove_ads"
-            android:title="@string/remove_ads"
-            android:summary="@string/pref_remove_ads_summary"
+            android:key="pref_erase_data"
+            android:title="@string/pref_erase_data_title"
+            android:summary="@string/pref_erase_data_summary"
             app:iconSpaceReserved="false" />
 
-        <Preference
-            android:key="restore_purchases"
-            android:title="@string/restore_purchases"
-            android:summary="@string/pref_restore_purchases_summary"
-            app:iconSpaceReserved="false" />
-            
-        <Preference
-            android:key="retry_billing"
-            android:title="@string/billing_retry"
-            android:summary="@string/billing_test_mode"
-            app:iconSpaceReserved="false"
-            android:visible="false" />
-            
-        <Preference
-            android:key="billing_status"
-            android:selectable="false"
-            app:iconSpaceReserved="false"
-            android:visible="false" />
     </PreferenceCategory>
 
-    <PreferenceCategory
-        android:title="@string/pref_category_support"
-        app:iconSpaceReserved="false">
+    <PreferenceCategory android:title="@string/pref_category_support">
 
         <Preference
-            android:key="buy_me_coffee"
+            android:key="pref_buy_coffee"
             android:title="@string/pref_buy_coffee_title"
             android:summary="@string/pref_buy_coffee_summary"
-            android:icon="@drawable/ic_coffee_cup"
             app:iconSpaceReserved="false" />
-            
-        <Preference
-            android:key="contact_us"
-            android:title="@string/pref_contact_us_title"
-            android:summary="@string/pref_contact_us_summary"
-            android:icon="@drawable/ic_email"
-            app:iconSpaceReserved="false" />
-    </PreferenceCategory>
 
+        <Preference
+            android:key="pref_version"
+            android:title="@string/pref_version_title"
+            android:selectable="false"
+            app:iconSpaceReserved="false" />
+
+    </PreferenceCategory>
 
 </PreferenceScreen>

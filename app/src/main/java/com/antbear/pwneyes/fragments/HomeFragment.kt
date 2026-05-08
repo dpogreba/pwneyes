@@ -1,21 +1,25 @@
 package com.antbear.pwneyes.fragments
 
 import android.os.Bundle
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.antbear.pwneyes.R
-import com.antbear.pwneyes.adapters.ConnectionAdapter
+import com.antbear.pwneyes.adapters.ConnectionPagerAdapter
 import com.antbear.pwneyes.data.BluetoothConnection
 import com.antbear.pwneyes.databinding.DialogAddConnectionBinding
 import com.antbear.pwneyes.databinding.FragmentHomeBinding
 import com.antbear.pwneyes.viewmodels.HomeViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.tabs.TabLayoutMediator
 
 class HomeFragment : Fragment() {
 
@@ -23,7 +27,8 @@ class HomeFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel: HomeViewModel by activityViewModels()
-    private lateinit var adapter: ConnectionAdapter
+    private lateinit var pagerAdapter: ConnectionPagerAdapter
+    private var tabMediator: TabLayoutMediator? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -34,43 +39,52 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setupRecyclerView()
+        setupPager()
         observeConnections()
         binding.fabAdd.setOnClickListener { showAddConnectionDialog() }
     }
 
     // -------------------------------------------------------------------------
-    // RecyclerView
+    // ViewPager2 + TabLayout
     // -------------------------------------------------------------------------
-    private fun setupRecyclerView() {
-        adapter = ConnectionAdapter(
-            onDeleteClick = { connection ->
-                MaterialAlertDialogBuilder(requireContext())
-                    .setTitle(R.string.delete_connection_confirm_title)
-                    .setMessage(
-                        getString(R.string.delete_connection_confirm_message, connection.name)
-                    )
-                    .setPositiveButton(R.string.action_delete) { _, _ ->
-                        viewModel.delete(connection)
-                        Snackbar.make(binding.root, R.string.connection_deleted, Snackbar.LENGTH_LONG)
-                            .setAction(R.string.undo) { viewModel.insert(connection) }
-                            .show()
-                    }
-                    .setNegativeButton(R.string.btn_cancel, null)
-                    .show()
-            }
-        )
-        binding.recyclerConnections.adapter = adapter
-        binding.recyclerConnections.layoutManager = LinearLayoutManager(requireContext())
+    private fun setupPager() {
+        pagerAdapter = ConnectionPagerAdapter(this)
+        binding.viewPager.adapter = pagerAdapter
     }
 
-    /** Switch between empty-state and list based on item count. */
+    /**
+     * Called every time the connection list changes (add / delete / status update).
+     * Re-attaches the mediator so tab labels and dot colors reflect the latest state.
+     */
+    private fun bindTabs(connections: List<BluetoothConnection>) {
+        // Detach old mediator before swapping data to avoid stale callbacks.
+        tabMediator?.detach()
+
+        pagerAdapter.submitList(connections)
+
+        tabMediator = TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
+            val c = pagerAdapter.getConnection(position)
+
+            // Dot color: green when connected, red when last check failed, grey if never checked.
+            val dotColor = when {
+                c.isConnected -> ContextCompat.getColor(requireContext(), R.color.status_connected)
+                c.lastConnectedMs > 0 -> ContextCompat.getColor(requireContext(), R.color.status_disconnected)
+                else -> ContextCompat.getColor(requireContext(), R.color.status_unknown)
+            }
+
+            // "● Name" — only the bullet gets a custom color; the name follows the theme.
+            val label = SpannableString("● ${c.name}")
+            label.setSpan(ForegroundColorSpan(dotColor), 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            tab.text = label
+        }.also { it.attach() }
+    }
+
     private fun observeConnections() {
         viewModel.allConnections.observe(viewLifecycleOwner) { connections ->
-            adapter.submitList(connections)
             val hasItems = connections.isNotEmpty()
-            binding.emptyState.visibility          = if (hasItems) View.GONE else View.VISIBLE
-            binding.recyclerConnections.visibility = if (hasItems) View.VISIBLE else View.GONE
+            binding.emptyState.visibility     = if (hasItems) View.GONE  else View.VISIBLE
+            binding.pagerContainer.visibility = if (hasItems) View.VISIBLE else View.GONE
+            if (hasItems) bindTabs(connections)
         }
     }
 
@@ -116,23 +130,17 @@ class HomeFragment : Fragment() {
     /**
      * Strips any scheme (http:// / https://) and port (:NNNN) so the user
      * can type just the IP *or* paste a full URL — either works.
-     *
-     * Examples:
-     *   "192.168.44.44"             → "192.168.44.44"
-     *   "192.168.44.44:8080"        → "192.168.44.44"
-     *   "http://192.168.44.44:8080" → "192.168.44.44"
-     *   "http://192.168.44.44"      → "192.168.44.44"
      */
     private fun normalizeIp(raw: String): String =
         raw.trim()
             .removePrefix("https://")
             .removePrefix("http://")
-            .substringBefore(":")   // drop :PORT if present
+            .substringBefore(":")
             .trim()
 
     /**
      * Returns true if [ip] is a valid IPv4 address (each octet 0–255).
-     * Always call this on the result of [normalizeIp].
+     * Always call on the result of [normalizeIp].
      */
     private fun isValidIp(ip: String): Boolean {
         val regex = Regex("""^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$""")
@@ -140,7 +148,12 @@ class HomeFragment : Fragment() {
         return match.groupValues.drop(1).all { it.toInt() in 0..255 }
     }
 
+    // -------------------------------------------------------------------------
+    // Lifecycle
+    // -------------------------------------------------------------------------
     override fun onDestroyView() {
+        tabMediator?.detach()
+        tabMediator = null
         super.onDestroyView()
         _binding = null
     }

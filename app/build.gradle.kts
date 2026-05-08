@@ -61,6 +61,7 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.androidx.preference.ktx)
     implementation(libs.androidx.drawerlayout)
+    implementation(libs.androidx.viewpager2)
     implementation(libs.coil)
     kapt(libs.androidx.room.compiler)
 }

@@ -13,6 +13,7 @@ room = "2.6.1"
 coroutines = "1.8.1"
 preferenceKtx = "1.2.1"
 drawerlayout = "1.2.0"
+viewpager2 = "1.1.0"
 coil = "2.6.0"
 
 [libraries]
@@ -30,6 +31,7 @@ androidx-room-compiler = { group = "androidx.room", name = "room-compiler", vers
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
 androidx-preference-ktx = { group = "androidx.preference", name = "preference-ktx", version.ref = "preferenceKtx" }
 androidx-drawerlayout = { group = "androidx.drawerlayout", name = "drawerlayout", version.ref = "drawerlayout" }
+androidx-viewpager2 = { group = "androidx.viewpager2", name = "viewpager2", version.ref = "viewpager2" }
 coil = { group = "io.coil-kt", name = "coil", version.ref = "coil" }
 
 [plugins]

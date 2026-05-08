@@ -64,6 +64,11 @@
     <string name="pref_erase_data_title">Erase All Data</string>
     <string name="pref_erase_data_summary">Remove all saved connections and reset settings</string>
 
+    <!-- WebView status banner -->
+    <string name="status_checking">Checking connection…</string>
+    <string name="status_unreachable">Unreachable — device may be offline</string>
+    <string name="btn_retry">Retry</string>
+
     <!-- Update checker -->
     <string name="update_dialog_title">Update Available</string>
     <string name="update_dialog_message">Version %1$s is available.\n\nDownload it from GitHub Releases?</string>

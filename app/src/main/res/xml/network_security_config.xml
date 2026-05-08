@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Pwnagotchi devices serve their web UI over plain HTTP on port 8080.
+    Android 9+ blocks cleartext by default, so we explicitly permit it here.
+
+    The base-config applies to all connections.  Because this app is
+    purpose-built to reach local-network devices (RFC-1918 addresses) it
+    is appropriate to allow cleartext for every destination — there is no
+    scenario in which PwnEyes would open a sensitive HTTPS resource over
+    plain HTTP.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <!-- Trust the system CA store (covers HTTPS update-checker calls). -->
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

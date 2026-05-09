@@ -63,11 +63,13 @@ jobs:
       # The in-app UpdateChecker queries the latest release to notify users.
       # To publish a release: git tag v1.1 && git push origin v1.1
       # -----------------------------------------------------------------------
+      - name: Rename APK for release
+        if: startsWith(github.ref, 'refs/tags/')
+        run: cp app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/PwnEyes-${{ github.ref_name }}.apk
+
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
           generate_release_notes: true
-          files: |
-            app/build/outputs/apk/debug/app-debug.apk
-            app/build/outputs/apk/release/app-release-unsigned.apk
+          files: app/build/outputs/apk/debug/PwnEyes-${{ github.ref_name }}.apk

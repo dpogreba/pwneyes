@@ -23,7 +23,7 @@
             android:layout_width="@dimen/empty_state_icon_size"
             android:layout_height="@dimen/empty_state_icon_size"
             android:alpha="0.4"
-            android:contentDescription="@string/cd_bluetooth_icon"
+            android:contentDescription="@string/cd_device_icon"
             android:src="@drawable/ic_bluetooth"
             app:tint="@color/blue_500" />
 

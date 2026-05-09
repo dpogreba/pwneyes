@@ -15,17 +15,6 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="@string/pref_category_connection">
-
-        <SwitchPreferenceCompat
-            android:key="pref_bluetooth_check"
-            android:title="@string/pref_bluetooth_check_title"
-            android:summary="@string/pref_bluetooth_check_summary"
-            android:defaultValue="true"
-            app:iconSpaceReserved="false" />
-
-    </PreferenceCategory>
-
     <PreferenceCategory android:title="@string/pref_category_data">
 
         <Preference

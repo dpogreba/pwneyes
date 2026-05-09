@@ -19,7 +19,7 @@
             android:layout_width="96dp"
             android:layout_height="96dp"
             android:alpha="0.4"
-            android:contentDescription="@string/cd_bluetooth_icon"
+            android:contentDescription="@string/cd_device_icon"
             android:src="@drawable/ic_bluetooth"
             app:tint="@color/blue_500" />
 
@@ -51,7 +51,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
-        android:text="Delete All"
+        android:text="@string/action_delete_all"
         android:visibility="gone"
         app:icon="@drawable/ic_delete"
         app:iconTint="@color/white" />

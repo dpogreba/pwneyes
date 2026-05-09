@@ -15,7 +15,7 @@
         android:layout_height="wrap_content"
         android:padding="@dimen/card_padding">
 
-        <!-- Bluetooth icon with status dot overlay -->
+        <!-- Device icon with status dot overlay -->
         <FrameLayout
             android:id="@+id/icon_container"
             android:layout_width="@dimen/device_icon_size"
@@ -28,7 +28,7 @@
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:layout_gravity="center"
-                android:contentDescription="@string/cd_bluetooth_icon"
+                android:contentDescription="@string/cd_device_icon"
                 android:src="@drawable/ic_bluetooth"
                 app:tint="@color/blue_500" />
 

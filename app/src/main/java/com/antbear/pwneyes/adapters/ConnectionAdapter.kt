@@ -6,20 +6,20 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.antbear.pwneyes.R
-import com.antbear.pwneyes.data.BluetoothConnection
+import com.antbear.pwneyes.data.Connection
 import com.antbear.pwneyes.databinding.ItemConnectionBinding
 import java.text.SimpleDateFormat
 import java.util.*
 
 class ConnectionAdapter(
-    private val onEditClick: (BluetoothConnection) -> Unit,
-    private val onDeleteClick: (BluetoothConnection) -> Unit
-) : ListAdapter<BluetoothConnection, ConnectionAdapter.ViewHolder>(DIFF_CALLBACK) {
+    private val onEditClick: (Connection) -> Unit,
+    private val onDeleteClick: (Connection) -> Unit
+) : ListAdapter<Connection, ConnectionAdapter.ViewHolder>(DIFF_CALLBACK) {
 
     inner class ViewHolder(private val binding: ItemConnectionBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(connection: BluetoothConnection) {
+        fun bind(connection: Connection) {
             binding.tvDeviceName.text = connection.name
             // Show the IP and the always-8080 URL so the user can confirm at a glance.
             binding.tvIpAddress.text  = connection.url   // "http://192.168.x.x:8080"
@@ -65,11 +65,11 @@ class ConnectionAdapter(
     }
 
     companion object {
-        private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<BluetoothConnection>() {
-            override fun areItemsTheSame(old: BluetoothConnection, new: BluetoothConnection) =
+        private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<Connection>() {
+            override fun areItemsTheSame(old: Connection, new: Connection) =
                 old.id == new.id
 
-            override fun areContentsTheSame(old: BluetoothConnection, new: BluetoothConnection) =
+            override fun areContentsTheSame(old: Connection, new: Connection) =
                 old == new
         }
     }

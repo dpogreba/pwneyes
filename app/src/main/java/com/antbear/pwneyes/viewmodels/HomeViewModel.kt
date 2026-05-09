@@ -4,7 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
-import com.antbear.pwneyes.data.BluetoothConnection
+import com.antbear.pwneyes.data.Connection
 import com.antbear.pwneyes.data.ConnectionRepository
 import com.antbear.pwneyes.data.PwnEyesDatabase
 import kotlinx.coroutines.launch
@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 class HomeViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository: ConnectionRepository
-    val allConnections: LiveData<List<BluetoothConnection>>
+    val allConnections: LiveData<List<Connection>>
 
     init {
         val dao = PwnEyesDatabase.getDatabase(application).connectionDao()
@@ -20,15 +20,15 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         allConnections = repository.allConnections
     }
 
-    fun insert(connection: BluetoothConnection) = viewModelScope.launch {
+    fun insert(connection: Connection) = viewModelScope.launch {
         repository.insert(connection)
     }
 
-    fun update(connection: BluetoothConnection) = viewModelScope.launch {
+    fun update(connection: Connection) = viewModelScope.launch {
         repository.update(connection)
     }
 
-    fun delete(connection: BluetoothConnection) = viewModelScope.launch {
+    fun delete(connection: Connection) = viewModelScope.launch {
         repository.delete(connection)
     }
 
@@ -40,5 +40,4 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         repository.setConnectionStatus(id, connected)
     }
 
-    // url is derived; no stored field needed: connection.url == "http://<ip>:8080"
 }

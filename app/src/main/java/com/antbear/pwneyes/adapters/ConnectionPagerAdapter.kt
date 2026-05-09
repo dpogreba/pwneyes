@@ -2,7 +2,7 @@ package com.antbear.pwneyes.adapters
 
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
-import com.antbear.pwneyes.data.BluetoothConnection
+import com.antbear.pwneyes.data.Connection
 import com.antbear.pwneyes.fragments.ConnectionWebViewFragment
 
 /**
@@ -14,17 +14,17 @@ import com.antbear.pwneyes.fragments.ConnectionWebViewFragment
  */
 class ConnectionPagerAdapter(fragment: Fragment) : FragmentStateAdapter(fragment) {
 
-    private val connections = mutableListOf<BluetoothConnection>()
+    private val connections = mutableListOf<Connection>()
 
     /** Replace the current list and notify the pager. */
-    fun submitList(newList: List<BluetoothConnection>) {
+    fun submitList(newList: List<Connection>) {
         connections.clear()
         connections.addAll(newList)
         notifyDataSetChanged()
     }
 
     /** Returns the connection at [position] — safe to call from the mediator callback. */
-    fun getConnection(position: Int): BluetoothConnection = connections[position]
+    fun getConnection(position: Int): Connection = connections[position]
 
     override fun getItemCount(): Int = connections.size
 

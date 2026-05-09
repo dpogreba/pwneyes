@@ -13,7 +13,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.antbear.pwneyes.R
 import com.antbear.pwneyes.adapters.ConnectionPagerAdapter
-import com.antbear.pwneyes.data.BluetoothConnection
+import com.antbear.pwneyes.data.Connection
 import com.antbear.pwneyes.databinding.DialogAddConnectionBinding
 import com.antbear.pwneyes.databinding.FragmentHomeBinding
 import com.antbear.pwneyes.viewmodels.HomeViewModel
@@ -56,7 +56,7 @@ class HomeFragment : Fragment() {
      * Called every time the connection list changes (add / delete / status update).
      * Re-attaches the mediator so tab labels and dot colors reflect the latest state.
      */
-    private fun bindTabs(connections: List<BluetoothConnection>) {
+    private fun bindTabs(connections: List<Connection>) {
         // Detach old mediator before swapping data to avoid stale callbacks.
         tabMediator?.detach()
 
@@ -117,7 +117,7 @@ class HomeFragment : Fragment() {
                     else -> {
                         dialogBinding.tilName.error = null
                         dialogBinding.tilIp.error   = null
-                        viewModel.insert(BluetoothConnection(name = name, ipAddress = ip))
+                        viewModel.insert(Connection(name = name, ipAddress = ip))
                         dialog.dismiss()
                     }
                 }

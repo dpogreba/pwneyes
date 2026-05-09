@@ -10,7 +10,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.antbear.pwneyes.R
 import com.antbear.pwneyes.adapters.ConnectionAdapter
-import com.antbear.pwneyes.data.BluetoothConnection
+import com.antbear.pwneyes.data.Connection
 import com.antbear.pwneyes.databinding.DialogAddConnectionBinding
 import com.antbear.pwneyes.databinding.FragmentEditConnectionsBinding
 import com.antbear.pwneyes.viewmodels.HomeViewModel
@@ -62,7 +62,7 @@ class EditConnectionsFragment : Fragment() {
         binding.recyclerEditConnections.layoutManager = LinearLayoutManager(requireContext())
     }
 
-    private fun showEditDialog(connection: BluetoothConnection) {
+    private fun showEditDialog(connection: Connection) {
         val dialogBinding = DialogAddConnectionBinding.inflate(layoutInflater)
 
         // Pre-populate with current values.

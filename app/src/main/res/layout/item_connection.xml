@@ -29,7 +29,7 @@
                 android:layout_height="32dp"
                 android:layout_gravity="center"
                 android:contentDescription="@string/cd_device_icon"
-                android:src="@drawable/ic_bluetooth"
+                android:src="@drawable/ic_device"
                 app:tint="@color/blue_500" />
 
             <!-- Coloured dot: green=connected, red=disconnected, grey=unknown -->

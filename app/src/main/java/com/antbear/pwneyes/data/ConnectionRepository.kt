@@ -4,13 +4,13 @@ import androidx.lifecycle.LiveData
 
 class ConnectionRepository(private val dao: ConnectionDao) {
 
-    val allConnections: LiveData<List<BluetoothConnection>> = dao.getAllConnections()
+    val allConnections: LiveData<List<Connection>> = dao.getAllConnections()
 
-    suspend fun insert(connection: BluetoothConnection): Long = dao.insert(connection)
+    suspend fun insert(connection: Connection): Long = dao.insert(connection)
 
-    suspend fun update(connection: BluetoothConnection) = dao.update(connection)
+    suspend fun update(connection: Connection) = dao.update(connection)
 
-    suspend fun delete(connection: BluetoothConnection) = dao.delete(connection)
+    suspend fun delete(connection: Connection) = dao.delete(connection)
 
     suspend fun deleteAll() = dao.deleteAll()
 

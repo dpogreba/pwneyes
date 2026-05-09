@@ -6,8 +6,8 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 
 @Database(
-    entities = [BluetoothConnection::class],
-    version = 2,       // bumped: macAddress/deviceUrl/rssi → ipAddress
+    entities = [Connection::class],
+    version = 2,
     exportSchema = false
 )
 abstract class PwnEyesDatabase : RoomDatabase() {
@@ -25,8 +25,6 @@ abstract class PwnEyesDatabase : RoomDatabase() {
                     PwnEyesDatabase::class.java,
                     "pwneyes_database"
                 )
-                    // Schema changed from v1 (macAddress) to v2 (ipAddress).
-                    // Drop-and-recreate is acceptable for early development.
                     .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance

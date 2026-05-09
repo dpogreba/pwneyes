@@ -7,19 +7,19 @@ import androidx.room.*
 interface ConnectionDao {
 
     @Query("SELECT * FROM connections ORDER BY name ASC")
-    fun getAllConnections(): LiveData<List<BluetoothConnection>>
+    fun getAllConnections(): LiveData<List<Connection>>
 
     @Query("SELECT * FROM connections WHERE id = :id")
-    suspend fun getById(id: Long): BluetoothConnection?
+    suspend fun getById(id: Long): Connection?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(connection: BluetoothConnection): Long
+    suspend fun insert(connection: Connection): Long
 
     @Update
-    suspend fun update(connection: BluetoothConnection)
+    suspend fun update(connection: Connection)
 
     @Delete
-    suspend fun delete(connection: BluetoothConnection)
+    suspend fun delete(connection: Connection)
 
     @Query("DELETE FROM connections")
     suspend fun deleteAll()

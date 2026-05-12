@@ -62,6 +62,6 @@ dependencies {
     implementation(libs.androidx.preference.ktx)
     implementation(libs.androidx.drawerlayout)
     implementation(libs.androidx.viewpager2)
-    implementation(libs.coil)
+    implementation(libs.androidx.swiperefreshlayout)
     kapt(libs.androidx.room.compiler)
 }

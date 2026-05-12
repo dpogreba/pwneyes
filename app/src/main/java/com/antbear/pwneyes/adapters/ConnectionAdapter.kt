@@ -21,8 +21,10 @@ class ConnectionAdapter(
 
         fun bind(connection: Connection) {
             binding.tvDeviceName.text = connection.name
-            // Show the IP and the always-8080 URL so the user can confirm at a glance.
-            binding.tvIpAddress.text  = connection.url   // "http://192.168.x.x:8080"
+            binding.tvIpAddress.text = if (connection.port != 8080)
+                "${connection.ipAddress}  ·  port ${connection.port}"
+            else
+                connection.ipAddress
 
             // Status label
             binding.tvStatus.text = when {
@@ -62,6 +64,12 @@ class ConnectionAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bind(getItem(position))
+    }
+
+    fun moveItem(from: Int, to: Int) {
+        val mutable = currentList.toMutableList()
+        Collections.swap(mutable, from, to)
+        submitList(mutable)
     }
 
     companion object {

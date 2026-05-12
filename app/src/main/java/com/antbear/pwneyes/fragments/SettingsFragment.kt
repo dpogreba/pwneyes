@@ -7,15 +7,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.text.HtmlCompat
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
+import androidx.preference.EditTextPreference
 import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import com.antbear.pwneyes.BuildConfig
 import com.antbear.pwneyes.R
 import com.antbear.pwneyes.databinding.FragmentSettingsBinding
-import com.antbear.pwneyes.viewmodels.HomeViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class SettingsFragment : Fragment() {
@@ -43,27 +43,23 @@ class SettingsFragment : Fragment() {
         _binding = null
     }
 
-    // -------------------------------------------------------------------------
-    // Inner PreferenceFragment
-    // -------------------------------------------------------------------------
     class PreferencesFragment : PreferenceFragmentCompat() {
-
-        private val viewModel: HomeViewModel by activityViewModels()
 
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.preferences, rootKey)
             setupThemePref()
             setupVersionPref()
-            setupEraseDataPref()
-            setupBuyCoffeePref()
+            setupDefaultPortPref()
+            setupGithubPref()
+            setupWhatsNewPref()
         }
 
         private fun setupThemePref() {
             findPreference<ListPreference>("pref_theme")?.setOnPreferenceChangeListener { _, value ->
                 val mode = when (value as String) {
-                    "light" -> AppCompatDelegate.MODE_NIGHT_NO
-                    "dark" -> AppCompatDelegate.MODE_NIGHT_YES
-                    else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+                    "light"  -> AppCompatDelegate.MODE_NIGHT_NO
+                    "dark"   -> AppCompatDelegate.MODE_NIGHT_YES
+                    else     -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
                 }
                 AppCompatDelegate.setDefaultNightMode(mode)
                 true
@@ -74,21 +70,34 @@ class SettingsFragment : Fragment() {
             findPreference<Preference>("pref_version")?.summary = BuildConfig.VERSION_NAME
         }
 
-        private fun setupEraseDataPref() {
-            findPreference<Preference>("pref_erase_data")?.setOnPreferenceClickListener {
-                MaterialAlertDialogBuilder(requireContext())
-                    .setTitle(R.string.delete_all_confirm_title)
-                    .setMessage(R.string.delete_all_confirm_message)
-                    .setPositiveButton(R.string.action_delete) { _, _ -> viewModel.deleteAll() }
-                    .setNegativeButton(R.string.btn_cancel, null)
-                    .show()
+        private fun setupDefaultPortPref() {
+            findPreference<EditTextPreference>("pref_default_port")
+                ?.setOnBindEditTextListener { editText ->
+                    editText.inputType = android.text.InputType.TYPE_CLASS_NUMBER
+                    editText.setSelection(editText.text?.length ?: 0)
+                }
+        }
+
+        private fun setupGithubPref() {
+            findPreference<Preference>("pref_github")?.setOnPreferenceClickListener {
+                startActivity(
+                    Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/dpogreba/pwneyes"))
+                )
                 true
             }
         }
 
-        private fun setupBuyCoffeePref() {
-            findPreference<Preference>("pref_buy_coffee")?.setOnPreferenceClickListener {
-                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://www.buymeacoffee.com/ltldrk")))
+        private fun setupWhatsNewPref() {
+            findPreference<Preference>("pref_whats_new")?.setOnPreferenceClickListener {
+                val content = HtmlCompat.fromHtml(
+                    getString(R.string.whats_new_content),
+                    HtmlCompat.FROM_HTML_MODE_COMPACT
+                )
+                MaterialAlertDialogBuilder(requireContext())
+                    .setTitle(R.string.pref_whats_new_title)
+                    .setMessage(content)
+                    .setPositiveButton(R.string.btn_cancel, null)
+                    .show()
                 true
             }
         }

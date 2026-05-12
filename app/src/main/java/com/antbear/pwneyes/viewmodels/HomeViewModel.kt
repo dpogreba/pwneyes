@@ -40,4 +40,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         repository.setConnectionStatus(id, connected)
     }
 
+    fun updateSortOrders(connections: List<Connection>) = viewModelScope.launch {
+        repository.updateSortOrders(connections)
+    }
 }

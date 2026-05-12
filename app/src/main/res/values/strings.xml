@@ -13,20 +13,23 @@
     <!-- Home screen -->
     <string name="fab_add_connection">Add Connection</string>
     <string name="no_connections_title">No Connections Yet</string>
-    <string name="no_connections_message">Tap the + button to add your first Pwnagotchi device</string>
+    <string name="no_connections_message">Tap + to add your Pwnagotchi\'s IP address</string>
 
     <!-- Add / Edit connection dialog -->
     <string name="dialog_add_connection_title">Add Connection</string>
     <string name="dialog_edit_connection_title">Edit Connection</string>
     <string name="hint_connection_name">Connection Name</string>
     <string name="hint_ip_address">IP Address</string>
-    <string name="hint_ip_helper">Port 8080 is always used. You can also paste a full URL.</string>
+    <string name="hint_ip_helper">You can also paste a full URL — the port will be stripped</string>
+    <string name="hint_port">Port</string>
+    <string name="hint_port_helper">1–65535, default 8080</string>
     <string name="btn_save">Save</string>
     <string name="btn_cancel">Cancel</string>
 
     <!-- Validation errors -->
     <string name="error_name_required">Connection name is required</string>
     <string name="error_invalid_ip">Enter a valid IPv4 address (e.g. 192.168.44.44)</string>
+    <string name="error_invalid_port">Port must be between 1 and 65535</string>
 
     <!-- Connection item -->
     <string name="status_connected">Connected</string>
@@ -50,18 +53,25 @@
     <string name="pref_category_general">General</string>
     <string name="pref_theme_title">App Theme</string>
     <string name="pref_theme_summary">Choose light, dark, or follow system</string>
-    <string name="pref_category_support">Support</string>
-    <string name="pref_buy_coffee_title">Buy Us a Coffee</string>
-    <string name="pref_buy_coffee_summary">Support PwnEyes development</string>
     <string name="pref_version_title">Version</string>
-    <string name="pref_category_data">Data</string>
-    <string name="pref_erase_data_title">Erase All Data</string>
-    <string name="pref_erase_data_summary">Remove all saved connections and reset settings</string>
+    <string name="pref_default_port_title">Default Port</string>
+    <string name="pref_default_port_summary">Pre-filled when adding a new connection</string>
+    <string name="pref_timeout_title">Connection Timeout</string>
+    <string name="pref_timeout_summary">How long to wait when checking reachability</string>
+    <string name="pref_auto_refresh_title">Auto-Refresh</string>
+    <string name="pref_auto_refresh_summary">Reload the web UI on a schedule</string>
+    <string name="pref_category_about">About</string>
+    <string name="pref_github_title">GitHub</string>
+    <string name="pref_github_summary">View source and report issues</string>
+    <string name="pref_whats_new_title">What\'s New</string>
+    <string name="pref_whats_new_summary">See what changed in this version</string>
 
     <!-- WebView status banner -->
     <string name="status_checking">Checking connection…</string>
     <string name="status_unreachable">Unreachable — device may be offline</string>
+    <string name="status_unreachable_named">Can\'t reach %1$s — is your phone on the same network?</string>
     <string name="btn_retry">Retry</string>
+    <string name="action_open_in_browser">Open in Browser</string>
 
     <!-- Update checker -->
     <string name="update_dialog_title">Update Available</string>
@@ -69,9 +79,32 @@
     <string name="update_dialog_download">Download</string>
     <string name="update_dialog_later">Later</string>
 
+    <!-- What's New dialog -->
+    <string name="whats_new_content">
+        <![CDATA[
+        <b>Re-Write 1.0</b><br/><br/>
+        PwnEyes has been rebuilt from the ground up.<br/><br/>
+        <b>New Features</b><br/>
+        • Multi-tab WebView — monitor multiple Pwnagotchis at once<br/>
+        • Custom port per connection<br/>
+        • Pull-to-refresh on the web view<br/>
+        • Auto-refresh on a configurable schedule<br/>
+        • Drag to reorder connections<br/>
+        • Open any device in your default browser<br/><br/>
+        <b>Improvements</b><br/>
+        • Smarter connection error messages<br/>
+        • Configurable connection timeout<br/>
+        • Cleaner settings screen<br/><br/>
+        <b>Under the Hood</b><br/>
+        • Full rewrite — Bluetooth removed, IP-based connections only<br/>
+        • MVVM architecture with Room persistence
+        ]]>
+    </string>
+
     <!-- Accessibility -->
     <string name="cd_device_icon">Device icon</string>
     <string name="cd_status_indicator">Connection status indicator</string>
     <string name="cd_edit_connection">Edit this connection</string>
     <string name="cd_delete_connection">Delete this connection</string>
+    <string name="cd_drag_handle">Drag to reorder</string>
 </resources>

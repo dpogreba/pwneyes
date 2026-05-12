@@ -25,10 +25,7 @@
 
     </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- IP address — port 8080 is always assumed.
-         suffixText keeps ":8080" visible inside the field at all times.
-         inputType is textNoSuggestions so the user can paste a full URL
-         (http://192.168.x.x:8080) and it will be stripped automatically. -->
+    <!-- IP address — you can also paste a full URL and the port will be stripped automatically. -->
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/til_ip"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -37,8 +34,7 @@
         android:layout_marginTop="12dp"
         android:hint="@string/hint_ip_address"
         app:helperText="@string/hint_ip_helper"
-        app:helperTextEnabled="true"
-        app:suffixText=":8080">
+        app:helperTextEnabled="true">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/et_ip_address"
@@ -46,6 +42,27 @@
             android:layout_height="wrap_content"
             android:fontFamily="monospace"
             android:inputType="textNoSuggestions"
+            android:maxLines="1" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Port number -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/til_port"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:hint="@string/hint_port"
+        app:helperText="@string/hint_port_helper"
+        app:helperTextEnabled="true">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/et_port"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="monospace"
+            android:inputType="number"
             android:maxLines="1" />
 
     </com.google.android.material.textfield.TextInputLayout>

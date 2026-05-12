@@ -11,6 +11,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.preference.PreferenceManager
 import com.antbear.pwneyes.R
 import com.antbear.pwneyes.adapters.ConnectionPagerAdapter
 import com.antbear.pwneyes.data.Connection
@@ -18,7 +19,6 @@ import com.antbear.pwneyes.databinding.DialogAddConnectionBinding
 import com.antbear.pwneyes.databinding.FragmentHomeBinding
 import com.antbear.pwneyes.viewmodels.HomeViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayoutMediator
 
 class HomeFragment : Fragment() {
@@ -89,10 +89,14 @@ class HomeFragment : Fragment() {
     }
 
     // -------------------------------------------------------------------------
-    // Add connection dialog — IP-based, port 8080 is always assumed
+    // Add connection dialog
     // -------------------------------------------------------------------------
     private fun showAddConnectionDialog() {
         val dialogBinding = DialogAddConnectionBinding.inflate(layoutInflater)
+
+        val defaultPort = PreferenceManager.getDefaultSharedPreferences(requireContext())
+            .getString("pref_default_port", "8080") ?: "8080"
+        dialogBinding.etPort.setText(defaultPort)
 
         val dialog = MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.dialog_add_connection_title)
@@ -114,10 +118,15 @@ class HomeFragment : Fragment() {
                     !isValidIp(ip) ->
                         dialogBinding.tilIp.error = getString(R.string.error_invalid_ip)
 
+                    !isValidPort(dialogBinding.etPort.text?.toString() ?: "") ->
+                        dialogBinding.tilPort.error = getString(R.string.error_invalid_port)
+
                     else -> {
+                        val port = dialogBinding.etPort.text?.toString()?.toIntOrNull() ?: 8080
                         dialogBinding.tilName.error = null
                         dialogBinding.tilIp.error   = null
-                        viewModel.insert(Connection(name = name, ipAddress = ip))
+                        dialogBinding.tilPort.error = null
+                        viewModel.insert(Connection(name = name, ipAddress = ip, port = port))
                         dialog.dismiss()
                     }
                 }
@@ -146,6 +155,11 @@ class HomeFragment : Fragment() {
         val regex = Regex("""^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$""")
         val match = regex.matchEntire(ip) ?: return false
         return match.groupValues.drop(1).all { it.toInt() in 0..255 }
+    }
+
+    private fun isValidPort(raw: String): Boolean {
+        val port = raw.trim().toIntOrNull() ?: return false
+        return port in 1..65535
     }
 
     // -------------------------------------------------------------------------

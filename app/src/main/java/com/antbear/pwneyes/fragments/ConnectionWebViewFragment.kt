@@ -1,16 +1,25 @@
 package com.antbear.pwneyes.fragments
 
 import android.annotation.SuppressLint
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.preference.PreferenceManager
 import com.antbear.pwneyes.R
 import com.antbear.pwneyes.databinding.FragmentConnectionWebviewBinding
 import com.antbear.pwneyes.viewmodels.HomeViewModel
@@ -34,6 +43,13 @@ class ConnectionWebViewFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel: HomeViewModel by activityViewModels()
+
+    private var connectionId: Long = 0
+    private var connectionUrl: String = ""
+    private var connectionName: String = ""
+
+    private val autoRefreshHandler = Handler(Looper.getMainLooper())
+    private var autoRefreshRunnable: Runnable? = null
 
     companion object {
         private const val ARG_ID   = "connection_id"
@@ -60,11 +76,80 @@ class ConnectionWebViewFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val id  = arguments?.getLong(ARG_ID)    ?: return
-        val url = arguments?.getString(ARG_URL) ?: return
+        connectionId   = arguments?.getLong(ARG_ID)      ?: return
+        connectionUrl  = arguments?.getString(ARG_URL)   ?: return
+        connectionName = arguments?.getString(ARG_NAME)  ?: ""
 
-        setupWebView(url)
-        checkAndLoad(id, url)
+        setupWebView(connectionUrl)
+        checkAndLoad(connectionId, connectionUrl)
+
+        binding.swipeRefresh.setColorSchemeColors(
+            requireContext().getColor(R.color.blue_500)
+        )
+        binding.swipeRefresh.setOnRefreshListener {
+            binding.progressBar.visibility = View.VISIBLE
+            binding.webView.reload()
+            checkAndLoad(connectionId, connectionUrl)
+        }
+
+        requireActivity().addMenuProvider(object : MenuProvider {
+            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                menuInflater.inflate(R.menu.menu_webview, menu)
+            }
+            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+                return when (menuItem.itemId) {
+                    R.id.action_open_browser -> {
+                        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(connectionUrl)))
+                        true
+                    }
+                    else -> false
+                }
+            }
+        }, viewLifecycleOwner)
+    }
+
+    // -------------------------------------------------------------------------
+    // Lifecycle
+    // -------------------------------------------------------------------------
+    override fun onResume() {
+        super.onResume()
+        scheduleAutoRefresh()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        cancelAutoRefresh()
+    }
+
+    override fun onDestroyView() {
+        cancelAutoRefresh()
+        binding.webView.stopLoading()
+        binding.webView.destroy()
+        super.onDestroyView()
+        _binding = null
+    }
+
+    // -------------------------------------------------------------------------
+    // Auto-refresh
+    // -------------------------------------------------------------------------
+    private fun scheduleAutoRefresh() {
+        val intervalMs = PreferenceManager.getDefaultSharedPreferences(requireContext())
+            .getString("pref_auto_refresh", "0")?.toLongOrNull() ?: 0L
+        if (intervalMs <= 0L) return
+        autoRefreshRunnable = Runnable {
+            if (_binding != null) {
+                binding.swipeRefresh.isRefreshing = true
+                binding.webView.reload()
+                checkAndLoad(connectionId, connectionUrl)
+                scheduleAutoRefresh()
+            }
+        }
+        autoRefreshHandler.postDelayed(autoRefreshRunnable!!, intervalMs)
+    }
+
+    private fun cancelAutoRefresh() {
+        autoRefreshRunnable?.let { autoRefreshHandler.removeCallbacks(it) }
+        autoRefreshRunnable = null
     }
 
     // -------------------------------------------------------------------------
@@ -74,17 +159,18 @@ class ConnectionWebViewFragment : Fragment() {
     private fun setupWebView(url: String) {
         binding.webView.apply {
             settings.apply {
-                javaScriptEnabled  = true   // Pwnagotchi's web UI requires JS
-                domStorageEnabled  = true
+                javaScriptEnabled    = true   // Pwnagotchi's web UI requires JS
+                domStorageEnabled    = true
                 loadWithOverviewMode = true
-                useWideViewPort    = true
-                builtInZoomControls = true
-                displayZoomControls = false
+                useWideViewPort      = true
+                builtInZoomControls  = true
+                displayZoomControls  = false
             }
 
             webViewClient = object : WebViewClient() {
                 override fun onPageFinished(view: WebView, url: String) {
                     _binding?.progressBar?.visibility = View.GONE
+                    _binding?.swipeRefresh?.isRefreshing = false
                 }
 
                 override fun onReceivedError(
@@ -94,6 +180,7 @@ class ConnectionWebViewFragment : Fragment() {
                 ) {
                     if (request.isForMainFrame) {
                         _binding?.progressBar?.visibility = View.GONE
+                        _binding?.swipeRefresh?.isRefreshing = false
                         showStatus(connected = false)
                     }
                 }
@@ -117,9 +204,11 @@ class ConnectionWebViewFragment : Fragment() {
         Thread {
             val reachable = try {
                 val conn = URL(url).openConnection() as HttpURLConnection
-                conn.requestMethod  = "HEAD"
-                conn.connectTimeout = 4_000
-                conn.readTimeout    = 4_000
+                conn.requestMethod = "HEAD"
+                val timeoutMs = PreferenceManager.getDefaultSharedPreferences(requireContext())
+                    .getString("pref_timeout", "4000")?.toIntOrNull() ?: 4_000
+                conn.connectTimeout = timeoutMs
+                conn.readTimeout    = timeoutMs
                 val code = conn.responseCode
                 conn.disconnect()
                 code < 400
@@ -136,9 +225,10 @@ class ConnectionWebViewFragment : Fragment() {
         }.also { it.isDaemon = true }.start()
 
         binding.btnRetry.setOnClickListener {
+            cancelAutoRefresh()
             binding.progressBar.visibility = View.VISIBLE
             binding.webView.reload()
-            checkAndLoad(id, url)
+            checkAndLoad(connectionId, connectionUrl)
         }
     }
 
@@ -151,33 +241,27 @@ class ConnectionWebViewFragment : Fragment() {
                 binding.statusBar.setBackgroundColor(
                     requireContext().getColor(R.color.status_checking)
                 )
-                binding.tvStatus.text          = getString(R.string.status_checking)
-                binding.btnRetry.visibility    = View.GONE
-                binding.statusBar.visibility   = View.VISIBLE
+                binding.tvStatus.text        = getString(R.string.status_checking)
+                binding.btnRetry.visibility  = View.GONE
+                binding.statusBar.visibility = View.VISIBLE
             }
             connected -> {
                 // Success — hide the banner entirely; the web UI says it all.
+                binding.swipeRefresh.isRefreshing = false
                 binding.statusBar.visibility = View.GONE
             }
             else -> {
+                binding.swipeRefresh.isRefreshing = false
                 binding.statusBar.setBackgroundColor(
                     requireContext().getColor(R.color.status_disconnected)
                 )
-                binding.tvStatus.text          = getString(R.string.status_unreachable)
-                binding.btnRetry.visibility    = View.VISIBLE
-                binding.statusBar.visibility   = View.VISIBLE
+                binding.tvStatus.text = if (connectionName.isNotBlank())
+                    getString(R.string.status_unreachable_named, connectionName)
+                else
+                    getString(R.string.status_unreachable)
+                binding.btnRetry.visibility  = View.VISIBLE
+                binding.statusBar.visibility = View.VISIBLE
             }
         }
-    }
-
-    // -------------------------------------------------------------------------
-    // Lifecycle
-    // -------------------------------------------------------------------------
-    override fun onDestroyView() {
-        // Properly tear down WebView to prevent memory leaks.
-        binding.webView.stopLoading()
-        binding.webView.destroy()
-        super.onDestroyView()
-        _binding = null
     }
 }

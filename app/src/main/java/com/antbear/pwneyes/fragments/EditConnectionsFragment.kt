@@ -7,7 +7,9 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.antbear.pwneyes.R
 import com.antbear.pwneyes.adapters.ConnectionAdapter
 import com.antbear.pwneyes.data.Connection
@@ -60,6 +62,25 @@ class EditConnectionsFragment : Fragment() {
         )
         binding.recyclerEditConnections.adapter = adapter
         binding.recyclerEditConnections.layoutManager = LinearLayoutManager(requireContext())
+
+        val dragCallback = object : ItemTouchHelper.SimpleCallback(
+            ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0
+        ) {
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder
+            ): Boolean {
+                adapter.moveItem(viewHolder.adapterPosition, target.adapterPosition)
+                return true
+            }
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) = Unit
+            override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
+                super.clearView(recyclerView, viewHolder)
+                viewModel.updateSortOrders(adapter.currentList)
+            }
+        }
+        ItemTouchHelper(dragCallback).attachToRecyclerView(binding.recyclerEditConnections)
     }
 
     private fun showEditDialog(connection: Connection) {
@@ -68,6 +89,7 @@ class EditConnectionsFragment : Fragment() {
         // Pre-populate with current values.
         dialogBinding.etConnectionName.setText(connection.name)
         dialogBinding.etIpAddress.setText(connection.ipAddress)
+        dialogBinding.etPort.setText(connection.port.toString())
 
         val dialog = MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.dialog_edit_connection_title)
@@ -86,10 +108,14 @@ class EditConnectionsFragment : Fragment() {
                         dialogBinding.tilName.error = getString(R.string.error_name_required)
                     !isValidIp(ip) ->
                         dialogBinding.tilIp.error = getString(R.string.error_invalid_ip)
+                    !isValidPort(dialogBinding.etPort.text?.toString() ?: "") ->
+                        dialogBinding.tilPort.error = getString(R.string.error_invalid_port)
                     else -> {
+                        val port = dialogBinding.etPort.text?.toString()?.toIntOrNull() ?: 8080
                         dialogBinding.tilName.error = null
                         dialogBinding.tilIp.error   = null
-                        viewModel.update(connection.copy(name = name, ipAddress = ip))
+                        dialogBinding.tilPort.error = null
+                        viewModel.update(connection.copy(name = name, ipAddress = ip, port = port))
                         dialog.dismiss()
                     }
                 }
@@ -110,6 +136,11 @@ class EditConnectionsFragment : Fragment() {
         val regex = Regex("""^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$""")
         val match = regex.matchEntire(ip) ?: return false
         return match.groupValues.drop(1).all { it.toInt() in 0..255 }
+    }
+
+    private fun isValidPort(raw: String): Boolean {
+        val port = raw.trim().toIntOrNull() ?: return false
+        return port in 1..65535
     }
 
     private fun observeConnections() {

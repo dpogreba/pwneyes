@@ -10,4 +10,26 @@
         <item>dark</item>
         <item>system</item>
     </string-array>
+    <string-array name="timeout_entries">
+        <item>4 seconds</item>
+        <item>8 seconds</item>
+        <item>15 seconds</item>
+    </string-array>
+    <string-array name="timeout_values">
+        <item>4000</item>
+        <item>8000</item>
+        <item>15000</item>
+    </string-array>
+    <string-array name="auto_refresh_entries">
+        <item>Off</item>
+        <item>30 seconds</item>
+        <item>1 minute</item>
+        <item>5 minutes</item>
+    </string-array>
+    <string-array name="auto_refresh_values">
+        <item>0</item>
+        <item>30000</item>
+        <item>60000</item>
+        <item>300000</item>
+    </string-array>
 </resources>

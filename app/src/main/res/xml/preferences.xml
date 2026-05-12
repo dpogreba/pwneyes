@@ -13,30 +13,51 @@
             android:defaultValue="system"
             app:iconSpaceReserved="false" />
 
-    </PreferenceCategory>
+        <EditTextPreference
+            android:key="pref_default_port"
+            android:title="@string/pref_default_port_title"
+            android:summary="@string/pref_default_port_summary"
+            android:defaultValue="8080"
+            app:iconSpaceReserved="false" />
 
-    <PreferenceCategory android:title="@string/pref_category_data">
+        <ListPreference
+            android:key="pref_timeout"
+            android:title="@string/pref_timeout_title"
+            android:summary="@string/pref_timeout_summary"
+            android:entries="@array/timeout_entries"
+            android:entryValues="@array/timeout_values"
+            android:defaultValue="4000"
+            app:iconSpaceReserved="false" />
 
-        <Preference
-            android:key="pref_erase_data"
-            android:title="@string/pref_erase_data_title"
-            android:summary="@string/pref_erase_data_summary"
+        <ListPreference
+            android:key="pref_auto_refresh"
+            android:title="@string/pref_auto_refresh_title"
+            android:summary="@string/pref_auto_refresh_summary"
+            android:entries="@array/auto_refresh_entries"
+            android:entryValues="@array/auto_refresh_values"
+            android:defaultValue="0"
             app:iconSpaceReserved="false" />
 
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="@string/pref_category_support">
-
-        <Preference
-            android:key="pref_buy_coffee"
-            android:title="@string/pref_buy_coffee_title"
-            android:summary="@string/pref_buy_coffee_summary"
-            app:iconSpaceReserved="false" />
+    <PreferenceCategory android:title="@string/pref_category_about">
 
         <Preference
             android:key="pref_version"
             android:title="@string/pref_version_title"
             android:selectable="false"
+            app:iconSpaceReserved="false" />
+
+        <Preference
+            android:key="pref_github"
+            android:title="@string/pref_github_title"
+            android:summary="@string/pref_github_summary"
+            app:iconSpaceReserved="false" />
+
+        <Preference
+            android:key="pref_whats_new"
+            android:title="@string/pref_whats_new_title"
+            android:summary="@string/pref_whats_new_summary"
             app:iconSpaceReserved="false" />
 
     </PreferenceCategory>

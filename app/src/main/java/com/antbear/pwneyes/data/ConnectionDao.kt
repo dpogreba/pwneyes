@@ -6,7 +6,7 @@ import androidx.room.*
 @Dao
 interface ConnectionDao {
 
-    @Query("SELECT * FROM connections ORDER BY name ASC")
+    @Query("SELECT * FROM connections ORDER BY sortOrder ASC, name ASC")
     fun getAllConnections(): LiveData<List<Connection>>
 
     @Query("SELECT * FROM connections WHERE id = :id")
@@ -26,4 +26,7 @@ interface ConnectionDao {
 
     @Query("UPDATE connections SET isConnected = :connected, lastConnectedMs = :timestampMs WHERE id = :id")
     suspend fun setConnectionStatus(id: Long, connected: Boolean, timestampMs: Long)
+
+    @Query("UPDATE connections SET sortOrder = :order WHERE id = :id")
+    suspend fun updateSortOrder(id: Long, order: Int)
 }

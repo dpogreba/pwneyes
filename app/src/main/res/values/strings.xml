@@ -31,6 +31,13 @@
     <string name="error_invalid_ip">Enter a valid IPv4 address (e.g. 192.168.44.44)</string>
     <string name="error_invalid_port">Port must be between 1 and 65535</string>
 
+    <!-- HTTP Basic Auth dialog -->
+    <string name="auth_dialog_title">Sign in to %1$s</string>
+    <string name="hint_username">Username</string>
+    <string name="hint_password">Password</string>
+    <string name="btn_sign_in">Sign In</string>
+    <string name="btn_close">Close</string>
+
     <!-- Connection item -->
     <string name="status_connected">Connected</string>
     <string name="status_disconnected">Disconnected</string>

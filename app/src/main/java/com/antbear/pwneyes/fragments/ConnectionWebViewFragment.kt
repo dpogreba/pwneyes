@@ -311,7 +311,6 @@ class ConnectionWebViewFragment : Fragment() {
             if (_binding == null) return false
 
             val popupWebView = WebView(requireContext()).apply {
-                @SuppressLint("SetJavaScriptEnabled")
                 settings.apply {
                     javaScriptEnabled = true
                     domStorageEnabled = true

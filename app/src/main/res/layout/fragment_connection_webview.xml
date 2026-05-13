@@ -26,7 +26,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/white"
             android:textSize="13sp" />
 
         <com.google.android.material.button.MaterialButton
@@ -35,7 +35,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/btn_retry"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/white"
             android:visibility="gone" />
 
     </LinearLayout>

@@ -15,9 +15,7 @@
         android:layout_marginBottom="12dp"
         android:background="@color/nav_footer_divider" />
 
-    <!-- Native button matching the custom BMC widget:
-         color=#FFDD00, emoji=🦴, text="Buy me a treat 4 our dogs",
-         outline=#000000, font-color=#000000 -->
+    <!-- Buy Me a Coffee button — BMC brand colors (yellow/black) -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_buy_coffee"
         android:layout_width="wrap_content"

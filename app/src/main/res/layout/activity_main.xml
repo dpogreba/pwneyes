@@ -67,7 +67,7 @@
 
         <!-- Pinned footer with "Buy me a coffee" button.
              android:id is required for ViewBinding to expose child views
-             as binding.navFooter.imgBuyCoffee in MainActivity. -->
+             as binding.navFooter.btnBuyCoffee in MainActivity. -->
         <include
             android:id="@+id/nav_footer"
             layout="@layout/nav_footer"

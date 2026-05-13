@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- PwnEyes launcher icon: white Bluetooth symbol centered on 108dp canvas -->
+<!-- PwnEyes launcher icon foreground — white symbol centered on 108dp canvas -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- Centered Bluetooth symbol (Material icon scaled ×4.5, offset by 42) -->
+    <!-- Symbol path, scaled ×4.5 and offset by 42 to center on the 108dp canvas -->
     <group
         android:translateX="42"
         android:translateY="42">

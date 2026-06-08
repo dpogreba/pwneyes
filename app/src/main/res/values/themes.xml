@@ -11,6 +11,7 @@
         <item name="android:statusBarColor" tools:targetApi="21">?attr/colorPrimaryVariant</item>
         <item name="android:navigationBarColor" tools:targetApi="21">@android:color/transparent</item>
         <item name="android:windowLightStatusBar" tools:targetApi="23">false</item>
+        <item name="navigationViewStyle">@style/Widget.PwnEyes.NavigationView</item>
     </style>
 
     <style name="Theme.PwnEyes.NoActionBar" parent="Theme.PwnEyes">
@@ -19,7 +20,9 @@
     </style>
 
     <style name="Theme.PwnEyes.AppBarOverlay"
-        parent="ThemeOverlay.MaterialComponents.Dark.ActionBar" />
+        parent="ThemeOverlay.MaterialComponents.Dark.ActionBar">
+        <item name="android:background">@drawable/toolbar_background</item>
+    </style>
 
     <style name="Theme.PwnEyes.PopupOverlay"
         parent="ThemeOverlay.MaterialComponents.Light" />
@@ -32,9 +35,27 @@
 
     <!-- FAB style -->
     <style name="Widget.PwnEyes.FAB" parent="Widget.MaterialComponents.FloatingActionButton">
-        <item name="backgroundTint">@color/blue_500</item>
-        <!-- android:tint omitted: Material FAB handles icon tinting internally;
-             setting it via style conflicts with the component's own pipeline -->
+        <item name="backgroundTint">@null</item>
+        <item name="android:background">@drawable/fab_gradient</item>
+        <item name="elevation">8dp</item>
+        <item name="hoveredFocusedTranslationZ">4dp</item>
+        <item name="pressedTranslationZ">6dp</item>
+    </style>
+
+    <!-- NavigationView style -->
+    <style name="Widget.PwnEyes.NavigationView" parent="Widget.MaterialComponents.NavigationView">
+        <item name="itemShapeAppearanceOverlay">@style/NavItemShapeAppearance</item>
+        <item name="itemShapeFillColor">@color/nav_item_active_background</item>
+        <item name="itemIconTint">@color/nav_item_icon_tint</item>
+        <item name="itemTextColor">@color/nav_item_text_color</item>
+    </style>
+
+    <style name="NavItemShapeAppearance" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopRight">28dp</item>
+        <item name="cornerSizeBottomRight">28dp</item>
+        <item name="cornerSizeTopLeft">0dp</item>
+        <item name="cornerSizeBottomLeft">0dp</item>
     </style>
 
 </resources>

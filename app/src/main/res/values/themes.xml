@@ -47,15 +47,13 @@
         <item name="itemShapeAppearanceOverlay">@style/NavItemShapeAppearance</item>
         <item name="itemShapeFillColor">@color/nav_item_active_background</item>
         <item name="itemIconTint">@color/nav_item_icon_tint</item>
-        <item name="itemTextColor">@color/nav_item_text_color</item>
+        <item name="itemTextColor">@color/nav_item_icon_tint</item>
     </style>
 
     <style name="NavItemShapeAppearance" parent="">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSizeTopRight">28dp</item>
         <item name="cornerSizeBottomRight">28dp</item>
-        <item name="cornerSizeTopLeft">0dp</item>
-        <item name="cornerSizeBottomLeft">0dp</item>
     </style>
 
 </resources>

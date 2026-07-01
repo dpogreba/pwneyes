@@ -2,7 +2,7 @@ name: Build APK
 
 on:
   push:
-    branches: [ main, master, 'feature/**', beta, Beta ]
+    branches: [ main, master, 'feature/**', beta ]
     tags:     [ 'v*.*' ]           # e.g. v1.1 — triggers GitHub Release creation
   pull_request:
     branches: [ main, master ]

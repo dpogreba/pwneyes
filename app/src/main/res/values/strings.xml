@@ -89,6 +89,8 @@
     <!-- What's New dialog -->
     <string name="whats_new_content">
         <![CDATA[
+        <b>Bugs Squashed — 1.1.1</b><br/><br/>
+        Cleaned up layout hierarchy, removed dead code, trimmed theme cruft.<br/><br/>
         <b>Re-Write 1.0</b><br/><br/>
         PwnEyes has been rebuilt from the ground up.<br/><br/>
         <b>New Features</b><br/>

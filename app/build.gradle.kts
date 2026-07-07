@@ -1,8 +1,31 @@
+import org.gradle.api.GradleException
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.kapt)
 }
+
+// ponytail: version derived from git tag; hand-editing is gone. Only tagged CI
+// builds ship a real version — untagged local builds fall back to 0.0.0.
+fun git(vararg args: String): String = try {
+    providers.exec {
+        commandLine("git", *args)
+        isIgnoreExitValue = true
+    }.standardOutput.asText.get().trim()
+} catch (_: Exception) { "" }   // no git binary / building from a source zip
+
+val rawTag = git("describe", "--tags", "--abbrev=0", "--match", "v[0-9]*").removePrefix("v")
+val isTagBuild = System.getenv("GITHUB_REF")?.startsWith("refs/tags/") == true
+
+// A tag-push CI build that can't resolve its tag must fail, not ship "0.0.0" and
+// silently break auto-update (UpdateChecker compares versionName).
+if (isTagBuild && rawTag.isEmpty())
+    throw GradleException("Tag build but no v-tag resolved; refusing to ship 0.0.0")
+
+val semver = rawTag.ifEmpty { "0.0.0" }
+val (verMajor, verMinor, verPatch) = (semver.split(".") + listOf("0", "0", "0"))
+    .take(3).map { it.toIntOrNull() ?: 0 }
 
 android {
     namespace = "com.antbear.pwneyes"
@@ -12,8 +35,8 @@ android {
         applicationId = "com.antbear.pwneyes"
         minSdk = 24
         targetSdk = 34
-        versionCode = 4
-        versionName = "1.1.1"
+        versionCode = verMajor * 10000 + verMinor * 100 + verPatch   // v1.1.1 -> 10101
+        versionName = semver
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 

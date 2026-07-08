@@ -1,6 +1,8 @@
 package com.antbear.pwneyes.adapters
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -13,12 +15,14 @@ import java.util.*
 
 class ConnectionAdapter(
     private val onEditClick: (Connection) -> Unit,
-    private val onDeleteClick: (Connection) -> Unit
+    private val onDeleteClick: (Connection) -> Unit,
+    private val onStartDrag: (RecyclerView.ViewHolder) -> Unit
 ) : ListAdapter<Connection, ConnectionAdapter.ViewHolder>(DIFF_CALLBACK) {
 
     inner class ViewHolder(private val binding: ItemConnectionBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
+        @SuppressLint("ClickableViewAccessibility")   // drag handle forwards ACTION_DOWN only
         fun bind(connection: Connection) {
             binding.tvDeviceName.text = connection.name
             binding.tvIpAddress.text = if (connection.port != 8080)
@@ -52,6 +56,13 @@ class ConnectionAdapter(
 
             binding.btnEdit.setOnClickListener   { onEditClick(connection) }
             binding.btnDelete.setOnClickListener { onDeleteClick(connection) }
+
+            // Drag starts only from the handle (long-press-anywhere is disabled on the
+            // callback), so a tap on Edit/Delete can never turn into a phantom drag.
+            binding.dragHandle.setOnTouchListener { _, event ->
+                if (event.actionMasked == MotionEvent.ACTION_DOWN) onStartDrag(this)
+                false
+            }
         }
     }
 
@@ -66,10 +77,24 @@ class ConnectionAdapter(
         holder.bind(getItem(position))
     }
 
+    // Cumulative order held during a drag. currentList lags behind submitList (async
+    // differ), so a burst of onMove callbacks must swap against the last pending order,
+    // not the stale committed one, or swaps get lost / positions desync and crash.
+    private var pendingOrder: MutableList<Connection>? = null
+
     fun moveItem(from: Int, to: Int) {
-        val mutable = currentList.toMutableList()
-        Collections.swap(mutable, from, to)
-        submitList(mutable)
+        val list = pendingOrder ?: currentList.toMutableList()
+        if (from !in list.indices || to !in list.indices) return
+        Collections.swap(list, from, to)
+        pendingOrder = list
+        submitList(list.toList())   // fresh copy; differ coalesces rapid moves
+    }
+
+    /** Authoritative order at drag end (currentList may still lag the last submit). */
+    fun endDrag(): List<Connection> {
+        val result = (pendingOrder ?: currentList).toList()
+        pendingOrder = null
+        return result
     }
 
     companion object {

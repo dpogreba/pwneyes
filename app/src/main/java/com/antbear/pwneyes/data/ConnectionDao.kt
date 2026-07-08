@@ -29,4 +29,10 @@ interface ConnectionDao {
 
     @Query("UPDATE connections SET sortOrder = :order WHERE id = :id")
     suspend fun updateSortOrder(id: Long, order: Int)
+
+    /** Persist a whole reorder in one transaction → a single table invalidation / LiveData emit. */
+    @Transaction
+    suspend fun applySortOrders(orderedIds: List<Long>) {
+        orderedIds.forEachIndexed { index, id -> updateSortOrder(id, index) }
+    }
 }

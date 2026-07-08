@@ -353,12 +353,19 @@ class ConnectionWebViewFragment : Fragment() {
     private fun checkAndLoad(id: Long, url: String) {
         showStatus(checking = true)
 
+        // Resolve everything lifecycle-bound NOW, on the main thread while attached.
+        // The activityViewModels() delegate calls requireActivity() on first access;
+        // if that first access happens on the probe thread after Home has been
+        // detached (Home -> Edit navigation), it throws IllegalStateException on a
+        // raw thread and kills the process. Force it here instead.
+        val vm = viewModel
+        val timeoutMs = PreferenceManager.getDefaultSharedPreferences(requireContext())
+            .getString("pref_timeout", "4000")?.toIntOrNull() ?: 4_000
+
         Thread {
             val reachable = try {
                 val conn = URL(url).openConnection() as HttpURLConnection
                 conn.requestMethod = "HEAD"
-                val timeoutMs = PreferenceManager.getDefaultSharedPreferences(requireContext())
-                    .getString("pref_timeout", "4000")?.toIntOrNull() ?: 4_000
                 conn.connectTimeout = timeoutMs
                 conn.readTimeout    = timeoutMs
                 val code = conn.responseCode
@@ -366,12 +373,11 @@ class ConnectionWebViewFragment : Fragment() {
                 code < 400
             } catch (_: Exception) { false }
 
-            viewModel.setConnectionStatus(id, reachable)
+            vm.setConnectionStatus(id, reachable)   // ViewModel is activity-scoped; safe off-thread
 
-            if (isAdded && _binding != null) {
-                requireActivity().runOnUiThread {
-                    if (_binding != null) showStatus(connected = reachable)
-                }
+            // activity is a nullable getter — never throws if detached (unlike requireActivity()).
+            activity?.runOnUiThread {
+                if (_binding != null) showStatus(connected = reachable)
             }
         }.also { it.isDaemon = true }.start()
 

@@ -26,6 +26,8 @@ class EditConnectionsFragment : Fragment() {
 
     private val viewModel: HomeViewModel by activityViewModels()
     private lateinit var adapter: ConnectionAdapter
+    private lateinit var itemTouchHelper: ItemTouchHelper
+    private var isDragging = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -58,7 +60,8 @@ class EditConnectionsFragment : Fragment() {
                     }
                     .setNegativeButton(R.string.btn_cancel, null)
                     .show()
-            }
+            },
+            onStartDrag = { viewHolder -> itemTouchHelper.startDrag(viewHolder) }
         )
         binding.recyclerEditConnections.adapter = adapter
         binding.recyclerEditConnections.layoutManager = LinearLayoutManager(requireContext())
@@ -66,21 +69,40 @@ class EditConnectionsFragment : Fragment() {
         val dragCallback = object : ItemTouchHelper.SimpleCallback(
             ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0
         ) {
+            // Drag is initiated explicitly from the handle (see onStartDrag), so a
+            // long-press on the card body — including on the Edit/Delete buttons —
+            // must NOT start a drag.
+            override fun isLongPressDragEnabled() = false
+
             override fun onMove(
                 recyclerView: RecyclerView,
                 viewHolder: RecyclerView.ViewHolder,
                 target: RecyclerView.ViewHolder
             ): Boolean {
-                adapter.moveItem(viewHolder.adapterPosition, target.adapterPosition)
+                val from = viewHolder.bindingAdapterPosition
+                val to = target.bindingAdapterPosition
+                if (from == RecyclerView.NO_POSITION || to == RecyclerView.NO_POSITION) return false
+                adapter.moveItem(from, to)
                 return true
             }
+
+            override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
+                super.onSelectedChanged(viewHolder, actionState)
+                if (actionState == ItemTouchHelper.ACTION_STATE_DRAG) isDragging = true
+            }
+
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) = Unit
+
             override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
                 super.clearView(recyclerView, viewHolder)
-                viewModel.updateSortOrders(adapter.currentList)
+                isDragging = false
+                // Persist the authoritative dragged order (currentList may lag the async
+                // differ). The Room UPDATE re-emits allConnections, resyncing the adapter.
+                viewModel.updateSortOrders(adapter.endDrag())
             }
         }
-        ItemTouchHelper(dragCallback).attachToRecyclerView(binding.recyclerEditConnections)
+        itemTouchHelper = ItemTouchHelper(dragCallback)
+        itemTouchHelper.attachToRecyclerView(binding.recyclerEditConnections)
     }
 
     private fun showEditDialog(connection: Connection) {
@@ -145,7 +167,9 @@ class EditConnectionsFragment : Fragment() {
 
     private fun observeConnections() {
         viewModel.allConnections.observe(viewLifecycleOwner) { connections ->
-            adapter.submitList(connections)
+            // Don't let a background status re-emit clobber an in-progress drag; clearView
+            // persists the final order, whose Room write re-emits and resyncs us.
+            if (!isDragging) adapter.submitList(connections)
             val hasItems = connections.isNotEmpty()
             binding.emptyState.visibility = if (hasItems) View.GONE else View.VISIBLE
             binding.recyclerEditConnections.visibility = if (hasItems) View.VISIBLE else View.GONE

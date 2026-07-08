@@ -17,9 +17,6 @@ class ConnectionRepository(private val dao: ConnectionDao) {
     suspend fun setConnectionStatus(id: Long, connected: Boolean) =
         dao.setConnectionStatus(id, connected, System.currentTimeMillis())
 
-    suspend fun updateSortOrders(connections: List<Connection>) {
-        connections.forEachIndexed { index, connection ->
-            dao.updateSortOrder(connection.id, index)
-        }
-    }
+    suspend fun updateSortOrders(connections: List<Connection>) =
+        dao.applySortOrders(connections.map { it.id })
 }

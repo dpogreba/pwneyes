@@ -40,6 +40,24 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory android:title="@string/pref_category_notify">
+
+        <SwitchPreferenceCompat
+            android:key="pref_notify_handshake"
+            android:title="@string/pref_notify_handshake_title"
+            android:summary="@string/pref_notify_handshake_summary"
+            android:defaultValue="false"
+            app:iconSpaceReserved="false" />
+
+        <SwitchPreferenceCompat
+            android:key="pref_notify_pot"
+            android:title="@string/pref_notify_pot_title"
+            android:summary="@string/pref_notify_pot_summary"
+            android:defaultValue="false"
+            app:iconSpaceReserved="false" />
+
+    </PreferenceCategory>
+
     <PreferenceCategory android:title="@string/pref_category_about">
 
         <Preference

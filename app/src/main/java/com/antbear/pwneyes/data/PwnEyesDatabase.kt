@@ -9,7 +9,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
     entities = [Connection::class],
-    version = 3,
+    version = 4,
     exportSchema = false
 )
 abstract class PwnEyesDatabase : RoomDatabase() {
@@ -27,6 +27,13 @@ abstract class PwnEyesDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE connections ADD COLUMN username TEXT")
+                database.execSQL("ALTER TABLE connections ADD COLUMN password TEXT")
+            }
+        }
+
         fun getDatabase(context: Context): PwnEyesDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -34,7 +41,7 @@ abstract class PwnEyesDatabase : RoomDatabase() {
                     PwnEyesDatabase::class.java,
                     "pwneyes_database"
                 )
-                    .addMigrations(MIGRATION_2_3)
+                    .addMigrations(MIGRATION_2_3, MIGRATION_3_4)
                     .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance

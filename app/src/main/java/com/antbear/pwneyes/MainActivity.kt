@@ -1,9 +1,13 @@
 package com.antbear.pwneyes
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.view.MenuItem
+import androidx.activity.result.contracts.ActivityResultContracts
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
@@ -12,6 +16,7 @@ import com.antbear.pwneyes.databinding.ActivityMainBinding
 import com.antbear.pwneyes.fragments.EditConnectionsFragment
 import com.antbear.pwneyes.fragments.HomeFragment
 import com.antbear.pwneyes.fragments.SettingsFragment
+import com.antbear.pwneyes.notify.PwnStatusWorker
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.navigation.NavigationView
 
@@ -19,6 +24,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var drawerToggle: ActionBarDrawerToggle
+
+    private val requestNotifPermission =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { /* result handled lazily */ }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,6 +43,19 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
 
         checkForUpdates()
+
+        // Background status poller for handshake / cracked-key notifications (idempotent).
+        PwnStatusWorker.schedule(this)
+        maybeRequestNotifPermission()
+    }
+
+    private fun maybeRequestNotifPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) !=
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            requestNotifPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
     }
 
     // -------------------------------------------------------------------------

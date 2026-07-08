@@ -112,6 +112,8 @@ class EditConnectionsFragment : Fragment() {
         dialogBinding.etConnectionName.setText(connection.name)
         dialogBinding.etIpAddress.setText(connection.ipAddress)
         dialogBinding.etPort.setText(connection.port.toString())
+        dialogBinding.etUsername.setText(connection.username)
+        dialogBinding.etPassword.setText(connection.password)
 
         val dialog = MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.dialog_edit_connection_title)
@@ -137,7 +139,15 @@ class EditConnectionsFragment : Fragment() {
                         dialogBinding.tilName.error = null
                         dialogBinding.tilIp.error   = null
                         dialogBinding.tilPort.error = null
-                        viewModel.update(connection.copy(name = name, ipAddress = ip, port = port))
+                        viewModel.update(
+                            connection.copy(
+                                name = name,
+                                ipAddress = ip,
+                                port = port,
+                                username = dialogBinding.etUsername.text?.toString()?.trim()?.ifBlank { null },
+                                password = dialogBinding.etPassword.text?.toString()?.ifBlank { null }
+                            )
+                        )
                         dialog.dismiss()
                     }
                 }

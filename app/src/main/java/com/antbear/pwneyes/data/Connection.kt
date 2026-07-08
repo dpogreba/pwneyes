@@ -16,7 +16,10 @@ data class Connection(
     @ColumnInfo(defaultValue = "8080")
     val port: Int = 8080,
     @ColumnInfo(defaultValue = "0")
-    val sortOrder: Int = 0
+    val sortOrder: Int = 0,
+    // Optional HTTP Basic Auth for the status poller (null when the device has auth disabled).
+    val username: String? = null,
+    val password: String? = null
 ) {
     @get:Ignore
     val url: String get() = "http://$ipAddress:$port"

@@ -126,7 +126,15 @@ class HomeFragment : Fragment() {
                         dialogBinding.tilName.error = null
                         dialogBinding.tilIp.error   = null
                         dialogBinding.tilPort.error = null
-                        viewModel.insert(Connection(name = name, ipAddress = ip, port = port))
+                        viewModel.insert(
+                            Connection(
+                                name = name,
+                                ipAddress = ip,
+                                port = port,
+                                username = dialogBinding.etUsername.text?.toString()?.trim()?.ifBlank { null },
+                                password = dialogBinding.etPassword.text?.toString()?.ifBlank { null }
+                            )
+                        )
                         dialog.dismiss()
                     }
                 }

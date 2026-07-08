@@ -9,6 +9,10 @@ interface ConnectionDao {
     @Query("SELECT * FROM connections ORDER BY sortOrder ASC, name ASC")
     fun getAllConnections(): LiveData<List<Connection>>
 
+    /** Blocking read for background workers (must not run on the main thread). */
+    @Query("SELECT * FROM connections")
+    fun getAllSync(): List<Connection>
+
     @Query("SELECT * FROM connections WHERE id = :id")
     suspend fun getById(id: Long): Connection?
 

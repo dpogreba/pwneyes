@@ -67,6 +67,16 @@
     <string name="pref_timeout_summary">How long to wait when checking reachability</string>
     <string name="pref_auto_refresh_title">Auto-Refresh</string>
     <string name="pref_auto_refresh_summary">Reload the web UI on a schedule</string>
+    <string name="pref_category_notify">Notifications</string>
+    <string name="pref_notify_handshake_title">New handshake</string>
+    <string name="pref_notify_handshake_summary">Notify when a device captures a new handshake (requires the PwnEyes plugin)</string>
+    <string name="pref_notify_pot_title">Cracked key</string>
+    <string name="pref_notify_pot_summary">Notify when a device cracks a new WPA key via wpa-sec</string>
+    <string name="notify_channel_name">Device Alerts</string>
+    <string name="notify_handshake_title">New handshake</string>
+    <string name="notify_handshake_text">%1$s captured a new handshake</string>
+    <string name="notify_pot_title">New cracked key</string>
+    <string name="notify_pot_text">%1$s cracked a new WPA key</string>
     <string name="pref_category_about">About</string>
     <string name="pref_github_title">GitHub</string>
     <string name="pref_github_summary">View source and report issues</string>

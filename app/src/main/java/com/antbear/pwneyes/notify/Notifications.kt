@@ -1,5 +1,6 @@
 package com.antbear.pwneyes.notify
 
+import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
@@ -17,7 +18,7 @@ object Notifications {
     /** Idempotent — safe to call every worker run; no Application subclass needed. */
     fun ensureChannel(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val mgr = context.getSystemService(NotificationManager::class.java)
+            val mgr = context.getSystemService(NotificationManager::class.java) ?: return
             if (mgr.getNotificationChannel(CHANNEL_ID) == null) {
                 mgr.createNotificationChannel(
                     NotificationChannel(
@@ -30,6 +31,10 @@ object Notifications {
         }
     }
 
+    // POST_NOTIFICATIONS is requested at startup; a denial is also caught below. The
+    // NotificationManagerCompat.notify call still trips lint's MissingPermission (the
+    // try/catch doesn't satisfy it), so suppress it here.
+    @SuppressLint("MissingPermission")
     fun notify(context: Context, connectionId: Long, connName: String, kind: NotifyKind) {
         val (titleRes, textRes, offset) = when (kind) {
             NotifyKind.HANDSHAKE ->

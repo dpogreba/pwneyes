@@ -33,10 +33,13 @@
         <item name="android:layout_height">10dp</item>
     </style>
 
-    <!-- FAB style -->
+    <!-- FAB style — solid brand blue + white icon. A Material FAB ignores
+         android:background, so the old fab_gradient never rendered and the FAB
+         fell back to a dark surface (invisible in dark mode); backgroundTint is
+         the only supported way to colour it. -->
     <style name="Widget.PwnEyes.FAB" parent="Widget.MaterialComponents.FloatingActionButton">
-        <item name="backgroundTint">@null</item>
-        <item name="android:background">@drawable/fab_gradient</item>
+        <item name="backgroundTint">@color/blue_500</item>
+        <item name="tint">@color/white</item>
         <item name="elevation">8dp</item>
         <item name="hoveredFocusedTranslationZ">4dp</item>
         <item name="pressedTranslationZ">6dp</item>

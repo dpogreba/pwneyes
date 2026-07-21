@@ -86,13 +86,17 @@
     <string name="update_dialog_download">Download</string>
     <string name="update_dialog_later">Later</string>
 
-    <!-- What's New dialog -->
+    <!-- What's New dialog.
+         NOTE: aapt2 applies its string-escape rules inside CDATA too — a bare
+         apostrophe is a build error and \' renders as a plain apostrophe.
+         Don't "unescape" the \' below, and never put an XML comment inside the
+         CDATA block (it would render as literal text in the dialog). -->
     <string name="whats_new_content">
         <![CDATA[
         <b>Signed Builds &amp; Fixes — 1.2.0</b><br/><br/>
         <b>⚠️ One-time reinstall required</b><br/>
         PwnEyes is now a properly signed release build instead of a debug build.
-        That changes the app's package identity, so this version installs
+        That changes the app\'s package identity, so this version installs
         <i>alongside</i> your old copy rather than over it.<br/><br/>
         • Uninstall the previous PwnEyes after installing this one<br/>
         • Your saved connections will need to be re-added<br/>

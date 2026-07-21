@@ -102,7 +102,7 @@
         <b>Signed Builds &amp; Fixes — 1.2.0</b><br/><br/>
         <b>⚠️ One-time reinstall required</b><br/>
         PwnEyes is now a properly signed release build instead of a debug build.
-        That changes the app\'s package identity, so this version installs
+        That changes the app's package identity, so this version installs
         <i>alongside</i> your old copy rather than over it.<br/><br/>
         • Uninstall the previous PwnEyes after installing this one<br/>
         • Your saved connections will need to be re-added<br/>

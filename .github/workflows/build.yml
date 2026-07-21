@@ -43,18 +43,11 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
-      - name: Build debug APK
-        run: ./gradlew assembleDebug --stacktrace
-
-      - name: Upload debug APK (artifact)
-        uses: actions/upload-artifact@v4
-        with:
-          name: pwneyes-debug-${{ github.run_number }}
-          path: app/build/outputs/apk/debug/app-debug.apk
-          retention-days: 30
-
-      # Signing material is decoded only for tag builds (the ones that publish a
-      # release), keeping secret exposure to the minimum number of runs.
+      # Decoded BEFORE the first ./gradlew call. build.gradle.kts evaluates its
+      # "tag build must have a keystore" guard on every Gradle invocation, so if
+      # KEYSTORE_PATH weren't set yet the assembleDebug below would throw and kill
+      # the whole tag build before signing ever happened.
+      # Tag builds only — keeps secret exposure to the runs that publish a release.
       - name: Decode signing keystore
         if: startsWith(github.ref, 'refs/tags/')
         env:
@@ -67,6 +60,16 @@ jobs:
           printf '%s' "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/pwneyes-release.jks"
           echo "KEYSTORE_PATH=$RUNNER_TEMP/pwneyes-release.jks" >> "$GITHUB_ENV"
 
+      - name: Build debug APK
+        run: ./gradlew assembleDebug --stacktrace
+
+      - name: Upload debug APK (artifact)
+        uses: actions/upload-artifact@v4
+        with:
+          name: pwneyes-debug-${{ github.run_number }}
+          path: app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 30
+
       - name: Build release APK
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
@@ -74,11 +77,23 @@ jobs:
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: ./gradlew assembleRelease --stacktrace
 
+      # Verify before publishing anything, so an unsigned build can never leave
+      # this job labelled as a release.
+      - name: Verify release APK is signed
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          APK=app/build/outputs/apk/release/app-release.apk
+          test -f "$APK" || { echo "::error::$APK missing — release build was not signed."; exit 1; }
+          APKSIGNER=$(ls "$ANDROID_HOME"/build-tools/*/apksigner 2>/dev/null | sort -V | tail -1)
+          test -n "$APKSIGNER" || { echo "::error::apksigner not found in $ANDROID_HOME/build-tools."; exit 1; }
+          "$APKSIGNER" verify --print-certs "$APK"
+
       # Filename differs by signing state (app-release.apk vs app-release-unsigned.apk).
+      # The artifact name says which, so a branch build is never mistaken for a signed one.
       - name: Upload release APK (artifact)
         uses: actions/upload-artifact@v4
         with:
-          name: pwneyes-release-${{ github.run_number }}
+          name: pwneyes-release-${{ startsWith(github.ref, 'refs/tags/') && 'signed' || 'unsigned' }}-${{ github.run_number }}
           path: app/build/outputs/apk/release/*.apk
           retention-days: 30
 
@@ -91,15 +106,6 @@ jobs:
       # was signed with a throwaway debug key regenerated on every runner — so no
       # two releases shared a signature and updates could never install in place.
       # -----------------------------------------------------------------------
-      - name: Verify release APK is signed
-        if: startsWith(github.ref, 'refs/tags/')
-        run: |
-          APK=app/build/outputs/apk/release/app-release.apk
-          test -f "$APK" || { echo "::error::$APK missing — release build was not signed."; exit 1; }
-          APKSIGNER=$(ls "$ANDROID_HOME"/build-tools/*/apksigner 2>/dev/null | sort -V | tail -1)
-          test -n "$APKSIGNER" || { echo "::error::apksigner not found in $ANDROID_HOME/build-tools."; exit 1; }
-          "$APKSIGNER" verify --print-certs "$APK"
-
       - name: Rename APK for release
         if: startsWith(github.ref, 'refs/tags/')
         run: cp app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/PwnEyes-${{ github.ref_name }}.apk

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Scoped deliberately to the single directory the updater writes to, so the
+     FileProvider can never hand out anything else. -->
+<paths>
+    <external-files-path name="updates" path="updates/" />
+</paths>

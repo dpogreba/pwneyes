@@ -9,9 +9,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.Fragment
 import com.antbear.pwneyes.databinding.ActivityMainBinding
+import com.antbear.pwneyes.databinding.DialogDownloadProgressBinding
 import com.antbear.pwneyes.fragments.EditConnectionsFragment
 import com.antbear.pwneyes.fragments.HomeFragment
 import com.antbear.pwneyes.fragments.SettingsFragment
+import com.antbear.pwneyes.update.ApkUpdater
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.navigation.NavigationView
 
@@ -78,26 +80,96 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     // -------------------------------------------------------------------------
     private fun checkForUpdates() {
         Thread {
-            val latest = UpdateChecker.latestVersionIfNewer(BuildConfig.VERSION_NAME)
-            if (latest != null) {
+            val update = UpdateChecker.latestUpdateIfNewer(BuildConfig.VERSION_NAME)
+            if (update != null) {
                 runOnUiThread {
-                    if (!isFinishing && !isDestroyed) showUpdateDialog(latest)
+                    if (!isFinishing && !isDestroyed) showUpdateDialog(update)
                 }
             }
         }.also { it.isDaemon = true }.start()
     }
 
-    private fun showUpdateDialog(version: String) {
+    private fun showUpdateDialog(update: UpdateChecker.UpdateInfo) {
         MaterialAlertDialogBuilder(this)
             .setTitle(getString(R.string.update_dialog_title))
-            .setMessage(getString(R.string.update_dialog_message, version))
-            .setPositiveButton(R.string.update_dialog_download) { _, _ ->
-                startActivity(
-                    Intent(Intent.ACTION_VIEW, Uri.parse(UpdateChecker.RELEASES_PAGE))
-                )
-            }
+            .setMessage(getString(R.string.update_dialog_message, update.version))
+            .setPositiveButton(R.string.update_dialog_download) { _, _ -> startUpdate(update) }
             .setNegativeButton(R.string.update_dialog_later, null)
             .show()
+    }
+
+    /**
+     * Download-and-install path. Every branch falls back to the releases page so a
+     * failure never leaves the user stuck with no way to update.
+     */
+    private fun startUpdate(update: UpdateChecker.UpdateInfo) {
+        val apkUrl = update.apkUrl
+        when {
+            apkUrl == null -> openReleasesPage()                     // release has no APK asset
+            !ApkUpdater.canRequestInstall(this) -> promptInstallPermission()
+            else -> downloadAndInstall(apkUrl)
+        }
+    }
+
+    /** Android 8+: the user grants "install unknown apps" once, in system settings. */
+    private fun promptInstallPermission() {
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.update_install_permission_title)
+            .setMessage(R.string.update_install_permission_message)
+            .setPositiveButton(R.string.update_open_settings) { _, _ ->
+                runCatching { startActivity(ApkUpdater.installPermissionIntent(this)) }
+                    .onFailure { openReleasesPage() }
+            }
+            .setNegativeButton(R.string.btn_cancel, null)
+            .show()
+    }
+
+    private fun downloadAndInstall(apkUrl: String) {
+        val progressBinding = DialogDownloadProgressBinding.inflate(layoutInflater)
+        val progressDialog = MaterialAlertDialogBuilder(this)
+            .setView(progressBinding.root)
+            .setCancelable(false)
+            .create()
+        progressDialog.show()
+
+        // Resolve the context on the main thread; the worker touches nothing
+        // lifecycle-bound (see the probe-thread crash this app already fixed once).
+        val ctx = applicationContext
+
+        Thread {
+            val file = ApkUpdater.downloadApk(ctx, apkUrl) { pct ->
+                runOnUiThread { progressBinding.progressDownload.progress = pct }
+            }
+            runOnUiThread {
+                if (isFinishing || isDestroyed) return@runOnUiThread
+                progressDialog.dismiss()
+                when {
+                    file == null ->
+                        updateFailed(R.string.update_download_failed)
+                    !ApkUpdater.signatureMatchesInstalledApp(ctx, file) -> {
+                        file.delete()
+                        updateFailed(R.string.update_signature_mismatch)
+                    }
+                    else ->
+                        runCatching { startActivity(ApkUpdater.installIntent(ctx, file)) }
+                            .onFailure { updateFailed(R.string.update_download_failed) }
+                }
+            }
+        }.also { it.isDaemon = true }.start()
+    }
+
+    private fun updateFailed(messageRes: Int) {
+        MaterialAlertDialogBuilder(this)
+            .setMessage(messageRes)
+            .setPositiveButton(R.string.update_open_browser) { _, _ -> openReleasesPage() }
+            .setNegativeButton(R.string.btn_cancel, null)
+            .show()
+    }
+
+    private fun openReleasesPage() {
+        runCatching {
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(UpdateChecker.RELEASES_PAGE)))
+        }
     }
 
     // -------------------------------------------------------------------------

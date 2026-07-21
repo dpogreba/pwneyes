@@ -85,6 +85,13 @@
     <string name="update_dialog_message">Version %1$s is available.\n\nDownload it from GitHub Releases?</string>
     <string name="update_dialog_download">Download</string>
     <string name="update_dialog_later">Later</string>
+    <string name="update_downloading">Downloading update…</string>
+    <string name="update_download_failed">Download failed. Open the releases page instead?</string>
+    <string name="update_signature_mismatch">This download isn\'t signed with the same key as your installed app, so it can\'t be installed as an update. Open the releases page to install it manually?</string>
+    <string name="update_install_permission_title">Allow installs</string>
+    <string name="update_install_permission_message">Android needs your permission for PwnEyes to install app updates. You\'ll be taken to the setting — enable it, then come back and tap Download again.</string>
+    <string name="update_open_settings">Open Settings</string>
+    <string name="update_open_browser">Open Releases</string>
 
     <!-- What's New dialog.
          NOTE: aapt2 applies its string-escape rules inside CDATA too — a bare

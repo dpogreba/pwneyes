@@ -89,6 +89,17 @@
     <!-- What's New dialog -->
     <string name="whats_new_content">
         <![CDATA[
+        <b>Signed Builds &amp; Fixes — 1.2.0</b><br/><br/>
+        <b>⚠️ One-time reinstall required</b><br/>
+        PwnEyes is now a properly signed release build instead of a debug build.
+        That changes the app\'s package identity, so this version installs
+        <i>alongside</i> your old copy rather than over it.<br/><br/>
+        • Uninstall the previous PwnEyes after installing this one<br/>
+        • Your saved connections will need to be re-added<br/>
+        • This is a one-time step — from here on, updates install in place<br/><br/>
+        <b>Fixes</b><br/>
+        • Fixed a crash when opening Edit Connections with saved devices<br/>
+        • Fixed the add button being invisible in dark mode<br/><br/>
         <b>Bugs Squashed — 1.1.1</b><br/><br/>
         Cleaned up layout hierarchy, removed dead code, trimmed theme cruft.<br/><br/>
         <b>Re-Write 1.0</b><br/><br/>

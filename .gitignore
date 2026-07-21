@@ -20,3 +20,11 @@ gradle/wrapper/gradle-wrapper.jar
 
 # Claude Code session files
 .claude/
+
+# Signing material — NEVER commit. Keystores and their passwords live only in
+# GitHub Secrets / your offline backup. Losing the key means no future in-place
+# updates are possible.
+*.jks
+*.keystore
+*.b64
+keystore.properties

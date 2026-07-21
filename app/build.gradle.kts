@@ -27,6 +27,22 @@ val semver = rawTag.ifEmpty { "0.0.0" }
 val (verMajor, verMinor, verPatch) = (semver.split(".") + listOf("0", "0", "0"))
     .take(3).map { it.toIntOrNull() ?: 0 }
 
+// Release signing. Credentials come from the environment ONLY (GitHub Secrets in CI) —
+// never from a file in this repo. Without them the release build is simply unsigned,
+// so local/branch builds still work.
+val keystorePath = System.getenv("KEYSTORE_PATH")
+val hasKeystore = !keystorePath.isNullOrEmpty() && file(keystorePath).exists()
+
+// An unsigned APK cannot be installed, and a release signed with a *different* key
+// cannot update an existing install. Publishing either from a tag build would ship a
+// broken update, so fail loudly instead — same principle as the version guard above.
+if (isTagBuild && !hasKeystore)
+    throw GradleException(
+        "Tag build without a signing keystore; refusing to publish an uninstallable " +
+            "unsigned APK. Set the KEYSTORE_BASE64 / KEYSTORE_PASSWORD / KEY_ALIAS / " +
+            "KEY_PASSWORD repository secrets."
+    )
+
 android {
     namespace = "com.antbear.pwneyes"
     compileSdk = 34
@@ -40,8 +56,22 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        create("release") {
+            if (hasKeystore) {
+                storeFile = file(keystorePath!!)
+                storePassword = System.getenv("KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("KEY_ALIAS")
+                keyPassword = System.getenv("KEY_PASSWORD")
+            }
+        }
+    }
+
     buildTypes {
         release {
+            // Signed when the keystore env is present; otherwise unsigned (and a tag
+            // build would already have failed the guard above).
+            signingConfig = if (hasKeystore) signingConfigs.getByName("release") else null
             isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),

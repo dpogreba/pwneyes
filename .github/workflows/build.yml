@@ -35,18 +35,10 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      # gradle-wrapper.jar is gitignored (binary); regenerate it here so
-      # ./gradlew works correctly for the rest of the build steps.
-      - name: Generate Gradle wrapper JAR
-        run: gradle wrapper --gradle-version 8.7 --distribution-type bin
-
-      - name: Make gradlew executable
-        run: chmod +x ./gradlew
-
-      # Decoded BEFORE the first ./gradlew call. build.gradle.kts evaluates its
-      # "tag build must have a keystore" guard on every Gradle invocation, so if
-      # KEYSTORE_PATH weren't set yet the assembleDebug below would throw and kill
-      # the whole tag build before signing ever happened.
+      # Must precede EVERY Gradle invocation, not just the build ones:
+      # build.gradle.kts evaluates its "tag build must have a keystore" guard at
+      # configuration time, so any gradle call on a tag ref — including the
+      # `gradle wrapper` below — throws if KEYSTORE_PATH isn't set yet.
       # Tag builds only — keeps secret exposure to the runs that publish a release.
       - name: Decode signing keystore
         if: startsWith(github.ref, 'refs/tags/')
@@ -59,6 +51,14 @@ jobs:
           fi
           printf '%s' "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/pwneyes-release.jks"
           echo "KEYSTORE_PATH=$RUNNER_TEMP/pwneyes-release.jks" >> "$GITHUB_ENV"
+
+      # gradle-wrapper.jar is gitignored (binary); regenerate it here so
+      # ./gradlew works correctly for the rest of the build steps.
+      - name: Generate Gradle wrapper JAR
+        run: gradle wrapper --gradle-version 8.7 --distribution-type bin
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
 
       - name: Build debug APK
         run: ./gradlew assembleDebug --stacktrace

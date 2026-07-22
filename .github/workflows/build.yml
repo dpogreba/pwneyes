@@ -49,7 +49,14 @@ jobs:
             echo "::error::KEYSTORE_BASE64 secret is not set — a tag build cannot produce an installable APK."
             exit 1
           fi
-          printf '%s' "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/pwneyes-release.jks"
+          # Strip all whitespace first: GNU base64 -d tolerates \n but rejects \r,
+          # and the secret picks up a CRLF when it is piped in from PowerShell or
+          # pasted through the web UI. Without this the decode dies on "invalid input".
+          printf '%s' "$KEYSTORE_BASE64" | tr -d '[:space:]' | base64 -d > "$RUNNER_TEMP/pwneyes-release.jks"
+          test -s "$RUNNER_TEMP/pwneyes-release.jks" || {
+            echo "::error::Decoded keystore is empty — KEYSTORE_BASE64 is truncated or not valid base64."
+            exit 1
+          }
           echo "KEYSTORE_PATH=$RUNNER_TEMP/pwneyes-release.jks" >> "$GITHUB_ENV"
 
       # gradle-wrapper.jar is gitignored (binary); regenerate it here so
